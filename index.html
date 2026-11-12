@@ -161,8 +161,6 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 .nav.dys-on{outline:2px solid #f59e0b}
 @keyframes zest-celebrate{0%,100%{transform:scale(1)}35%{transform:scale(1.035)}65%{transform:scale(.99)}}
 .mn-celebrate{animation:zest-celebrate .75s ease-in-out 2;border-color:#f59e0b!important;box-shadow:0 0 0 4px #f59e0b44,0 12px 36px #f59e0b33!important}
-.otp-code{font-size:30px;font-weight:800;letter-spacing:8px;padding:12px 18px;border:1px dashed var(--accent);border-radius:14px;background:var(--box);color:var(--accent);display:inline-block}
-.otp-input{font-size:26px;font-weight:800;letter-spacing:10px;max-width:260px;margin:12px auto;text-align:center}
 .header-profile{position:fixed;top:15px;right:15px;z-index:9999;display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(100vw - 30px);background:var(--card);padding:8px 15px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .header-avatar{width:46px;height:46px;flex:0 0 46px;display:flex;align-items:center;justify-content:center;padding:4px;border:4px solid #64748b;border-radius:50%;background:linear-gradient(145deg,#fef3c7,#f9a8d4);color:#0f172a;font-size:27px;box-shadow:0 4px 14px rgba(236,72,153,.25);user-select:none;transition:border-color .3s ease,box-shadow .3s ease}
 .header-avatar.is-online{border-color:#4caf50;box-shadow:0 0 0 2px #4caf5033,0 4px 14px rgba(236,72,153,.25)}
@@ -213,7 +211,6 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 .header-provider svg{display:block}
 .header-provider.google svg{width:18px;height:18px}
 .header-provider.apple svg{width:18px;height:18px}
-.header-auth-note{flex:0 0 100%;margin:0;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--box)}
 .offline-badge{width:max-content;max-width:100%;margin:8px 0 12px;padding:6px 10px;border:1px solid var(--bd);border-radius:999px;background:color-mix(in srgb,var(--box) 76%,transparent);color:var(--sub);font-size:12px}
 .cards-section{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
 .card-today{margin:0;padding:13px 16px;background:linear-gradient(135deg,#4f46e533,#ec489933);border-color:var(--accent)}
@@ -407,7 +404,6 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  }
  .header-profile{margin:0}
  .header-auth{flex-wrap:wrap}
- .header-auth-note{order:5}
  main{width:100%;max-width:1100px;margin:0 auto;padding:24px}
  footer{width:100%}
 }
@@ -486,18 +482,10 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  </button>
  <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" onclick="toggleMobileNav()">☰ Menu</button>
  <div class="header-auth" id="header-auth">
-  <button class="btn sm" type="button" onclick="headerAuth('login')">Connexion</button>
-  <button class="btn sm grad" type="button" onclick="headerAuth('register')">Inscription</button>
-  <button class="btn sm header-provider apple" type="button" title="Continuer avec Apple (simulation)" aria-label="Continuer avec Apple (simulation)" onclick="headerProvider('Apple')">
-   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
-   </svg>
-  </button>
   <button class="btn sm header-provider google" id="firebase-header-google-button" type="button" title="Continuer avec Google" aria-label="Continuer avec Google">
    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
   </button>
  </div>
- <p class="sub hide header-auth-note" id="header-auth-note" role="status" aria-live="polite"></p>
  <nav id="site-nav" class="mobile-collapsed">
   <button class="nav on" id="nav-accueil" onclick="switchTab('accueil')">🏠 Accueil</button>
   <button class="nav" id="nav-vocabulaire" onclick="switchTab('vocabulaire')">📚 Dictionnaire</button>
@@ -518,7 +506,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
   <button type="button" id="mobile-nav-home" class="on" onclick="switchTab('accueil')"><span>🏠</span><span>Accueil</span></button>
   <button type="button" id="mobile-nav-dictionary" onclick="switchTab('vocabulaire')"><span>📖</span><span>Dictionnaire</span></button>
   <button type="button" id="mobile-nav-courses" onclick="switchTab('cours-gram')"><span>🎓</span><span>Cours</span></button>
-  <button type="button" id="mobile-nav-profile" onclick="switchTab(window.stu||window.tch||window.dir?'portail':'connexion')"><span>👤</span><span>Profil</span></button>
+  <button type="button" id="mobile-nav-profile" onclick="switchTab(window.zestFirebaseUser?'portail':'connexion')"><span>👤</span><span>Profil</span></button>
  </nav>
 
  <main>
@@ -861,63 +849,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
    <p class="msg" id="firebase-session-message" role="status" aria-live="polite"></p>
    <button class="btn red" id="firebase-signout-button" type="button">Se déconnecter 🚪</button>
   </div>
-
-  <div id="conn-active-box" class="hide box center" style="background:#10b98111;border-color:#10b981;padding:20px">
-   <h3 style="color:#10b981">✅ Session active détectée</h3>
-   <p id="conn-active-text" style="font-weight:600;margin:10px 0"></p>
-   <p class="sub">Pour te connecter à un autre compte, tu dois impérativement te déconnecter.</p>
-   <button class="btn red" onclick="masterLogout()">Se déconnecter de tout 🚪</button>
-  </div>
-
-  <div id="conn-forms-container">
-   <!-- Élève -->
-   <div class="box" style="margin-top:16px">
-    <span class="tag">Connexion élève</span>
-    <h3 id="s-title">Créer mon compte élève</h3>
-    <p class="sub" id="s-sub">Entre ton pseudo (filtré contre les insultes), ton e-mail, ta date d'anniversaire et (optionnellement) le code de ton prof.</p>
-    <input class="inp" id="s-pseudo" placeholder="Ton pseudo" maxlength="20" autocomplete="username">
-    <input class="inp" id="s-email" type="email" placeholder="Ton adresse e-mail (ex: eleve@ecole.be)" autocomplete="email">
-    <label class="sub" style="font-size:12px;display:block;margin-bottom:4px">🎂 Ta date d'anniversaire :</label>
-    <input class="inp" id="s-bday" type="date">
-    <input class="inp" id="s-pass" type="password" placeholder="Mot de passe (6 caractères min.)">
-    <input class="inp" id="s-confirm" type="password" placeholder="Confirmer le mot de passe">
-    <input class="inp" id="s-code" placeholder="CODE DE CLASSE (Optionnel, ex: PROF-DUPONT)">
-    <p id="s-msg" class="msg"></p>
-    <button class="btn grad full" id="s-btn" onclick="studentSubmit()">S'inscrire et lier 🚀</button>
-    <p class="center"><button class="link" id="s-toggle" onclick="setStudentMode(!regMode)">Déjà un compte ? Se connecter</button></p>
-    <p class="center"><button class="link" id="s-recover" type="button" onclick="openPasswordRecovery()">Mot de passe oublié ?</button></p>
-   </div>
-
-   <!-- Professeur -->
-   <div class="box" style="margin-top:16px">
-    <span class="tag v">Espace professeur</span>
-    <h3 id="t-title">Connexion professeur</h3>
-    <p class="sub">Connecte-toi avec ton code de classe et ton mot de passe.</p>
-    <input class="inp" id="t-email" type="email" placeholder="Adresse e-mail professeur (ex: prof@ecole.be)" autocomplete="email">
-    <input class="inp" id="t-code" placeholder="CODE DE CLASSE (ex: PROF-DUPONT)" maxlength="24" autocomplete="username">
-    <input class="inp" id="t-pass" type="password" placeholder="Mot de passe">
-    <input class="inp" id="t-confirm" type="password" placeholder="Confirmer le mot de passe">
-    <p id="t-msg" class="msg"></p>
-    <button class="btn violet full" id="t-btn" onclick="teacherSubmit()">Se connecter</button>
-    <p class="center"><button class="link" id="t-toggle" onclick="setTeacherMode(!tReg)">Pas de code ? Créer ma classe</button></p>
-    <p class="center"><button class="link" id="t-recover" type="button" onclick="openPasswordRecovery()">Mot de passe oublié ?</button></p>
-   </div>
-
-   <!-- Direction -->
-   <div class="box" style="margin-top:16px;border-color:#d97706">
-    <span class="tag a">🏛 Espace Direction & École</span>
-    <h3 id="dir-title">Connexion direction</h3>
-    <p class="sub" id="dir-sub">Connecte-toi avec ton code de direction.</p>
-    <input class="inp" id="dir-email" type="email" placeholder="E-mail direction (ex: direction@ecole.be)" autocomplete="email">
-    <input class="inp" id="dir-code" placeholder="Code direction (ex: DIR-ZEST)" autocomplete="username">
-    <input class="inp" id="dir-pass" type="password" placeholder="Mot de passe">
-    <input class="inp" id="dir-confirm" type="password" placeholder="Confirmer le mot de passe">
-    <p id="dir-msg" class="msg"></p>
-    <button class="btn amber full" id="dir-submit" onclick="dirSubmit()">Se connecter</button>
-    <p class="center"><button class="link" id="dir-toggle" onclick="setDirMode(!dirRegMode)">Pas de compte direction ? S’inscrire</button></p>
-    <p class="center"><button class="link" id="dir-recover" type="button" onclick="openPasswordRecovery()">Mot de passe oublié ?</button></p>
-   </div>
-  </div>
+  <p class="sub">Les profils élèves, professeurs et direction locaux ne sont pas encore migrés vers Firebase. Leurs portails restent temporairement indisponibles.</p>
  </div>
 </section>
 
@@ -926,7 +858,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  <div id="portail-locked" class="card center">
   <span class="tag">🔒 Espace Sécurisé</span>
   <h2>Accès restreint</h2>
-  <p class="sub">Tu dois être connecté pour accéder à ce portail.</p>
+  <p class="sub">Les profils locaux élève, professeur et direction ne sont pas encore migrés vers Firebase. Ces portails sont temporairement indisponibles.</p>
   <button class="btn grad" onclick="switchTab('connexion')">Aller à l'espace Connexion 🔑</button>
  </div>
 
@@ -1001,13 +933,13 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
   </div>
 
   <h3>🎯 Difficultés par sujet (Erreurs analysées)</h3><div id="mistakes"></div>
-  <button class="btn red sm" onclick="studentLogout()">Se déconnecter</button>
+  <button class="btn red sm" onclick="zestFirebaseSignOut()">Se déconnecter</button>
  </div>
 
  <div id="portail-teacher" class="card hide">
   <div class="row" style="border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:16px">
    <div><span class="tag g">Professeur connecté</span><h2 id="t-name"></h2><small class="sub" id="t-dash-email"></small></div>
-   <button class="btn red sm" onclick="teacherLogout()">Se déconnecter</button>
+   <button class="btn red sm" onclick="zestFirebaseSignOut()">Se déconnecter</button>
   </div>
   <div id="t-tools">
    <div class="box"><h3>📌 Annonce de classe</h3><textarea class="inp" id="teacher-announcement-input" rows="3" maxlength="240" placeholder="Ex. : Interro sur les verbes séparables mardi !"></textarea><button class="btn amber" type="button" onclick="publishAnnouncement('teacher-announcement-input')">Épingler l’annonce</button><button class="btn red sm" type="button" onclick="removeAnnouncement()">Retirer l’annonce</button><small class="sub">Stockée sur cet appareil ; visible aux visiteurs de cette installation.</small></div>
@@ -1030,7 +962,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  <div id="portail-direction" class="card hide" style="border-color:#d97706">
   <div class="row" style="border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:16px">
    <div><span class="tag a">🏛️ Direction connectée</span><h2 id="dir-logged-name">Institut Saint-Joseph</h2></div>
-   <button class="btn red sm" onclick="dirLogout()">Se déconnecter</button>
+   <button class="btn red sm" onclick="zestFirebaseSignOut()">Se déconnecter</button>
   </div>
   <div class="grid3" style="margin-bottom:14px">
    <div class="box"><small class="sub">TOTAL ÉLÈVES</small><h2 id="dir-tot-stu" style="color:var(--accent);font-size:28px">0</h2></div>
@@ -1038,15 +970,6 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
    <div class="box"><small class="sub">PARTIES</small><h2 id="dir-tot-games" style="color:#10b981;font-size:28px">0</h2></div>
   </div>
   <div class="box"><h3>📌 Annonce de l’établissement</h3><textarea class="inp" id="direction-announcement-input" rows="3" maxlength="240" placeholder="Ex. : Interro sur les verbes séparables mardi !"></textarea><button class="btn amber" type="button" onclick="publishAnnouncement('direction-announcement-input')">Épingler l’annonce</button><button class="btn red sm" type="button" onclick="removeAnnouncement()">Retirer l’annonce</button><small class="sub">Stockée sur cet appareil ; visible aux visiteurs de cette installation.</small></div>
-
-  <div class="box" style="border-color:#d97706;background:#d9770611">
-   <h3>➕ Créer un accès professeur</h3>
-   <input class="inp" id="dir-t-code" placeholder="Code prof (ex: PROF-JEAN)">
-   <input class="inp" id="dir-t-email" type="email" placeholder="E-mail du prof (ex: jean@ecole.be)">
-   <input class="inp" id="dir-t-pass" type="password" placeholder="Mot de passe (6 min.)">
-   <p id="dir-t-msg" class="msg"></p>
-   <button class="btn amber full" onclick="dirCreateTeacher()">Créer ce compte prof 👨‍🏫</button>
-  </div>
 
   <h3>📊 Progression globale par classe</h3>
   <div id="dir-classes-list"></div>
@@ -1100,38 +1023,6 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
   <p class="yaya-energy-status" id="yaya-shop-status" role="status" aria-live="polite"></p>
  </div>
  <button class="scroll-top-button" id="scroll-to-top" type="button" onclick="scrollToTop()" aria-label="Remonter en haut de la page">⬆️</button>
-</div>
-
-<div id="recovery-modal" class="modal hide" role="dialog" aria-modal="true" aria-labelledby="recovery-title" aria-describedby="recovery-description" onclick="if(event.target===this)closePasswordRecovery()">
- <div class="mbox center" style="max-width:440px">
-  <span class="tag v">🔑 Récupération de compte</span>
-  <h2 id="recovery-title">Mot de passe oublié ?</h2>
-  <p class="sub" id="recovery-description">Entre l’adresse e-mail associée à ton compte.</p>
-  <div id="recovery-request-step">
-   <label for="recovery-email" class="sub" style="display:block;text-align:left">Adresse e-mail</label>
-   <input class="inp" id="recovery-email" type="email" autocomplete="email" placeholder="nom@exemple.be">
-   <p class="sub" style="font-size:12px">Simulation locale : aucun e-mail réel n’est envoyé.</p>
-   <p class="msg" id="recovery-request-feedback" role="status" aria-live="polite"></p>
-   <button class="btn grad full" type="button" onclick="requestPasswordRecovery()">Envoyer le code de réinitialisation</button>
-  </div>
-  <div id="recovery-reset-step" class="hide">
-   <p class="sub" id="recovery-code-notice"></p>
-   <div class="otp-code" id="recovery-demo-code" aria-label="Code de test"></div>
-   <label for="recovery-code" class="sub" style="display:block;text-align:left;margin-top:12px">Code à 6 chiffres</label>
-   <input class="inp otp-input" id="recovery-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="••••••">
-   <label for="recovery-new-pass" class="sub" style="display:block;text-align:left">Nouveau mot de passe (6 caractères min.)</label>
-   <input class="inp" id="recovery-new-pass" type="password" autocomplete="new-password" placeholder="Nouveau mot de passe">
-   <label for="recovery-confirm-pass" class="sub" style="display:block;text-align:left">Confirmer le nouveau mot de passe</label>
-   <input class="inp" id="recovery-confirm-pass" type="password" autocomplete="new-password" placeholder="Confirmer le mot de passe">
-   <p class="msg" id="recovery-reset-feedback" role="alert" aria-live="assertive"></p>
-   <button class="btn grad full" type="button" onclick="completePasswordRecovery()">Réinitialiser le mot de passe</button>
-  </div>
-  <div id="recovery-success-step" class="hide">
-   <p class="msg ok" id="recovery-success" role="status" aria-live="polite"></p>
-   <button class="btn grad full" type="button" onclick="closePasswordRecovery();switchTab('connexion')">Retour à la connexion</button>
-  </div>
-  <button class="btn sm" type="button" style="background:#64748b;margin-top:10px" onclick="closePasswordRecovery()">Annuler</button>
- </div>
 </div>
 
 <script>
@@ -1296,25 +1187,11 @@ var K = {
  users: 'zest-home-users',
  teachers: 'zest-teachers',
  directors: 'zest-directors',
- quizzes: 'zest-published-quizzes',
- stu: 'zest-home-user',
- tch: 'zest-logged-teacher',
- dir: 'zest-logged-dir'
+ quizzes: 'zest-published-quizzes'
 };
-var ADMIN_CODE = 'ADMIN-ZEST', ADMIN_HASH = 'h17q9jojcuho';
 
 (function initDefaultData(){
  try {
-    var teachers = ld(K.teachers, {});
-    if (!teachers['PROF-DUPONT']) {
-      teachers['PROF-DUPONT'] = {email: 'prof@ecole.be', pass: hash('123456')};
-      sv(K.teachers, teachers);
-    }
-    var directors = ld(K.directors, {});
-    if (!directors['DIR-ZEST']) {
-      directors['DIR-ZEST'] = {email: 'direction@ecole.be', pass: hash('dir123')};
-      sv(K.directors, directors);
-    }
     var savedAccent = localStorage.getItem('zest-accent');
     var savedGrad = localStorage.getItem('zest-grad');
     if(savedAccent && savedGrad) {
@@ -1346,21 +1223,23 @@ function applyUltimateBranding(){
  if(legendBadge) legendBadge.style.display = unlocked ? 'inline-block' : 'none';
 }
 
-function hash(s){
- var h1 = 0xdeadbeef, h2 = 0x41c6ce57, i, c;
- s = 'zest:' + s;
- for (i = 0; i < s.length; i++){ c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
- h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
- h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
- return 'h' + (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+var stu = null, tch = null, dir = null;
+['zest-home-user','zest-logged-teacher','zest-logged-dir','zest-otp-verified-sessions-v1'].forEach(rm);
+function stripLegacyPasswords(key){
+ var accounts=ld(key,{}),changed=false;
+ Object.keys(accounts).forEach(function(id){
+  var account=accounts[id];
+  if(typeof account==='string'){accounts[id]={};changed=true;}
+  else if(account&&typeof account==='object'&&Object.prototype.hasOwnProperty.call(account,'pass')){
+   delete account.pass;changed=true;
+  }
+ });
+ if(changed){
+  try{localStorage.setItem(key,JSON.stringify(accounts));}
+  catch(error){console.error('Impossible de supprimer les anciens mots de passe locaux :',error);}
+ }
 }
-function passOk(stored, p){ return stored === hash(p) || stored === p; }
-
-var stu = ld(K.stu, null), tch = ld(K.tch, null), dir = ld(K.dir, null);
-if (stu && !ld(K.users, {})[stu]) { stu = null; rm(K.stu); }
-if (tch && tch !== 'ADMIN' && !ld(K.teachers, {})[tch]) { tch = null; rm(K.tch); }
-if (dir && !ld(K.directors, {})[dir]) { dir = null; rm(K.dir); }
-rm('zest-otp-verified-sessions-v1');
+[K.users,K.teachers,K.directors].forEach(stripLegacyPasswords);
 
 function me(){ return stu ? ld(K.users, {})[stu] : null; }
 function saveMe(fn){ var u = ld(K.users, {}); if (stu && u[stu]) { fn(u[stu]); sv(K.users, u); } }
@@ -1661,15 +1540,6 @@ function updateLiveYayaReaction(emoji,message){
  reaction.textContent='';
  reaction.appendChild(createYayaTeaching(emoji,message));
  reaction.classList.remove('hide');
-}
-function headerAuth(mode){
- setStudentMode(mode!=='login');
- switchTab('connexion');
- var pseudo=$('s-pseudo');if(pseudo)pseudo.focus({preventScroll:true});
-}
-function headerProvider(provider){
- var note=$('header-auth-note');
- if(note){note.textContent='La connexion '+provider+' n’est pas activée : utilise la connexion élève pour créer un compte ou te connecter.';note.classList.remove('hide');}
 }
 function toggleTheme(){ 
  try {
@@ -2351,328 +2221,6 @@ function isProfanePseudo(pseudo) {
  return false;
 }
 
-var regMode = true;
-function setStudentMode(reg){
- regMode = reg;
- var sTitle = $('s-title'), sSub = $('s-sub'), sBtn = $('s-btn'), sToggle = $('s-toggle');
- if(sTitle) sTitle.textContent = reg ? 'Créer mon compte élève' : 'Connexion élève';
- if(sSub) sSub.textContent = reg ? 'Entre ton pseudo, ton e-mail, ta date d\'anniversaire et (optionnellement) le code de ton prof.' : 'Content de te revoir !';
- if(sBtn) sBtn.textContent = reg ? "S'inscrire et lier 🚀" : 'Se connecter 🔑';
- if(sToggle) sToggle.textContent = reg ? 'Déjà un compte ? Se connecter' : "Pas encore de compte ? S'inscrire";
- show('s-email', reg); show('s-bday', reg); show('s-confirm', reg); show('s-code', reg);
- show('s-recover',!reg);
- say('s-msg', '');
-}
-
-function completeLocalLogin(kind,identifier,email,payload){
- applyLocalLogin({kind:kind,identifier:identifier,email:email,payload:payload});
-}
-function reportLocalLoginConflict(message,kind){
- if(message){
-  say(kind.indexOf('student-')===0?'s-msg':kind.indexOf('director-')===0?'dir-msg':'t-msg',message);
- }
-}
-function applyLocalLogin(request){
- if(request.kind==='student-register'){
-   var users=ld(K.users,{}),taken=Object.keys(users).some(function(name){return name.toLowerCase()===request.identifier.toLowerCase();});
-   if(taken)return reportLocalLoginConflict('Ce pseudo vient d’être créé entre-temps. Vérifie le formulaire et réessaie.','student-register');
-   users[request.identifier]=request.payload;
-   sv(K.users,users);stu=request.identifier;sv(K.stu,stu);
- }else if(request.kind==='student-login'){
-   var studentUsers=ld(K.users,{}),student=studentUsers[request.identifier];
-   if(!student||String(student.email||'').toLowerCase()!==request.email.toLowerCase())return reportLocalLoginConflict('Le compte ou son adresse e-mail a changé. Recommence la connexion.','student-login');
-   stu=request.identifier;sv(K.stu,stu);
- }else if(request.kind==='teacher-register'){
-   var teachers=ld(K.teachers,{});
-   if(teachers[request.identifier])return reportLocalLoginConflict('Ce code de classe vient d’être créé entre-temps. Réessaie avec un autre code.','teacher-register');
-   teachers[request.identifier]=request.payload;sv(K.teachers,teachers);tch=request.identifier;sv(K.tch,tch);
- }else if(request.kind==='teacher-login'){
-   var currentTeachers=ld(K.teachers,{}),currentTeacher=currentTeachers[request.identifier];
-   var currentPass=(typeof currentTeacher==='object'&&currentTeacher!==null)?currentTeacher.pass:currentTeacher;
-   if(!currentPass||currentPass!==request.payload.passSnapshot)return reportLocalLoginConflict('Le compte professeur a changé. Recommence la connexion.','teacher-login');
-   if(request.payload.linkEmail){
-     if(typeof currentTeacher==='object'&&currentTeacher!==null)currentTeacher.email=request.email;
-     else currentTeachers[request.identifier]={pass:currentPass,email:request.email};
-     sv(K.teachers,currentTeachers);
-   }else if(typeof currentTeacher!=='object'||currentTeacher===null||String(currentTeacher.email||'').toLowerCase()!==request.email.toLowerCase())return reportLocalLoginConflict('Le compte professeur ou son adresse e-mail a changé. Recommence la connexion.','teacher-login');
-   tch=request.identifier;sv(K.tch,tch);
- }else if(request.kind==='admin-login'){
-   tch='ADMIN';sv(K.tch,tch);
- }else if(request.kind==='director-register'){
-   var directors=ld(K.directors,{});if(directors[request.identifier])return reportLocalLoginConflict('Ce compte de direction vient d’être créé entre-temps. Réessaie avec un autre code.','director-register');
-   directors[request.identifier]=request.payload;sv(K.directors,directors);dir=request.identifier;sv(K.dir,dir);
- }else if(request.kind==='director-login'){
-   var currentDirectors=ld(K.directors,{}),currentDirector=currentDirectors[request.identifier];
-   if(!currentDirector||!passOk(currentDirector.pass,request.payload.passSnapshot)||String(currentDirector.email||'').toLowerCase()!==request.email.toLowerCase())return reportLocalLoginConflict('Le compte de direction ou son adresse e-mail a changé. Recommence la connexion.','director-login');
-   dir=request.identifier;sv(K.dir,dir);
- }
- var isStudent=request.kind.indexOf('student-')===0,isDirector=request.kind.indexOf('director-')===0;
- (isStudent?['s-pseudo','s-email','s-bday','s-pass','s-confirm','s-code']:isDirector?['dir-email','dir-code','dir-pass','dir-confirm']:['t-email','t-code','t-pass','t-confirm']).forEach(function(id){var field=$(id);if(field)field.value='';});
- say(isStudent?'s-msg':isDirector?'dir-msg':'t-msg','');
- renderAll();switchTab('portail');
-}
-
-var pendingPasswordRecovery=null;
-function openPasswordRecovery(){
- pendingPasswordRecovery=null;
- $('recovery-email').value='';$('recovery-code').value='';$('recovery-new-pass').value='';$('recovery-confirm-pass').value='';
- $('recovery-demo-code').textContent='';$('recovery-code-notice').textContent='';
- $('recovery-request-feedback').textContent='';$('recovery-reset-feedback').textContent='';
- $('recovery-success').textContent='';
- show('recovery-request-step',true);show('recovery-reset-step',false);show('recovery-success-step',false);
- show('recovery-modal',true);
- setTimeout(function(){var input=$('recovery-email');if(input)input.focus();},0);
-}
-function createRecoveryCode(){
- if(!window.crypto||typeof window.crypto.getRandomValues!=='function')return null;
- var data=new Uint32Array(1),limit=4294000000;
- do{window.crypto.getRandomValues(data);}while(data[0]>=limit);
- return String(data[0]%1000000).padStart(6,'0');
-}
-function closePasswordRecovery(){
- pendingPasswordRecovery=null;
- show('recovery-modal',false);
- ['recovery-email','recovery-code','recovery-new-pass','recovery-confirm-pass'].forEach(function(id){var field=$(id);if(field)field.value='';});
- $('recovery-demo-code').textContent='';$('recovery-code-notice').textContent='';$('recovery-success').textContent='';
- show('recovery-request-step',true);show('recovery-reset-step',false);show('recovery-success-step',false);
-}
-function requestPasswordRecovery(){
- var email=$('recovery-email').value.trim().toLowerCase(),feedback=$('recovery-request-feedback');
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){say('recovery-request-feedback','Entre une adresse e-mail valide.');return;}
- var targets=[],users=ld(K.users,{}),teachers=ld(K.teachers,{}),directors=ld(K.directors,{});
- Object.keys(users).forEach(function(id){var account=users[id];if(account&&String(account.email||'').trim().toLowerCase()===email)targets.push({role:'student',id:id,email:email});});
- Object.keys(teachers).forEach(function(id){var account=teachers[id];if(account&&typeof account==='object'&&String(account.email||'').trim().toLowerCase()===email)targets.push({role:'teacher',id:id,email:email});});
- Object.keys(directors).forEach(function(id){var account=directors[id];if(account&&typeof account==='object'&&String(account.email||'').trim().toLowerCase()===email)targets.push({role:'director',id:id,email:email});});
- if(!targets.length){pendingPasswordRecovery=null;say('recovery-request-feedback','Aucun compte associé à cette adresse n’a été trouvé.');return;}
- var code=createRecoveryCode();
- if(!code){say('recovery-request-feedback','La génération sécurisée du code est indisponible dans ce navigateur.');return;}
- pendingPasswordRecovery={email:email,targets:targets,code:code,attempts:0,expiresAt:Date.now()+10*60*1000};
- $('recovery-code-notice').textContent='Un code de réinitialisation a été envoyé à '+email+'. (Simulation locale : Code de test : '+code+')';
- $('recovery-demo-code').textContent=code;
- $('recovery-code').value='';$('recovery-new-pass').value='';$('recovery-confirm-pass').value='';
- $('recovery-reset-feedback').textContent='';
- show('recovery-request-step',false);show('recovery-reset-step',true);
- setTimeout(function(){var input=$('recovery-code');if(input)input.focus();},0);
-}
-function completePasswordRecovery(){
- var request=pendingPasswordRecovery;
- if(!request)return;
- if(Date.now()>request.expiresAt){pendingPasswordRecovery=null;show('recovery-reset-step',false);show('recovery-request-step',true);say('recovery-request-feedback','Le code a expiré. Demande un nouveau code.');return;}
- var code=$('recovery-code').value.trim(),password=$('recovery-new-pass').value,confirmation=$('recovery-confirm-pass').value;
- if(!/^\d{6}$/.test(code)){say('recovery-reset-feedback','Saisis les 6 chiffres du code.');return;}
- if(code!==request.code){
-   request.attempts++;
-   if(request.attempts>=5){pendingPasswordRecovery=null;$('recovery-demo-code').textContent='';show('recovery-reset-step',false);show('recovery-request-step',true);say('recovery-request-feedback','Trop de codes incorrects. Demande un nouveau code.');return;}
-   say('recovery-reset-feedback','Code incorrect. Il te reste '+(5-request.attempts)+' tentative(s).');$('recovery-code').value='';$('recovery-code').focus();return;
- }
- if(password.length<6){say('recovery-reset-feedback','Le nouveau mot de passe doit faire 6 caractères minimum.');return;}
- if(password!==confirmation){say('recovery-reset-feedback','Les deux mots de passe ne correspondent pas.');return;}
- var stores={student:ld(K.users,{}),teacher:ld(K.teachers,{}),director:ld(K.directors,{})},keyFor={student:K.users,teacher:K.teachers,director:K.directors},changed={student:false,teacher:false,director:false};
- for(var i=0;i<request.targets.length;i++){
-   var target=request.targets[i],account=stores[target.role][target.id];
-   if(!account||typeof account!=='object'||String(account.email||'').trim().toLowerCase()!==request.email)return say('recovery-reset-feedback','Les informations du compte ont changé. Demande un nouveau code.');
- }
- request.targets.forEach(function(target){
-   stores[target.role][target.id].pass=hash(password);
-   changed[target.role]=true;
- });
- var oldValues={},newValues={};
- Object.keys(changed).forEach(function(role){if(changed[role]){oldValues[keyFor[role]]=localStorage.getItem(keyFor[role]);newValues[keyFor[role]]=JSON.stringify(stores[role]);}});
- try{
-   Object.keys(newValues).forEach(function(key){localStorage.setItem(key,newValues[key]);});
-   Object.keys(newValues).forEach(function(key){if(localStorage.getItem(key)!==newValues[key])throw new Error('La sauvegarde du compte a échoué.');});
- }catch(error){
-   Object.keys(oldValues).forEach(function(key){try{if(oldValues[key]===null)localStorage.removeItem(key);else localStorage.setItem(key,oldValues[key]);}catch(rollbackError){console.error('Restauration impossible après échec de réinitialisation :',rollbackError);}});
-   console.error('Échec de la sauvegarde du nouveau mot de passe :',error);
-   say('recovery-reset-feedback','Impossible d’enregistrer le nouveau mot de passe. Vérifie l’espace de stockage du navigateur et réessaie.');return;
- }
- if(stu&&request.targets.some(function(target){return target.role==='student'&&target.id===stu;})){stu=null;rm(K.stu);}
- if(tch&&request.targets.some(function(target){return target.role==='teacher'&&target.id===tch;})){tch=null;rm(K.tch);}
- if(dir&&request.targets.some(function(target){return target.role==='director'&&target.id===dir;})){dir=null;rm(K.dir);}
- pendingPasswordRecovery=null;
- $('recovery-demo-code').textContent='';$('recovery-code').value='';$('recovery-new-pass').value='';$('recovery-confirm-pass').value='';
- show('recovery-request-step',false);show('recovery-reset-step',false);
- say('recovery-reset-feedback','');say('recovery-success','Mot de passe réinitialisé avec succès. Reconnecte-toi avec ton nouveau mot de passe.',true);
- show('recovery-success-step',true);
- renderAll();
-}
-
-function studentSubmit(){
- var pseudo = $('s-pseudo').value.trim(), pass = $('s-pass').value, users = ld(K.users, {});
- if (pseudo.length < 3) return say('s-msg', 'Le pseudo doit faire 3 caractères minimum.');
- 
- if (isProfanePseudo(pseudo)) {
-    return say('s-msg', '🚫 Pseudo refusé par le filtre de modération (terme inapproprié détecté).');
- }
-
- var key = Object.keys(users).filter(function(u){ return u.toLowerCase() === pseudo.toLowerCase(); })[0];
- if (regMode){
-    if (pass.length < 6) return say('s-msg', 'Le mot de passe doit faire 6 caractères minimum.');
-    var email = $('s-email').value.trim();
-    var bday = $('s-bday').value;
-    var code = $('s-code').value.trim().toUpperCase();
-    if (!email || email.indexOf('@') === -1) return say('s-msg', 'Entre une adresse e-mail valide.');
-    if (!bday) return say('s-msg', 'Entre ta date d\'anniversaire !');
-    if (key) return say('s-msg', 'Ce pseudo est déjà pris.');
-    if (pass !== $('s-confirm').value) return say('s-msg', 'Les mots de passe ne correspondent pas.');
-    
-    if (code && !ld(K.teachers, {})[code]) {
-      return say('s-msg', 'Code de classe invalide.');
-    }
-
-    var newStudent = {
-      email: email, 
-      birthday: bday, 
-      pass: hash(pass), 
-      teacherCode: code || '', 
-      skin: '🦊', 
-      gamesPlayed: 0, 
-      totalScore: 0, 
-      mistakes: {}, 
-      nameChangesCount: 0, 
-      owned: ['🦊', '🌸', '⚡', '🍥', '🐱', '🍀', '🔥'],
-      ultimateUnlocked: false
-    };
-    completeLocalLogin('student-register',pseudo,email,newStudent);
- } else {
-    if (!key || !passOk(users[key].pass, pass)) return say('s-msg', 'Pseudo ou mot de passe incorrect.');
-    completeLocalLogin('student-login',key,users[key].email||'');
- }
-}
-function studentLogout(){ stu = null; rm(K.stu); resetLive(); renderAll(); }
-
-function changeStudentPseudo(){
- var inp = $('new-pseudo-input');
- if(!inp) return;
- var newPseudo = inp.value.trim();
- if(newPseudo.length < 3) return say('pseudo-change-msg', 'Le pseudo doit faire au moins 3 caractères.');
- if(isProfanePseudo(newPseudo)) return say('pseudo-change-msg', '🚫 Pseudo refusé par le filtre de modération.');
- 
- var users = ld(K.users, {});
- var existingKey = Object.keys(users).find(function(k){ return k.toLowerCase() === newPseudo.toLowerCase(); });
- if(existingKey && existingKey.toLowerCase() !== stu.toLowerCase()){
-    return say('pseudo-change-msg', 'Ce pseudo est déjà pris.');
- }
-
- var userData = users[stu];
- if(!userData) return;
- 
- userData.nameChangesCount = userData.nameChangesCount || 0;
- var cost = (userData.nameChangesCount === 0) ? 0 : 200;
- 
- var availablePts = Math.max(0, (userData.totalScore || 0) - (userData.spent || 0));
- if(cost > 0 && availablePts < cost){
-    return say('pseudo-change-msg', '❌ Tu n\'as pas assez de points (200 pts requis).');
- }
-
- if(cost > 0){
-    userData.spent = (userData.spent || 0) + cost;
- }
- userData.nameChangesCount++;
-
- delete users[stu];
- users[newPseudo] = userData;
- sv(K.users, users);
-
- stu = newPseudo;
- sv(K.stu, stu);
-
- inp.value = '';
- say('pseudo-change-msg', '✅ Pseudo modifié avec succès !', true);
- setTimeout(function(){ say('pseudo-change-msg', ''); }, 3000);
- renderAll();
-}
-
-var tReg = false;
-function setTeacherMode(reg){
- tReg = reg;
- var tTitle = $('t-title'), tBtn = $('t-btn'), tToggle = $('t-toggle');
- if(tTitle) tTitle.textContent = reg ? 'Créer mon code prof' : 'Connexion professeur';
- if(tBtn) tBtn.textContent = reg ? 'Créer le code' : 'Se connecter';
- if(tToggle) tToggle.textContent = reg ? 'Déjà un code ? Se connecter' : 'Pas de code ? Créer ma classe';
- show('t-email', true); show('t-confirm', reg);
- show('t-recover',!reg);
- say('t-msg', '');
-}
-function teacherSubmit(){
- var code = $('t-code').value.trim().toUpperCase(), pass = $('t-pass').value, teachers = ld(K.teachers, {});
- if (code.length < 3) return say('t-msg', 'Le code doit faire 3 caractères minimum.');
- if (pass.length < 6) return say('t-msg', 'Le mot de passe doit faire 6 caractères minimum.');
- if (code === ADMIN_CODE){
-    if (tReg || hash(pass) !== ADMIN_HASH) return say('t-msg', 'Accès refusé.');
-    completeLocalLogin('admin-login','ADMIN','');
- } else if (tReg){
-    var email = $('t-email').value.trim();
-    if (!email || email.indexOf('@') === -1) return say('t-msg', 'E-mail invalide.');
-    if (teachers[code]) return say('t-msg', 'Ce code existe déjà.');
-    if (pass !== $('t-confirm').value) return say('t-msg', 'Les mots de passe ne correspondent pas.');
-    completeLocalLogin('teacher-register',code,email,{pass:hash(pass),email:email});
- } else {
-    var tData = teachers[code];
-    var storedPass = (typeof tData === 'object' && tData !== null) ? tData.pass : tData;
-    if (!storedPass || !passOk(storedPass, pass)) return say('t-msg', 'Code ou mot de passe incorrect.');
-    var teacherEmail=(typeof tData==='object'&&tData!==null)?String(tData.email||'').trim():'',linkEmail=!teacherEmail;
-    if(linkEmail)teacherEmail=$('t-email').value.trim();
-    if(!teacherEmail||teacherEmail.indexOf('@')===-1)return say('t-msg',linkEmail?'Ce compte ancien n’a pas d’adresse enregistrée. Entre une adresse à associer.':'Adresse e-mail professeur invalide.');
-    completeLocalLogin('teacher-login',code,teacherEmail,{passSnapshot:storedPass,linkEmail:linkEmail});
- }
-}
-function teacherLogout(){ tch = null; rm(K.tch); renderAll(); }
-
-var dirRegMode = false;
-function setDirMode(reg){
- dirRegMode = reg;
- var dTitle = $('dir-title'), dSub = $('dir-sub'), dBtn = $('dir-submit'), dToggle = $('dir-toggle');
- if(dTitle) dTitle.textContent = reg ? 'Créer un compte direction' : 'Connexion direction';
- if(dSub) dSub.textContent = reg ? 'Crée ton code direction.' : 'Connecte-toi avec ton code.';
- if(dBtn) dBtn.textContent = reg ? 'Créer le compte 🏛' : 'Se connecter 🔑';
- if(dToggle) dToggle.textContent = reg ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire';
- show('dir-email', reg); show('dir-confirm', reg);
- show('dir-recover',!reg);
- say('dir-msg', '');
-}
-function dirSubmit(){
- var code = $('dir-code').value.trim().toUpperCase(), pass = $('dir-pass').value, directors = ld(K.directors, {});
- if (code.length < 3) return say('dir-msg', 'Le code doit faire 3 caractères minimum.');
- if (pass.length < 6) return say('dir-msg', 'Le mot de passe doit faire 6 caractères minimum.');
- if (dirRegMode){
-    var email = $('dir-email').value.trim();
-    if (!email || email.indexOf('@') === -1) return say('dir-msg', 'E-mail invalide.');
-    if (directors[code]) return say('dir-msg', 'Ce code existe déjà.');
-    if (pass !== $('dir-confirm').value) return say('dir-msg', 'Les mots de passe ne correspondent pas.');
-    completeLocalLogin('director-register',code,email,{pass:hash(pass),email:email});
- } else {
-    var dData = directors[code];
-    if (!dData || !passOk(dData.pass, pass)) return say('dir-msg', 'Code ou mot de passe incorrect.');
-    completeLocalLogin('director-login',code,dData.email||'',{passSnapshot:dData.pass});
- }
-}
-function dirLogout(){ dir = null; rm(K.dir); renderAll(); }
-
-function masterLogout(){
- stu = null; tch = null; dir = null;
- rm(K.stu); rm(K.tch); rm(K.dir);
- if(typeof window.zestFirebaseSignOut==='function')window.zestFirebaseSignOut();
- resetLive(); renderAll();
-}
-
-function dirCreateTeacher(){
- var code = $('dir-t-code').value.trim().toUpperCase();
- var email = $('dir-t-email').value.trim();
- var pass = $('dir-t-pass').value;
- var teachers = ld(K.teachers, {});
- if (code.length < 3) return say('dir-t-msg', 'Le code doit faire 3 caractères minimum.');
- if (!email || email.indexOf('@') === -1) return say('dir-t-msg', 'E-mail invalide.');
- if (pass.length < 6) return say('dir-t-msg', 'Le mot de passe doit faire 6 caractères minimum.');
- if (teachers[code]) return say('dir-t-msg', 'Ce code existe déjà.');
- teachers[code] = {pass: hash(pass), email: email};
- sv(K.teachers, teachers);
- ['dir-t-code','dir-t-email','dir-t-pass'].forEach(function(i){ var el = $(i); if(el) el.value = ''; });
- say('dir-t-msg', '✅ Compte professeur créé !', true);
- setTimeout(function(){ say('dir-t-msg', ''); }, 3000);
- renderAll();
-}
-
 var GAARA_SVG = '<svg viewBox="0 0 32 32" width="28" height="28" style="vertical-align:middle"><circle cx="16" cy="16" r="15" fill="#f97316"/><path d="M10 22 C10 15 22 15 22 22 Z" fill="#7c2d12"/><circle cx="12" cy="14" r="1.5" fill="#0f172a"/><circle cx="20" cy="14" r="1.5" fill="#0f172a"/><path d="M14 19 Q16 21 18 19" stroke="#0f172a" stroke-width="1.5" fill="none"/><path d="M8 10 Q16 4 24 10 L22 16 Q16 10 10 16 Z" fill="#b45309"/></svg>';
 
 function renderClanQuest(){
@@ -2916,26 +2464,14 @@ function renderYayaScanHistory(){
 
 function renderAll(){
  try {
-    var isLocalConnected = !!(stu || tch || dir);
-    var isConnected = isLocalConnected || !!window.zestFirebaseUser;
+    var isConnected = !!window.zestFirebaseUser;
     var badge = $('badge'); if(badge) badge.textContent = isConnected ? '🟢' : '';
     renderHeaderProfile();
 
-    show('conn-active-box', isLocalConnected);
-    show('conn-forms-container', !isConnected);
-    if (isLocalConnected) {
-      var connText = '';
-      if (stu) connText = 'Connecté en tant qu’élève : <b>' + stu + '</b>';
-      else if (tch) connText = tch === 'ADMIN' ? 'Connecté en tant que Super Admin' : 'Connecté en tant que professeur (Classe : <b>' + tch + '</b>)';
-      else if (dir) connText = 'Connecté en tant que direction (Code : <b>' + dir + '</b>)';
-      var activeTextEl = $('conn-active-text');
-      if (activeTextEl) activeTextEl.innerHTML = connText;
-    }
-
-    show('portail-locked', !isLocalConnected);
-    show('portail-student', !!stu);
-    show('portail-teacher', !!tch);
-    show('portail-direction', !!dir);
+    show('portail-locked', true);
+    show('portail-student', false);
+    show('portail-teacher', false);
+    show('portail-direction', false);
 
     renderClanQuest();
     renderAnnouncement();
@@ -3123,7 +2659,7 @@ function renderAdmin(){
 function factoryReset(){
  if (tch !== 'ADMIN') return;
  if (confirm('⚠️ Tout supprimer ?')){
-    [K.users, K.teachers, K.directors, K.quizzes, K.stu, K.tch, K.dir].forEach(rm); location.reload();
+    [K.users, K.teachers, K.directors, K.quizzes].forEach(rm); location.reload();
   }
 }
 
@@ -4859,6 +4395,7 @@ if(location.protocol==='file:'){
     onAuthStateChanged,
     signOut
   } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCpBCHLo7LRqYfmiBBbb7bPfoWkrb9FQAE",
     authDomain: "zest-bd035.firebaseapp.com",
@@ -4870,6 +4407,7 @@ if(location.protocol==='file:'){
   };
 
   const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const googleProvider = new GoogleAuthProvider();
 
