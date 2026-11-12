@@ -506,7 +506,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
   <button type="button" id="mobile-nav-home" class="on" onclick="switchTab('accueil')"><span>🏠</span><span>Accueil</span></button>
   <button type="button" id="mobile-nav-dictionary" onclick="switchTab('vocabulaire')"><span>📖</span><span>Dictionnaire</span></button>
   <button type="button" id="mobile-nav-courses" onclick="switchTab('cours-gram')"><span>🎓</span><span>Cours</span></button>
-  <button type="button" id="mobile-nav-profile" onclick="switchTab(window.zestFirebaseUser?'portail':'connexion')"><span>👤</span><span>Profil</span></button>
+  <button type="button" id="mobile-nav-profile" onclick="switchTab((stu||tch||dir)?'portail':'connexion')"><span>👤</span><span>Profil</span></button>
  </nav>
 
  <main>
@@ -525,7 +525,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
     <span class="tag legend" id="ultimate-legend-badge" style="display:none;margin-left:auto">Version Ultimate Débloquée 🚀</span>
    </div>
   </div>
-  <button class="card row home-profile-card clickable-card" id="home-profile-link" type="button" onclick="switchTab('portail')">
+  <button class="card row home-profile-card clickable-card" id="home-profile-link" type="button" onclick="switchTab((stu||tch||dir)?'portail':'connexion')">
    <span><span class="tag v" id="home-profile-presence">🌙 Hors ligne</span><strong id="home-profile-title" style="display:block;margin-top:6px">Mon profil & paramètres</strong><span class="sub" id="home-profile-copy">Connecte-toi pour consulter ton profil et tes réglages.</span></span>
    <span class="arrow" aria-hidden="true">›</span>
   </button>
@@ -831,7 +831,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 <section id="tab-connexion" class="tab hide" style="max-width:760px;margin:0 auto">
  <div class="card">
   <h2>🔑 Espace de Connexion</h2>
-  <p class="sub">Connecte-toi ci-dessous avec Google ou par lien magique envoyé par e-mail.</p>
+  <p class="sub">Connecte-toi en un clic avec Google ou par lien magique, ou accède à ton profil Zest (élève, professeur, direction).</p>
 
   <div class="box" id="firebase-auth-panel" style="margin-top:16px">
    <span class="tag">Connexion Firebase</span>
@@ -849,7 +849,89 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
    <p class="msg" id="firebase-session-message" role="status" aria-live="polite"></p>
    <button class="btn red" id="firebase-signout-button" type="button">Se déconnecter 🚪</button>
   </div>
-  <p class="sub">Les profils élèves, professeurs et direction locaux ne sont pas encore migrés vers Firebase. Leurs portails restent temporairement indisponibles.</p>
+
+  <!-- PROFILS LOCAUX ZEST -->
+  <div style="margin-top:22px">
+   <h3>Profils Zest</h3>
+   <p class="sub">Choisis ton espace, puis connecte-toi ou crée ton compte.</p>
+   <div class="cats" id="auth-role-switch" role="group" aria-label="Choisir son espace">
+    <button class="cat on" type="button" id="auth-role-tab-student" onclick="setAuthRole('student')">🎓 Élève</button>
+    <button class="cat" type="button" id="auth-role-tab-teacher" onclick="setAuthRole('teacher')">👨‍🏫 Professeur</button>
+    <button class="cat" type="button" id="auth-role-tab-direction" onclick="setAuthRole('direction')">🏛️ Direction</button>
+   </div>
+  <div id="auth-role-student" class="box auth-role">
+   <span class="tag ">🎓 Espace élève</span>
+   <p class="sub" style="margin:8px 0 12px">Retrouve ta progression, tes points et ton avatar avec ton pseudo.</p>
+   <div class="cats" role="group" aria-label="Connexion ou création de compte">
+    <button class="cat on" type="button" id="auth-student-tab-login" onclick="setAuthMode('student','login')">Connexion</button>
+    <button class="cat" type="button" id="auth-student-tab-signup" onclick="setAuthMode('student','signup')">Créer un compte</button>
+   </div>
+   <form id="student-login-form" novalidate>
+    <input class="inp" id="student-login-id" type="text" placeholder="Ton pseudo" aria-label="Ton pseudo" autocomplete="username" maxlength="40">
+    <input class="inp" id="student-login-pass" type="password" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="current-password">
+    <p class="msg" id="student-login-msg" role="status" aria-live="polite"></p>
+    <button class="btn grad full" id="student-login-btn" type="submit">Se connecter 🎓</button>
+   </form>
+   <form id="student-signup-form" class="hide" novalidate>
+    <p class="sub" style="margin:0 0 10px">Crée ton profil élève. Si ton professeur t’a donné un code de classe, ajoute-le pour rejoindre sa classe.</p>
+    <input class="inp" id="student-signup-id" type="text" placeholder="Choisis ton pseudo (2 à 20 caractères)" aria-label="Choisis ton pseudo (2 à 20 caractères)" autocomplete="username" maxlength="40">
+    <input class="inp" id="student-signup-email" type="email" placeholder="Ton e-mail (facultatif)" aria-label="Ton e-mail (facultatif)" autocomplete="email">
+    <label class="sub" for="student-signup-birthday" style="display:block;margin:2px 0 4px">Date de naissance (facultatif)</label>
+    <input class="inp" id="student-signup-birthday" type="date" placeholder="Date de naissance" aria-label="Date de naissance" autocomplete="bday">
+    <input class="inp" id="student-signup-code" type="text" placeholder="Code de ta classe (facultatif)" aria-label="Code de ta classe (facultatif)" autocomplete="off" maxlength="20">
+    <input class="inp" id="student-signup-pass" type="password" placeholder="Mot de passe (6 caractères minimum)" aria-label="Mot de passe (6 caractères minimum)" autocomplete="new-password">
+    <input class="inp" id="student-signup-pass2" type="password" placeholder="Confirme le mot de passe" aria-label="Confirme le mot de passe" autocomplete="new-password">
+    <p class="msg" id="student-signup-msg" role="status" aria-live="polite"></p>
+    <button class="btn grad full" id="student-signup-btn" type="submit">Créer mon compte élève 🚀</button>
+   </form>
+  </div>
+  <div id="auth-role-teacher" class="box auth-role hide">
+   <span class="tag g">👨‍🏫 Espace professeur</span>
+   <p class="sub" style="margin:8px 0 12px">Suis tes élèves, publie des quiz et épingle des annonces pour ta classe.</p>
+   <div class="cats" role="group" aria-label="Connexion ou création de compte">
+    <button class="cat on" type="button" id="auth-teacher-tab-login" onclick="setAuthMode('teacher','login')">Connexion</button>
+    <button class="cat" type="button" id="auth-teacher-tab-signup" onclick="setAuthMode('teacher','signup')">Créer un compte</button>
+   </div>
+   <form id="teacher-login-form" novalidate>
+    <input class="inp" id="teacher-login-id" type="text" placeholder="Code de ta classe" aria-label="Code de ta classe" autocomplete="username" maxlength="40">
+    <input class="inp" id="teacher-login-pass" type="password" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="current-password">
+    <p class="msg" id="teacher-login-msg" role="status" aria-live="polite"></p>
+    <button class="btn green full" id="teacher-login-btn" type="submit">Se connecter 👨‍🏫</button>
+   </form>
+   <form id="teacher-signup-form" class="hide" novalidate>
+    <p class="sub" style="margin:0 0 10px">Le code de classe est l’identifiant de ton espace : tes élèves le saisiront à leur inscription pour rejoindre ta classe.</p>
+    <input class="inp" id="teacher-signup-id" type="text" placeholder="Code de classe à créer (ex. : 3A-MARTIN)" aria-label="Code de classe à créer (ex. : 3A-MARTIN)" autocomplete="username" maxlength="40">
+    <input class="inp" id="teacher-signup-email" type="email" placeholder="Ton e-mail" aria-label="Ton e-mail" autocomplete="email">
+    <input class="inp" id="teacher-signup-pass" type="password" placeholder="Mot de passe (6 caractères minimum)" aria-label="Mot de passe (6 caractères minimum)" autocomplete="new-password">
+    <input class="inp" id="teacher-signup-pass2" type="password" placeholder="Confirme le mot de passe" aria-label="Confirme le mot de passe" autocomplete="new-password">
+    <p class="msg" id="teacher-signup-msg" role="status" aria-live="polite"></p>
+    <button class="btn green full" id="teacher-signup-btn" type="submit">Créer mon espace professeur 🚀</button>
+   </form>
+  </div>
+  <div id="auth-role-direction" class="box auth-role hide">
+   <span class="tag a">🏛️ Espace direction</span>
+   <p class="sub" style="margin:8px 0 12px">Consulte la progression globale de l’établissement, classe par classe.</p>
+   <div class="cats" role="group" aria-label="Connexion ou création de compte">
+    <button class="cat on" type="button" id="auth-direction-tab-login" onclick="setAuthMode('direction','login')">Connexion</button>
+    <button class="cat" type="button" id="auth-direction-tab-signup" onclick="setAuthMode('direction','signup')">Créer un compte</button>
+   </div>
+   <form id="direction-login-form" novalidate>
+    <input class="inp" id="direction-login-id" type="text" placeholder="Nom de l’établissement" aria-label="Nom de l’établissement" autocomplete="username" maxlength="40">
+    <input class="inp" id="direction-login-pass" type="password" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="current-password">
+    <p class="msg" id="direction-login-msg" role="status" aria-live="polite"></p>
+    <button class="btn amber full" id="direction-login-btn" type="submit">Se connecter 🏛️</button>
+   </form>
+   <form id="direction-signup-form" class="hide" novalidate>
+    <p class="sub" style="margin:0 0 10px">Crée l’espace de ton établissement pour suivre l’ensemble des classes.</p>
+    <input class="inp" id="direction-signup-id" type="text" placeholder="Nom de l’établissement" aria-label="Nom de l’établissement" autocomplete="username" maxlength="40">
+    <input class="inp" id="direction-signup-email" type="email" placeholder="E-mail de la direction" aria-label="E-mail de la direction" autocomplete="email">
+    <input class="inp" id="direction-signup-pass" type="password" placeholder="Mot de passe (6 caractères minimum)" aria-label="Mot de passe (6 caractères minimum)" autocomplete="new-password">
+    <input class="inp" id="direction-signup-pass2" type="password" placeholder="Confirme le mot de passe" aria-label="Confirme le mot de passe" autocomplete="new-password">
+    <p class="msg" id="direction-signup-msg" role="status" aria-live="polite"></p>
+    <button class="btn amber full" id="direction-signup-btn" type="submit">Créer l’espace direction 🚀</button>
+   </form>
+  </div>
+  </div>
  </div>
 </section>
 
@@ -858,7 +940,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  <div id="portail-locked" class="card center">
   <span class="tag">🔒 Espace Sécurisé</span>
   <h2>Accès restreint</h2>
-  <p class="sub">Les profils locaux élève, professeur et direction ne sont pas encore migrés vers Firebase. Ces portails sont temporairement indisponibles.</p>
+  <p class="sub" id="portail-locked-text">Connecte-toi avec ton profil élève, professeur ou direction pour accéder à cet espace.</p>
   <button class="btn grad" onclick="switchTab('connexion')">Aller à l'espace Connexion 🔑</button>
  </div>
 
@@ -933,13 +1015,13 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
   </div>
 
   <h3>🎯 Difficultés par sujet (Erreurs analysées)</h3><div id="mistakes"></div>
-  <button class="btn red sm" onclick="zestFirebaseSignOut()">Se déconnecter</button>
+  <button class="btn red sm" onclick="zestLogout()">Se déconnecter</button>
  </div>
 
  <div id="portail-teacher" class="card hide">
   <div class="row" style="border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:16px">
    <div><span class="tag g">Professeur connecté</span><h2 id="t-name"></h2><small class="sub" id="t-dash-email"></small></div>
-   <button class="btn red sm" onclick="zestFirebaseSignOut()">Se déconnecter</button>
+   <button class="btn red sm" onclick="zestLogout()">Se déconnecter</button>
   </div>
   <div id="t-tools">
    <div class="box"><h3>📌 Annonce de classe</h3><textarea class="inp" id="teacher-announcement-input" rows="3" maxlength="240" placeholder="Ex. : Interro sur les verbes séparables mardi !"></textarea><button class="btn amber" type="button" onclick="publishAnnouncement('teacher-announcement-input')">Épingler l’annonce</button><button class="btn red sm" type="button" onclick="removeAnnouncement()">Retirer l’annonce</button><small class="sub">Stockée sur cet appareil ; visible aux visiteurs de cette installation.</small></div>
@@ -962,7 +1044,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  <div id="portail-direction" class="card hide" style="border-color:#d97706">
   <div class="row" style="border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:16px">
    <div><span class="tag a">🏛️ Direction connectée</span><h2 id="dir-logged-name">Institut Saint-Joseph</h2></div>
-   <button class="btn red sm" onclick="zestFirebaseSignOut()">Se déconnecter</button>
+   <button class="btn red sm" onclick="zestLogout()">Se déconnecter</button>
   </div>
   <div class="grid3" style="margin-bottom:14px">
    <div class="box"><small class="sub">TOTAL ÉLÈVES</small><h2 id="dir-tot-stu" style="color:var(--accent);font-size:28px">0</h2></div>
@@ -1224,22 +1306,23 @@ function applyUltimateBranding(){
 }
 
 var stu = null, tch = null, dir = null;
-['zest-home-user','zest-logged-teacher','zest-logged-dir','zest-otp-verified-sessions-v1'].forEach(rm);
-function stripLegacyPasswords(key){
- var accounts=ld(key,{}),changed=false;
- Object.keys(accounts).forEach(function(id){
-  var account=accounts[id];
-  if(typeof account==='string'){accounts[id]={};changed=true;}
-  else if(account&&typeof account==='object'&&Object.prototype.hasOwnProperty.call(account,'pass')){
-   delete account.pass;changed=true;
-  }
- });
- if(changed){
-  try{localStorage.setItem(key,JSON.stringify(accounts));}
-  catch(error){console.error('Impossible de supprimer les anciens mots de passe locaux :',error);}
+var ZEST_SESSION_KEYS = {student:'zest-home-user', teacher:'zest-logged-teacher', direction:'zest-logged-dir'};
+rm('zest-otp-verified-sessions-v1');
+(function restoreLocalSession(){
+ function readSaved(key){
+  try{
+   var raw = localStorage.getItem(key);
+   if(raw === null) return null;
+   try{ return JSON.parse(raw); }catch(e){ return raw; }
+  }catch(e){ return null; }
  }
-}
-[K.users,K.teachers,K.directors].forEach(stripLegacyPasswords);
+ function has(o, k){ return typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k); }
+ var s = readSaved(ZEST_SESSION_KEYS.student), t2 = readSaved(ZEST_SESSION_KEYS.teacher), d = readSaved(ZEST_SESSION_KEYS.direction);
+ if(has(ld(K.users, {}), s)) stu = s;
+ else if(has(ld(K.teachers, {}), t2)) tch = t2;
+ else if(has(ld(K.directors, {}), d)) dir = d;
+ else Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
+})();
 
 function me(){ return stu ? ld(K.users, {})[stu] : null; }
 function saveMe(fn){ var u = ld(K.users, {}); if (stu && u[stu]) { fn(u[stu]); sv(K.users, u); } }
@@ -1452,8 +1535,8 @@ function renderHeaderProfile(){
  if(avatar){avatar.classList.toggle('is-online',!!session);avatar.classList.toggle('is-offline',!session);avatar.setAttribute('aria-label','Yaya, la mascotte de Zest, '+(session?'en ligne':'hors ligne'));avatar.title=session?'Yaya est en ligne':'Yaya est hors ligne';}
  if(homePresence){homePresence.textContent=session?'🟢 En ligne':'🌙 Hors ligne';homePresence.className='tag '+(session?'g':'v');}
  var homeTitle=$('home-profile-title'),homeCopy=$('home-profile-copy');
- if(homeTitle)homeTitle.textContent=stu?'Mon profil & paramètres':firebaseUser?'Compte Firebase':'Connexion et profil';
- if(homeCopy)homeCopy.textContent=stu?'Bienvenue, '+stu+' ! Consulte ton profil, tes points et tes paramètres.':firebaseUser?'Connecté en tant que '+(firebaseUser.displayName||firebaseUser.email||'utilisateur Firebase')+'. Les profils de rôle ne sont pas encore migrés.':'Connecte-toi pour accéder à ton profil et à tes paramètres.';
+ if(homeTitle)homeTitle.textContent=stu?'Mon profil & paramètres':tch?'Espace professeur':dir?'Espace direction':firebaseUser?'Compte Firebase':'Connexion et profil';
+ if(homeCopy)homeCopy.textContent=stu?'Bienvenue, '+stu+' ! Consulte ton profil, tes points et tes paramètres.':tch?'Connecté à l’espace professeur (classe '+tch+').':dir?'Connecté à l’espace direction ('+dir+').':firebaseUser?'Connecté en tant que '+(firebaseUser.displayName||firebaseUser.email||'utilisateur Firebase')+'. Connecte-toi aussi avec ton profil Zest pour retrouver ta progression.':'Connecte-toi pour accéder à ton profil et à tes paramètres.';
  if(session&&session!==avatarBubbleSession)showAvatarBubble(getAvatarGreeting(),4000);
  avatarBubbleSession=session;
 }
@@ -2464,14 +2547,22 @@ function renderYayaScanHistory(){
 
 function renderAll(){
  try {
-    var isConnected = !!window.zestFirebaseUser;
+    var isConnected = !!(window.zestFirebaseUser || stu || tch || dir);
     var badge = $('badge'); if(badge) badge.textContent = isConnected ? '🟢' : '';
     renderHeaderProfile();
 
-    show('portail-locked', true);
-    show('portail-student', false);
-    show('portail-teacher', false);
-    show('portail-direction', false);
+    show('portail-locked', !(stu || tch || dir));
+    show('portail-student', !!stu);
+    show('portail-teacher', !!tch);
+    show('portail-direction', !!dir);
+
+    var lockedText = $('portail-locked-text');
+    if (lockedText) {
+      var fbUser = window.zestFirebaseUser;
+      lockedText.textContent = fbUser
+        ? 'Tu es connecté avec Firebase (' + (fbUser.displayName || fbUser.email || 'compte') + '). Pour accéder à ta progression, connecte-toi aussi avec ton profil élève, professeur ou direction.'
+        : 'Connecte-toi avec ton profil élève, professeur ou direction pour accéder à cet espace.';
+    }
 
     renderClanQuest();
     renderAnnouncement();
@@ -2553,7 +2644,7 @@ function renderAll(){
     if (tch){
       var admin = tch === 'ADMIN';
       var tObj = ld(K.teachers, {})[tch];
-      var tEmail = (typeof tObj === 'object' && tObj !== null) ? tObj.email : 'Admin';
+      var tEmail = (typeof tObj === 'object' && tObj !== null) ? (tObj.email || '—') : 'Admin';
       if($('t-name')) $('t-name').textContent = admin ? '👑 Super admin' : 'Classe : ' + tch;
       if($('t-dash-email')) $('t-dash-email').textContent = '✉ ' + tEmail;
       show('t-tools', !admin); show('t-admin', admin);
@@ -4383,6 +4474,256 @@ if(location.protocol==='file:'){
  offlineStatus.classList.remove('hide');
 }
 </script>
+<!-- AUTHENTIFICATION LOCALE : profils élève, professeur et direction -->
+<script>
+(function(){
+ 'use strict';
+
+ /* ===== Configuration ===== */
+ var ADMIN_CODE = 'ADMIN';
+ /* Mot de passe du compte super admin (code de classe « ADMIN » dans l’onglet Professeur).
+    Laisse vide pour désactiver ce compte ; renseigne-le pour l’activer. */
+ var ADMIN_PASSWORD = '';
+ var MIN_PASSWORD = 6;
+ var PBKDF2_ITERATIONS = 100000;
+ var RESERVED = ['__proto__', 'constructor', 'prototype', 'tostring', 'valueof', 'hasownproperty'];
+ var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+ /* ===== Utilitaires ===== */
+ function clean(v){ return String(v == null ? '' : v).trim().replace(/\s+/g, ' '); }
+ function val(id){ var e = $(id); return e ? clean(e.value) : ''; }
+ function raw(id){ var e = $(id); return e ? e.value : ''; }
+ function has(o, k){ return Object.prototype.hasOwnProperty.call(o, k); }
+ function isReserved(v){ return RESERVED.indexOf(String(v).toLowerCase()) >= 0; }
+ function findKey(store, id){
+  if(has(store, id)) return id;
+  var low = id.toLowerCase(), keys = Object.keys(store);
+  for(var i = 0; i < keys.length; i++){ if(keys[i].toLowerCase() === low) return keys[i]; }
+  return null;
+ }
+ function setBusy(btn, busy){ if(btn) btn.disabled = !!busy; }
+ function toAccount(r){
+  if(typeof r === 'string') return {pass: r};              /* très ancien format : mot de passe seul */
+  return (r && typeof r === 'object') ? r : {};
+ }
+
+ /* ===== Mots de passe (PBKDF2-SHA256 + sel aléatoire) ===== */
+ function toHex(bytes){ return Array.prototype.map.call(bytes, function(b){ return ('0' + b.toString(16)).slice(-2); }).join(''); }
+ function randomSalt(){ var a = new Uint8Array(16); crypto.getRandomValues(a); return toHex(a); }
+ async function hashPassword(pass, salt){
+  if(!(window.crypto && crypto.subtle)) throw new Error('crypto-unavailable');
+  var enc = new TextEncoder();
+  var key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
+  var bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt:enc.encode(salt), iterations:PBKDF2_ITERATIONS}, key, 256);
+  return toHex(new Uint8Array(bits));
+ }
+ async function setPassword(acc, pass){
+  acc.passSalt = randomSalt();
+  acc.passHash = await hashPassword(pass, acc.passSalt);
+  delete acc.pass;
+ }
+ /* Retourne 'ok', 'bad' ou 'none' (profil sans mot de passe) */
+ async function checkPassword(acc, pass){
+  if(typeof acc.passHash === 'string' && typeof acc.passSalt === 'string'){
+   return (await hashPassword(pass, acc.passSalt)) === acc.passHash ? 'ok' : 'bad';
+  }
+  if(typeof acc.pass === 'string' && acc.pass !== '') return acc.pass === pass ? 'ok' : 'bad';   /* ancien format, migré à la connexion */
+  return 'none';
+ }
+ function errorText(error){
+  if(error && error.message === 'crypto-unavailable') return 'Ton navigateur bloque le chiffrement des mots de passe. Ouvre Zest en HTTPS (ou sur localhost).';
+  return 'Une erreur est survenue. Réessaie, ou recharge la page.';
+ }
+
+ /* ===== Rôles ===== */
+ function validatePseudo(v){
+  if(v.length < 2 || v.length > 20) return 'Le pseudo doit contenir entre 2 et 20 caractères.';
+  if(!/^[\p{L}\p{N}_.\- ]+$/u.test(v)) return 'Le pseudo ne peut contenir que des lettres, chiffres, espaces, « . », « - » et « _ ».';
+  if(isReserved(v)) return 'Ce pseudo n’est pas disponible.';
+  if(isProfanePseudo(v)) return '🚫 Pseudo refusé par le filtre de modération.';
+  return '';
+ }
+ function validateClassCode(v){
+  if(v.length < 2 || v.length > 20) return 'Le code de classe doit contenir entre 2 et 20 caractères.';
+  if(!/^[\p{L}\p{N}_.\- ]+$/u.test(v)) return 'Le code de classe ne peut contenir que des lettres, chiffres, espaces, « . », « - » et « _ ».';
+  if(isReserved(v) || v.toUpperCase() === ADMIN_CODE) return 'Ce code de classe n’est pas disponible.';
+  if(isProfanePseudo(v)) return '🚫 Code refusé par le filtre de modération.';
+  return '';
+ }
+ function validateSchoolName(v){
+  if(v.length < 2 || v.length > 40) return 'Le nom de l’établissement doit contenir entre 2 et 40 caractères.';
+  if(/[<>]/.test(v)) return 'Le nom ne peut pas contenir « < » ou « > ».';
+  if(isReserved(v)) return 'Ce nom n’est pas disponible.';
+  return '';
+ }
+ var ROLES = {
+  student:   {store:K.users,     session:ZEST_SESSION_KEYS.student,   validate:validatePseudo,    normalize:function(v){ return v; },                    unknown:'Profil introuvable. Vérifie ton pseudo ou crée un compte.',            taken:'Ce pseudo est déjà pris.',                  emailRequired:false},
+  teacher:   {store:K.teachers,  session:ZEST_SESSION_KEYS.teacher,   validate:validateClassCode, normalize:function(v){ return v.toUpperCase(); },     unknown:'Code de classe introuvable. Vérifie le code ou crée ton espace.',      taken:'Ce code de classe existe déjà.',            emailRequired:true},
+  direction: {store:K.directors, session:ZEST_SESSION_KEYS.direction, validate:validateSchoolName, normalize:function(v){ return v; },                    unknown:'Établissement introuvable. Vérifie le nom ou crée l’espace direction.', taken:'Cet établissement existe déjà.',            emailRequired:true}
+ };
+
+ /* ===== Affichage : choix du rôle et du mode ===== */
+ window.setAuthRole = function(role){
+  Object.keys(ROLES).forEach(function(r){
+   show('auth-role-' + r, r === role);
+   var tab = $('auth-role-tab-' + r); if(tab) tab.className = 'cat' + (r === role ? ' on' : '');
+  });
+ };
+ window.setAuthMode = function(role, mode){
+  show(role + '-login-form', mode === 'login');
+  show(role + '-signup-form', mode === 'signup');
+  var l = $('auth-' + role + '-tab-login'), s = $('auth-' + role + '-tab-signup');
+  if(l) l.className = 'cat' + (mode === 'login' ? ' on' : '');
+  if(s) s.className = 'cat' + (mode === 'signup' ? ' on' : '');
+  say(role + '-login-msg', ''); say(role + '-signup-msg', '');
+ };
+
+ /* ===== Session ===== */
+ function startSession(role, key, persist){
+  stu = null; tch = null; dir = null;
+  Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
+  if(role === 'student') stu = key; else if(role === 'teacher') tch = key; else dir = key;
+  if(persist) sv(ROLES[role].session, key);
+  Object.keys(ROLES).forEach(function(r){
+   ['login', 'signup'].forEach(function(m){ var f = $(r + '-' + m + '-form'); if(f) f.reset(); say(r + '-' + m + '-msg', ''); });
+   window.setAuthMode(r, 'login');                              /* on revient sur « Connexion » pour la prochaine fois */
+  });
+  applyUltimateBranding();
+  switchTab('portail');
+ }
+
+ window.zestLogout = async function(){
+  stu = null; tch = null; dir = null;
+  Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
+  if(window.zestFirebaseUser && typeof window.zestFirebaseSignOut === 'function'){
+   try{ await window.zestFirebaseSignOut(); }catch(e){ console.error('[Zest] Déconnexion Firebase :', e); }
+  }
+  applyUltimateBranding();
+  switchTab('connexion');
+ };
+
+ /* ===== Connexion ===== */
+ async function login(role){
+  var cfg = ROLES[role], msg = role + '-login-msg', btn = $(role + '-login-btn');
+  var id = val(role + '-login-id'), pass = raw(role + '-login-pass');
+  if(!id || !pass) return say(msg, 'Renseigne ton identifiant et ton mot de passe.');
+  setBusy(btn, true);
+  try{
+   if(role === 'teacher' && id.toUpperCase() === ADMIN_CODE){
+    if(!ADMIN_PASSWORD) return say(msg, 'Le compte super admin n’est pas configuré.');
+    if(pass !== ADMIN_PASSWORD) return say(msg, 'Mot de passe incorrect.');
+    return startSession('teacher', ADMIN_CODE, false);          /* session admin jamais mémorisée */
+   }
+   var store = ld(cfg.store, {}), key = findKey(store, id);
+   if(!key) return say(msg, cfg.unknown);
+   var acc = toAccount(store[key]), changed = false;
+   var status = await checkPassword(acc, pass);
+   if(status === 'bad') return say(msg, 'Mot de passe incorrect.');
+   if(status === 'none'){
+    if(pass.length < MIN_PASSWORD) return say(msg, 'Ce profil n’a plus de mot de passe. Saisis celui que tu veux utiliser à partir de maintenant (' + MIN_PASSWORD + ' caractères minimum).');
+    if(!confirm('Ce profil n’a plus de mot de passe.\nUtiliser celui que tu viens de saisir comme nouveau mot de passe ?')) return say(msg, '');
+    await setPassword(acc, pass); changed = true;
+   }else if(!acc.passHash){
+    await setPassword(acc, pass); changed = true;                /* migration d’un ancien mot de passe en clair */
+   }
+   if(changed){ store[key] = acc; sv(cfg.store, store); }
+   startSession(role, key, true);
+  }catch(error){
+   console.error('[Zest] Connexion locale (' + role + ') :', error);
+   say(msg, errorText(error));
+  }finally{
+   setBusy(btn, false);
+  }
+ }
+
+ /* ===== Création de compte ===== */
+ async function signup(role){
+  var cfg = ROLES[role], msg = role + '-signup-msg', btn = $(role + '-signup-btn');
+  var id = cfg.normalize(val(role + '-signup-id')), email = val(role + '-signup-email');
+  var p1 = raw(role + '-signup-pass'), p2 = raw(role + '-signup-pass2');
+  var birthday = '', code = '';
+  var err = cfg.validate(id);
+  if(err) return say(msg, err);
+  if(!email && cfg.emailRequired) return say(msg, 'Renseigne une adresse e-mail.');
+  if(email && !EMAIL_RE.test(email)) return say(msg, 'Cette adresse e-mail n’est pas valide.');
+  if(role === 'student'){
+   birthday = val('student-signup-birthday');
+   if(birthday && (isNaN(new Date(birthday).getTime()) || new Date(birthday) > new Date() || birthday < '1900-01-01')) return say(msg, 'La date de naissance n’est pas valide.');
+   code = val('student-signup-code');
+   if(code){
+    var codeErr = validateClassCode(code.toUpperCase());
+    if(codeErr) return say(msg, codeErr.replace('Le code de classe', 'Le code de classe saisi'));
+    var teacherKey = findKey(ld(K.teachers, {}), code);
+    code = teacherKey || code.toUpperCase();
+   }
+  }
+  if(p1.length < MIN_PASSWORD) return say(msg, 'Le mot de passe doit contenir au moins ' + MIN_PASSWORD + ' caractères.');
+  if(p1 !== p2) return say(msg, 'Les deux mots de passe ne correspondent pas.');
+  var store = ld(cfg.store, {});
+  if(findKey(store, id)) return say(msg, cfg.taken);
+  setBusy(btn, true);
+  try{
+   var acc;
+   if(role === 'student'){
+    acc = {email:email, birthday:birthday, teacherCode:code, totalScore:0, spent:0, gamesPlayed:0, skin:'🦊', owned:[], mistakes:{}, pseudoChanges:0, createdAt:Date.now()};
+   }else{
+    acc = {email:email, createdAt:Date.now()};
+   }
+   await setPassword(acc, p1);
+   store = ld(cfg.store, {});                                    /* relecture : évite d’écraser une écriture concurrente */
+   if(findKey(store, id)) return say(msg, cfg.taken);
+   store[id] = acc; sv(cfg.store, store);
+   startSession(role, id, true);
+  }catch(error){
+   console.error('[Zest] Création de compte (' + role + ') :', error);
+   say(msg, errorText(error));
+  }finally{
+   setBusy(btn, false);
+  }
+ }
+
+ /* ===== Changement de pseudo (1re modification gratuite, ensuite 200 points) ===== */
+ window.changeStudentPseudo = function(){
+  var msg = 'pseudo-change-msg', input = $('new-pseudo-input');
+  if(!stu) return say(msg, 'Connecte-toi avec un profil élève.');
+  var np = clean(input ? input.value : '');
+  var err = validatePseudo(np);
+  if(err) return say(msg, err);
+  var users = ld(K.users, {}), old = stu, u = users[old];
+  if(!u) return say(msg, 'Profil introuvable.');
+  if(np === old) return say(msg, 'C’est déjà ton pseudo.');
+  var clash = Object.keys(users).some(function(k){ return k !== old && k.toLowerCase() === np.toLowerCase(); });
+  if(clash) return say(msg, 'Ce pseudo est déjà pris.');
+  var changes = Number(u.pseudoChanges) || 0, cost = changes >= 1 ? 200 : 0;
+  if(cost && availableStudentXp(u) < cost) return say(msg, 'Il te faut 200 points disponibles (tu en as ' + availableStudentXp(u) + ').');
+  if(cost && !confirm('Changer de pseudo coûte 200 points. Continuer ?')) return;
+  u.pseudoChanges = changes + 1;
+  if(cost) u.spent = (Number(u.spent) || 0) + cost;
+  delete users[old]; users[np] = u; sv(K.users, users);
+  ['zest-scan-history-', 'zest-srs-cards-'].forEach(function(prefix){        /* données rattachées au pseudo */
+   try{
+    var v = localStorage.getItem(prefix + old);
+    if(v !== null){ localStorage.setItem(prefix + np, v); localStorage.removeItem(prefix + old); }
+   }catch(e){ console.error('[Zest] Migration de ' + prefix + old + ' :', e); }
+  });
+  stu = np; sv(ROLES.student.session, np);
+  if(input) input.value = '';
+  renderAll();
+  say(msg, 'Pseudo modifié : ' + np + (cost ? ' (−200 points)' : ''), true);
+ };
+
+ /* ===== Branchements ===== */
+ Object.keys(ROLES).forEach(function(role){
+  var lf = $(role + '-login-form'), sf = $(role + '-signup-form');
+  if(lf) lf.addEventListener('submit', function(e){ e.preventDefault(); login(role); });
+  if(sf) sf.addEventListener('submit', function(e){ e.preventDefault(); signup(role); });
+ });
+ var birthdayInput = $('student-signup-birthday');
+ if(birthdayInput){ var d = new Date(); birthdayInput.max = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+ window.addEventListener('load', function(){ applyUltimateBranding(); renderAll(); });
+})();
+</script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import {
@@ -4395,7 +4736,7 @@ if(location.protocol==='file:'){
     onAuthStateChanged,
     signOut
   } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
+  import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCpBCHLo7LRqYfmiBBbb7bPfoWkrb9FQAE",
     authDomain: "zest-bd035.firebaseapp.com",
@@ -4407,8 +4748,16 @@ if(location.protocol==='file:'){
   };
 
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
   const auth = getAuth(app);
+  auth.languageCode = "fr";
+
+  // Analytics est facultatif : s’il n’est pas supporté (navigateur, cookies bloqués, hors ligne…),
+  // il ne doit surtout pas empêcher le reste de la connexion de fonctionner.
+  isAnalyticsSupported().then(function (supported) {
+    if (supported) getAnalytics(app);
+  }).catch(function (error) {
+    console.warn("[Zest · Firebase] Analytics désactivé :", error);
+  });
   const googleProvider = new GoogleAuthProvider();
 
   const authMessage = document.getElementById("firebase-auth-message");
@@ -4429,14 +4778,71 @@ if(location.protocol==='file:'){
     authMessage.className = isSuccess ? "msg ok" : "msg";
   }
 
+  // Message lisible (en français) pour un code d’erreur Firebase, avec le code entre parenthèses.
+  function describeFirebaseError(error, fallback) {
+    const code = (error && error.code) || "";
+    const host = window.location.hostname || window.location.protocol;
+    const messages = {
+      "auth/operation-not-allowed": "La connexion par lien e-mail n’est pas activée. Console Firebase › Authentication › Méthode de connexion › E-mail/Mot de passe : active aussi « Lien envoyé par e-mail (connexion sans mot de passe) ».",
+      "auth/unauthorized-continue-uri": "Le domaine « " + host + " » n’est pas autorisé. Console Firebase › Authentication › Paramètres › Domaines autorisés : ajoute-le.",
+      "auth/unauthorized-domain": "Le domaine « " + host + " » n’est pas autorisé. Console Firebase › Authentication › Paramètres › Domaines autorisés : ajoute-le.",
+      "auth/invalid-continue-uri": "L’adresse de la page n’est pas une URL valide pour Firebase. Ouvre Zest via http(s), pas depuis un fichier local.",
+      "auth/missing-continue-uri": "L’URL de retour du lien est manquante.",
+      "auth/invalid-email": "L’adresse e-mail n’est pas valide (ou ne correspond pas à celle du lien).",
+      "auth/too-many-requests": "Trop de tentatives. Patiente quelques minutes avant de réessayer.",
+      "auth/quota-exceeded": "Le quota d’e-mails Firebase est dépassé pour aujourd’hui. Réessaie plus tard.",
+      "auth/network-request-failed": "Problème de réseau. Vérifie ta connexion Internet.",
+      "auth/invalid-api-key": "La clé API Firebase est refusée. Vérifie la clé et ses restrictions dans la console Google Cloud.",
+      "auth/api-key-not-valid": "La clé API Firebase est refusée. Vérifie la clé et ses restrictions dans la console Google Cloud.",
+      "auth/configuration-not-found": "Firebase Authentication n’est pas initialisé pour ce projet. Console Firebase › Authentication › clique sur « Commencer ».",
+      "auth/invalid-action-code": "Le lien est invalide, expiré ou déjà utilisé. Demande-en un nouveau.",
+      "auth/expired-action-code": "Le lien a expiré. Demande-en un nouveau.",
+      "auth/popup-blocked": "Ton navigateur a bloqué la fenêtre Google. Autorise les pop-ups pour ce site."
+    };
+    let base = messages[code];
+    if (!base && code.indexOf("requests-from-referer") !== -1) {
+      base = "Cette adresse (« " + host + " ») est bloquée par les restrictions de la clé API. Console Google Cloud › Identifiants : autorise ce référent.";
+    }
+    base = base || fallback;
+    return code ? base + " [" + code + "]" : base;
+  }
+
+  // Diagnostic détaillé dans la console du navigateur (F12 › Console).
+  function logFirebaseError(context, error, extra) {
+    console.error("[Zest · Firebase] " + context + " a échoué", {
+      code: error && error.code,
+      message: error && error.message,
+      customData: error && error.customData,
+      explication: describeFirebaseError(error, "Erreur inconnue."),
+      page: {
+        href: window.location.href,
+        origin: window.location.origin,
+        hostname: window.location.hostname,
+        protocol: window.location.protocol
+      },
+      firebase: { authDomain: firebaseConfig.authDomain, projectId: firebaseConfig.projectId },
+      extra: extra || null
+    });
+    console.error(error);
+  }
+
+  function showAuthPanel() {
+    if (typeof window.switchTab === "function") window.switchTab("connexion");
+  }
+
   async function signInWithGoogle() {
     try {
       await signInWithPopup(auth, googleProvider);
       showAuthMessage("Connexion Google réussie.", true);
       if (typeof window.switchTab === "function") window.switchTab("accueil");
     } catch (error) {
-      console.error("La connexion Google a échoué :", error);
-      showAuthMessage("La connexion Google a échoué. Réessaie ou utilise le lien par e-mail.", false);
+      logFirebaseError("signInWithPopup (Google)", error);
+      showAuthPanel();
+      if (error && error.code === "auth/popup-closed-by-user") {
+        showAuthMessage("La fenêtre Google a été fermée avant la fin de la connexion.", false);
+        return;
+      }
+      showAuthMessage(describeFirebaseError(error, "La connexion Google a échoué. Réessaie ou utilise le lien par e-mail."), false);
     }
   }
 
@@ -4461,6 +4867,7 @@ if(location.protocol==='file:'){
       };
 
       emailSignInButton.disabled = true;
+      showAuthMessage("Envoi du lien en cours…", true);
       try {
         await sendSignInLinkToEmail(auth, email, actionCodeSettings);
         try {
@@ -4472,8 +4879,8 @@ if(location.protocol==='file:'){
         }
         showAuthMessage("Lien de connexion envoyé. Vérifie ta boîte mail ainsi que tes spams.", true);
       } catch (error) {
-        console.error("L’envoi du lien de connexion a échoué :", error);
-        showAuthMessage("Impossible d’envoyer le lien de connexion. Vérifie l’adresse et réessaie.", false);
+        logFirebaseError("sendSignInLinkToEmail", error, { email: email, actionCodeSettings: actionCodeSettings });
+        showAuthMessage(describeFirebaseError(error, "Impossible d’envoyer le lien de connexion. Vérifie l’adresse et réessaie."), false);
       } finally {
         emailSignInButton.disabled = false;
       }
@@ -4554,12 +4961,17 @@ if(location.protocol==='file:'){
       showAuthMessage("Connexion par e-mail réussie.", true);
       if (typeof window.switchTab === "function") window.switchTab("accueil");
     } catch (error) {
-      console.error("La validation du lien de connexion a échoué :", error);
-      showAuthMessage("Le lien de connexion est invalide ou expiré. Demande-en un nouveau.", false);
+      logFirebaseError("signInWithEmailLink", error);
+      // On nettoie l’URL (oobCode, apiKey…) pour ne pas les réinjecter dans un prochain envoi de lien.
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showAuthPanel();
+      showAuthMessage(describeFirebaseError(error, "Le lien de connexion est invalide ou expiré. Demande-en un nouveau."), false);
     }
   }
 
-  completeEmailLinkSignIn();
+  completeEmailLinkSignIn().catch(function (error) {
+    logFirebaseError("completeEmailLinkSignIn", error);
+  });
 </script>
 </body>
 </html>
