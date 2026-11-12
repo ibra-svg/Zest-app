@@ -480,6 +480,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 <header>
  <div class="logo" onclick="switchTab('accueil')"><b>Z</b><div><h1 id="brand-title">Zest</h1><small id="brand-sub">Apprends le néerlandais sans stress !</small></div></div>
  <span class="header-greeting hide" id="header-greeting"></span>
+ <span class="sub hide" id="firebase-header-user" aria-live="polite"></span>
  <button class="zest-weather-widget" id="zest-weather-widget" type="button" onclick="fetchBrusselsWeather()" aria-label="Actualiser la météo de Bruxelles">
   <span class="zest-weather-icon" id="zest-weather-icon" aria-hidden="true">🌤️</span><span id="zest-weather-label">Météo Bruxelles</span>
  </button>
@@ -842,7 +843,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 <section id="tab-connexion" class="tab hide" style="max-width:760px;margin:0 auto">
  <div class="card">
   <h2>🔑 Espace de Connexion</h2>
-  <p class="sub">Connecte-toi ci-dessous. Si tu es déjà connecté, tu dois d'abord te déconnecter pour changer de compte.</p>
+  <p class="sub">Connecte-toi ci-dessous avec Google ou par lien magique envoyé par e-mail.</p>
 
   <div class="box" id="firebase-auth-panel" style="margin-top:16px">
    <span class="tag">Connexion Firebase</span>
@@ -852,6 +853,13 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
    <input class="inp" id="firebase-email" type="email" placeholder="Ton adresse e-mail" autocomplete="email" required>
    <button class="btn grad full" id="firebase-email-button" type="button">M’envoyer un lien de connexion</button>
    <p class="msg" id="firebase-auth-message" role="status" aria-live="polite"></p>
+  </div>
+
+  <div id="firebase-auth-session" class="hide box center" role="status" aria-live="polite" style="background:#10b98111;border-color:#10b981;padding:20px">
+   <h3 style="color:#10b981">✅ Connecté à Zest</h3>
+   <p id="firebase-auth-user" style="font-weight:600;margin:10px 0"></p>
+   <p class="msg" id="firebase-session-message" role="status" aria-live="polite"></p>
+   <button class="btn red" id="firebase-signout-button" type="button">Se déconnecter 🚪</button>
   </div>
 
   <div id="conn-active-box" class="hide box center" style="background:#10b98111;border-color:#10b981;padding:20px">
@@ -884,7 +892,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
    <div class="box" style="margin-top:16px">
     <span class="tag v">Espace professeur</span>
     <h3 id="t-title">Connexion professeur</h3>
-    <p class="sub">À la connexion, le code est destiné à l’adresse enregistrée pour la classe. Le super-admin indique une adresse de test. (Simulation locale, sans e-mail réel.)</p>
+    <p class="sub">Connecte-toi avec ton code de classe et ton mot de passe.</p>
     <input class="inp" id="t-email" type="email" placeholder="Adresse e-mail professeur (ex: prof@ecole.be)" autocomplete="email">
     <input class="inp" id="t-code" placeholder="CODE DE CLASSE (ex: PROF-DUPONT)" maxlength="24" autocomplete="username">
     <input class="inp" id="t-pass" type="password" placeholder="Mot de passe">
@@ -1094,21 +1102,6 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  <button class="scroll-top-button" id="scroll-to-top" type="button" onclick="scrollToTop()" aria-label="Remonter en haut de la page">⬆️</button>
 </div>
 
-<div id="otp-modal" class="modal hide" role="dialog" aria-modal="true" aria-labelledby="otp-title" aria-describedby="otp-description" onclick="if(event.target===this)cancelOtp()">
- <div class="mbox center" style="max-width:440px">
-  <span class="tag v">🔐 Vérification en deux étapes</span>
-  <h2 id="otp-title">Confirme ton identité</h2>
-  <p class="sub" id="otp-description"></p>
-  <p class="sub" style="font-size:12px">Simulation locale : aucun e-mail réel n’est envoyé. Pour une vraie sécurité, il faut un serveur d’authentification et un service d’e-mail.</p>
-  <div class="otp-code" id="otp-demo-code" aria-label="Code de test"></div>
-  <label for="otp-input" class="sub" style="display:block;margin-top:14px">Saisis le code à 6 chiffres</label>
-  <input class="inp otp-input" id="otp-input" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="••••••" aria-describedby="otp-feedback">
-  <p class="msg" id="otp-feedback" role="alert" aria-live="assertive"></p>
-  <button class="btn grad full" id="otp-verify" type="button" onclick="verifyOtp()">Vérifier et continuer</button>
-  <button class="btn sm" type="button" style="background:#64748b;margin-top:8px" onclick="cancelOtp()">Annuler</button>
- </div>
-</div>
-
 <div id="recovery-modal" class="modal hide" role="dialog" aria-modal="true" aria-labelledby="recovery-title" aria-describedby="recovery-description" onclick="if(event.target===this)closePasswordRecovery()">
  <div class="mbox center" style="max-width:440px">
   <span class="tag v">🔑 Récupération de compte</span>
@@ -1306,8 +1299,7 @@ var K = {
  quizzes: 'zest-published-quizzes',
  stu: 'zest-home-user',
  tch: 'zest-logged-teacher',
- dir: 'zest-logged-dir',
- otpVerified: 'zest-otp-verified-sessions-v1'
+ dir: 'zest-logged-dir'
 };
 var ADMIN_CODE = 'ADMIN-ZEST', ADMIN_HASH = 'h17q9jojcuho';
 
@@ -1365,12 +1357,10 @@ function hash(s){
 function passOk(stored, p){ return stored === hash(p) || stored === p; }
 
 var stu = ld(K.stu, null), tch = ld(K.tch, null), dir = ld(K.dir, null);
-var otpVerifiedSessions=ld(K.otpVerified,{});
-if (!otpVerifiedSessions || typeof otpVerifiedSessions!=='object' || Array.isArray(otpVerifiedSessions))otpVerifiedSessions={};
-if (stu && (!ld(K.users, {})[stu] || otpVerifiedSessions.student!==stu)) { stu = null; rm(K.stu); delete otpVerifiedSessions.student; }
-if (tch && (otpVerifiedSessions.teacher!==tch || (tch !== 'ADMIN' && !ld(K.teachers, {})[tch]))) { tch = null; rm(K.tch); delete otpVerifiedSessions.teacher; }
-if (dir && (!ld(K.directors, {})[dir] || otpVerifiedSessions.director!==dir)) { dir = null; rm(K.dir); delete otpVerifiedSessions.director; }
-sv(K.otpVerified,otpVerifiedSessions);
+if (stu && !ld(K.users, {})[stu]) { stu = null; rm(K.stu); }
+if (tch && tch !== 'ADMIN' && !ld(K.teachers, {})[tch]) { tch = null; rm(K.tch); }
+if (dir && !ld(K.directors, {})[dir]) { dir = null; rm(K.dir); }
+rm('zest-otp-verified-sessions-v1');
 
 function me(){ return stu ? ld(K.users, {})[stu] : null; }
 function saveMe(fn){ var u = ld(K.users, {}); if (stu && u[stu]) { fn(u[stu]); sv(K.users, u); } }
@@ -1576,10 +1566,10 @@ function hideAvatarBubble(){
 }
 function renderHeaderProfile(){
  var user=me(),greeting=$('header-greeting'),auth=$('header-auth');
- var session=stu||tch||dir||null,avatar=$('header-avatar'),homePresence=$('home-profile-presence');
+ var firebaseUser=window.zestFirebaseUser||null,session=stu||tch||dir||(firebaseUser&&firebaseUser.uid)||null,avatar=$('header-avatar'),homePresence=$('home-profile-presence');
  updateStudentStreak();
  if(greeting)updateYayaGreeting();
- if(auth)auth.classList.toggle('hide',!!(stu||tch||dir));
+ if(auth)auth.classList.toggle('hide',!!session);
  if(avatar){avatar.classList.toggle('is-online',!!session);avatar.classList.toggle('is-offline',!session);avatar.setAttribute('aria-label','Yaya, la mascotte de Zest, '+(session?'en ligne':'hors ligne'));avatar.title=session?'Yaya est en ligne':'Yaya est hors ligne';}
  if(homePresence){homePresence.textContent=session?'🟢 En ligne':'🌙 Hors ligne';homePresence.className='tag '+(session?'g':'v');}
  var homeTitle=$('home-profile-title'),homeCopy=$('home-profile-copy');
@@ -1681,9 +1671,6 @@ function headerProvider(provider){
  var note=$('header-auth-note');
  if(note){note.textContent='La connexion '+provider+' n’est pas activée : utilise la connexion élève pour créer un compte ou te connecter.';note.classList.remove('hide');}
 }
-function markOtpVerified(role,identifier){otpVerifiedSessions=ld(K.otpVerified,{});otpVerifiedSessions[role]=identifier;sv(K.otpVerified,otpVerifiedSessions);}
-function clearOtpVerified(role){otpVerifiedSessions=ld(K.otpVerified,{});delete otpVerifiedSessions[role];sv(K.otpVerified,otpVerifiedSessions);}
-
 function toggleTheme(){ 
  try {
     var d = document.body.classList.toggle('dark');
@@ -2377,92 +2364,53 @@ function setStudentMode(reg){
  say('s-msg', '');
 }
 
-var pendingOtp=null;
-function createOtpCode(){
- if(!window.crypto||typeof window.crypto.getRandomValues!=='function')return null;
- var data=new Uint32Array(1),limit=4294000000;
- do{window.crypto.getRandomValues(data);}while(data[0]>=limit);
- return String(data[0]%1000000).padStart(6,'0');
+function completeLocalLogin(kind,identifier,email,payload){
+ applyLocalLogin({kind:kind,identifier:identifier,email:email,payload:payload});
 }
-function beginOtp(kind,identifier,email,payload){
- var code=createOtpCode();
- if(!code)return false;
- pendingOtp={kind:kind,identifier:identifier,email:email,payload:payload,code:code,attempts:0,expiresAt:Date.now()+5*60*1000};
- $('otp-description').textContent='Un code de vérification à 6 chiffres a été envoyé à '+email+'. (Simulation : Code de test : '+code+')';
- $('otp-demo-code').textContent=code;
- $('otp-input').value='';
- $('otp-feedback').textContent='';
- show('otp-modal',true);
- setTimeout(function(){var field=$('otp-input');if(field)field.focus();},0);
- return true;
+function reportLocalLoginConflict(message,kind){
+ if(message){
+  say(kind.indexOf('student-')===0?'s-msg':kind.indexOf('director-')===0?'dir-msg':'t-msg',message);
+ }
 }
-function cancelOtp(message){
- var request=pendingOtp;
- pendingOtp=null;
- show('otp-modal',false);
- $('otp-input').value='';
- $('otp-demo-code').textContent='';
- ['s-pass','s-confirm','t-pass','t-confirm','dir-pass','dir-confirm'].forEach(function(id){var field=$(id);if(field)field.value='';});
- if(message&&request)say(request.kind.indexOf('student-')===0?'s-msg':request.kind.indexOf('director-')===0?'dir-msg':'t-msg',message);
-}
-function finishOtpLogin(request){
+function applyLocalLogin(request){
  if(request.kind==='student-register'){
    var users=ld(K.users,{}),taken=Object.keys(users).some(function(name){return name.toLowerCase()===request.identifier.toLowerCase();});
-   if(taken)return cancelOtp('Ce pseudo vient d’être créé entre-temps. Vérifie le formulaire et réessaie.');
+   if(taken)return reportLocalLoginConflict('Ce pseudo vient d’être créé entre-temps. Vérifie le formulaire et réessaie.','student-register');
    users[request.identifier]=request.payload;
-   sv(K.users,users);stu=request.identifier;markOtpVerified('student',stu);sv(K.stu,stu);
+   sv(K.users,users);stu=request.identifier;sv(K.stu,stu);
  }else if(request.kind==='student-login'){
    var studentUsers=ld(K.users,{}),student=studentUsers[request.identifier];
-   if(!student||String(student.email||'').toLowerCase()!==request.email.toLowerCase())return cancelOtp('Le compte ou son adresse e-mail a changé. Recommence la connexion.');
-   stu=request.identifier;markOtpVerified('student',stu);sv(K.stu,stu);
+   if(!student||String(student.email||'').toLowerCase()!==request.email.toLowerCase())return reportLocalLoginConflict('Le compte ou son adresse e-mail a changé. Recommence la connexion.','student-login');
+   stu=request.identifier;sv(K.stu,stu);
  }else if(request.kind==='teacher-register'){
    var teachers=ld(K.teachers,{});
-   if(teachers[request.identifier])return cancelOtp('Ce code de classe vient d’être créé entre-temps. Réessaie avec un autre code.');
-   teachers[request.identifier]=request.payload;sv(K.teachers,teachers);tch=request.identifier;markOtpVerified('teacher',tch);sv(K.tch,tch);
+   if(teachers[request.identifier])return reportLocalLoginConflict('Ce code de classe vient d’être créé entre-temps. Réessaie avec un autre code.','teacher-register');
+   teachers[request.identifier]=request.payload;sv(K.teachers,teachers);tch=request.identifier;sv(K.tch,tch);
  }else if(request.kind==='teacher-login'){
    var currentTeachers=ld(K.teachers,{}),currentTeacher=currentTeachers[request.identifier];
    var currentPass=(typeof currentTeacher==='object'&&currentTeacher!==null)?currentTeacher.pass:currentTeacher;
-   if(!currentPass||currentPass!==request.payload.passSnapshot)return cancelOtp('Le compte professeur a changé. Recommence la connexion.');
+   if(!currentPass||currentPass!==request.payload.passSnapshot)return reportLocalLoginConflict('Le compte professeur a changé. Recommence la connexion.','teacher-login');
    if(request.payload.linkEmail){
      if(typeof currentTeacher==='object'&&currentTeacher!==null)currentTeacher.email=request.email;
      else currentTeachers[request.identifier]={pass:currentPass,email:request.email};
      sv(K.teachers,currentTeachers);
-   }else if(typeof currentTeacher!=='object'||currentTeacher===null||String(currentTeacher.email||'').toLowerCase()!==request.email.toLowerCase())return cancelOtp('Le compte professeur ou son adresse e-mail a changé. Recommence la connexion.');
-   tch=request.identifier;markOtpVerified('teacher',tch);sv(K.tch,tch);
+   }else if(typeof currentTeacher!=='object'||currentTeacher===null||String(currentTeacher.email||'').toLowerCase()!==request.email.toLowerCase())return reportLocalLoginConflict('Le compte professeur ou son adresse e-mail a changé. Recommence la connexion.','teacher-login');
+   tch=request.identifier;sv(K.tch,tch);
  }else if(request.kind==='admin-login'){
-   tch='ADMIN';markOtpVerified('teacher',tch);sv(K.tch,tch);
+   tch='ADMIN';sv(K.tch,tch);
  }else if(request.kind==='director-register'){
-   var directors=ld(K.directors,{});if(directors[request.identifier])return cancelOtp('Ce compte de direction vient d’être créé entre-temps. Réessaie avec un autre code.');
-   directors[request.identifier]=request.payload;sv(K.directors,directors);dir=request.identifier;markOtpVerified('director',dir);sv(K.dir,dir);
+   var directors=ld(K.directors,{});if(directors[request.identifier])return reportLocalLoginConflict('Ce compte de direction vient d’être créé entre-temps. Réessaie avec un autre code.','director-register');
+   directors[request.identifier]=request.payload;sv(K.directors,directors);dir=request.identifier;sv(K.dir,dir);
  }else if(request.kind==='director-login'){
    var currentDirectors=ld(K.directors,{}),currentDirector=currentDirectors[request.identifier];
-   if(!currentDirector||!passOk(currentDirector.pass,request.payload.passSnapshot)||String(currentDirector.email||'').toLowerCase()!==request.email.toLowerCase())return cancelOtp('Le compte de direction ou son adresse e-mail a changé. Recommence la connexion.');
-   dir=request.identifier;markOtpVerified('director',dir);sv(K.dir,dir);
+   if(!currentDirector||!passOk(currentDirector.pass,request.payload.passSnapshot)||String(currentDirector.email||'').toLowerCase()!==request.email.toLowerCase())return reportLocalLoginConflict('Le compte de direction ou son adresse e-mail a changé. Recommence la connexion.','director-login');
+   dir=request.identifier;sv(K.dir,dir);
  }
  var isStudent=request.kind.indexOf('student-')===0,isDirector=request.kind.indexOf('director-')===0;
  (isStudent?['s-pseudo','s-email','s-bday','s-pass','s-confirm','s-code']:isDirector?['dir-email','dir-code','dir-pass','dir-confirm']:['t-email','t-code','t-pass','t-confirm']).forEach(function(id){var field=$(id);if(field)field.value='';});
- pendingOtp=null;
- show('otp-modal',false);
- $('otp-input').value='';$('otp-demo-code').textContent='';
  say(isStudent?'s-msg':isDirector?'dir-msg':'t-msg','');
  renderAll();switchTab('portail');
 }
-function verifyOtp(){
- if(!pendingOtp)return;
- var code=$('otp-input').value.trim();
- if(Date.now()>pendingOtp.expiresAt){cancelOtp('Code expiré. Valide à nouveau tes identifiants pour recevoir un nouveau code.');return;}
- if(!/^\d{6}$/.test(code)){say('otp-feedback','Saisis les 6 chiffres du code.');return;}
- if(code!==pendingOtp.code){
-   pendingOtp.attempts++;
-   var remaining=5-pendingOtp.attempts;
-   if(remaining<=0){cancelOtp('Vérification bloquée après 5 codes incorrects. Recommence la connexion.');return;}
-   say('otp-feedback','Code incorrect. Il te reste '+remaining+' tentative(s).');
-   $('otp-input').value='';$('otp-input').focus();return;
- }
- finishOtpLogin(pendingOtp);
-}
-var otpInput=$('otp-input');
-if(otpInput)otpInput.addEventListener('keydown',function(event){if(event.key==='Enter')verifyOtp();});
 
 var pendingPasswordRecovery=null;
 function openPasswordRecovery(){
@@ -2474,6 +2422,12 @@ function openPasswordRecovery(){
  show('recovery-request-step',true);show('recovery-reset-step',false);show('recovery-success-step',false);
  show('recovery-modal',true);
  setTimeout(function(){var input=$('recovery-email');if(input)input.focus();},0);
+}
+function createRecoveryCode(){
+ if(!window.crypto||typeof window.crypto.getRandomValues!=='function')return null;
+ var data=new Uint32Array(1),limit=4294000000;
+ do{window.crypto.getRandomValues(data);}while(data[0]>=limit);
+ return String(data[0]%1000000).padStart(6,'0');
 }
 function closePasswordRecovery(){
  pendingPasswordRecovery=null;
@@ -2490,7 +2444,7 @@ function requestPasswordRecovery(){
  Object.keys(teachers).forEach(function(id){var account=teachers[id];if(account&&typeof account==='object'&&String(account.email||'').trim().toLowerCase()===email)targets.push({role:'teacher',id:id,email:email});});
  Object.keys(directors).forEach(function(id){var account=directors[id];if(account&&typeof account==='object'&&String(account.email||'').trim().toLowerCase()===email)targets.push({role:'director',id:id,email:email});});
  if(!targets.length){pendingPasswordRecovery=null;say('recovery-request-feedback','Aucun compte associé à cette adresse n’a été trouvé.');return;}
- var code=createOtpCode();
+ var code=createRecoveryCode();
  if(!code){say('recovery-request-feedback','La génération sécurisée du code est indisponible dans ce navigateur.');return;}
  pendingPasswordRecovery={email:email,targets:targets,code:code,attempts:0,expiresAt:Date.now()+10*60*1000};
  $('recovery-code-notice').textContent='Un code de réinitialisation a été envoyé à '+email+'. (Simulation locale : Code de test : '+code+')';
@@ -2532,13 +2486,13 @@ function completePasswordRecovery(){
    console.error('Échec de la sauvegarde du nouveau mot de passe :',error);
    say('recovery-reset-feedback','Impossible d’enregistrer le nouveau mot de passe. Vérifie l’espace de stockage du navigateur et réessaie.');return;
  }
- if(stu&&request.targets.some(function(target){return target.role==='student'&&target.id===stu;})){stu=null;rm(K.stu);clearOtpVerified('student');}
- if(tch&&request.targets.some(function(target){return target.role==='teacher'&&target.id===tch;})){tch=null;rm(K.tch);clearOtpVerified('teacher');}
- if(dir&&request.targets.some(function(target){return target.role==='director'&&target.id===dir;})){dir=null;rm(K.dir);clearOtpVerified('director');}
+ if(stu&&request.targets.some(function(target){return target.role==='student'&&target.id===stu;})){stu=null;rm(K.stu);}
+ if(tch&&request.targets.some(function(target){return target.role==='teacher'&&target.id===tch;})){tch=null;rm(K.tch);}
+ if(dir&&request.targets.some(function(target){return target.role==='director'&&target.id===dir;})){dir=null;rm(K.dir);}
  pendingPasswordRecovery=null;
  $('recovery-demo-code').textContent='';$('recovery-code').value='';$('recovery-new-pass').value='';$('recovery-confirm-pass').value='';
  show('recovery-request-step',false);show('recovery-reset-step',false);
- say('recovery-reset-feedback','');say('recovery-success','Mot de passe réinitialisé avec succès. Reconnecte-toi avec ton nouveau mot de passe, puis valide le code OTP habituel.',true);
+ say('recovery-reset-feedback','');say('recovery-success','Mot de passe réinitialisé avec succès. Reconnecte-toi avec ton nouveau mot de passe.',true);
  show('recovery-success-step',true);
  renderAll();
 }
@@ -2579,15 +2533,13 @@ function studentSubmit(){
       owned: ['🦊', '🌸', '⚡', '🍥', '🐱', '🍀', '🔥'],
       ultimateUnlocked: false
     };
-    if(!beginOtp('student-register',pseudo,email,newStudent))return say('s-msg','La génération sécurisée du code est indisponible dans ce navigateur.');
+    completeLocalLogin('student-register',pseudo,email,newStudent);
  } else {
     if (!key || !passOk(users[key].pass, pass)) return say('s-msg', 'Pseudo ou mot de passe incorrect.');
-    var studentEmail=String(users[key].email||'').trim();
-    if(!studentEmail||studentEmail.indexOf('@')===-1)return say('s-msg','Aucune adresse e-mail vérifiable n’est enregistrée pour ce compte. Contacte ton professeur.');
-    if(!beginOtp('student-login',key,studentEmail))return say('s-msg','La génération sécurisée du code est indisponible dans ce navigateur.');
+    completeLocalLogin('student-login',key,users[key].email||'');
  }
 }
-function studentLogout(){ stu = null; rm(K.stu); clearOtpVerified('student'); resetLive(); renderAll(); }
+function studentLogout(){ stu = null; rm(K.stu); resetLive(); renderAll(); }
 
 function changeStudentPseudo(){
  var inp = $('new-pseudo-input');
@@ -2623,7 +2575,6 @@ function changeStudentPseudo(){
  sv(K.users, users);
 
  stu = newPseudo;
- markOtpVerified('student',stu);
  sv(K.stu, stu);
 
  inp.value = '';
@@ -2649,15 +2600,13 @@ function teacherSubmit(){
  if (pass.length < 6) return say('t-msg', 'Le mot de passe doit faire 6 caractères minimum.');
  if (code === ADMIN_CODE){
     if (tReg || hash(pass) !== ADMIN_HASH) return say('t-msg', 'Accès refusé.');
-    var adminEmail=$('t-email').value.trim();
-    if(!adminEmail||adminEmail.indexOf('@')===-1)return say('t-msg','Entre une adresse e-mail pour la vérification simulée du super-admin.');
-    if(!beginOtp('admin-login','ADMIN',adminEmail))return say('t-msg','La génération sécurisée du code est indisponible dans ce navigateur.');
+    completeLocalLogin('admin-login','ADMIN','');
  } else if (tReg){
     var email = $('t-email').value.trim();
     if (!email || email.indexOf('@') === -1) return say('t-msg', 'E-mail invalide.');
     if (teachers[code]) return say('t-msg', 'Ce code existe déjà.');
     if (pass !== $('t-confirm').value) return say('t-msg', 'Les mots de passe ne correspondent pas.');
-    if(!beginOtp('teacher-register',code,email,{pass:hash(pass),email:email}))return say('t-msg','La génération sécurisée du code est indisponible dans ce navigateur.');
+    completeLocalLogin('teacher-register',code,email,{pass:hash(pass),email:email});
  } else {
     var tData = teachers[code];
     var storedPass = (typeof tData === 'object' && tData !== null) ? tData.pass : tData;
@@ -2665,10 +2614,10 @@ function teacherSubmit(){
     var teacherEmail=(typeof tData==='object'&&tData!==null)?String(tData.email||'').trim():'',linkEmail=!teacherEmail;
     if(linkEmail)teacherEmail=$('t-email').value.trim();
     if(!teacherEmail||teacherEmail.indexOf('@')===-1)return say('t-msg',linkEmail?'Ce compte ancien n’a pas d’adresse enregistrée. Entre une adresse à associer.':'Adresse e-mail professeur invalide.');
-    if(!beginOtp('teacher-login',code,teacherEmail,{passSnapshot:storedPass,linkEmail:linkEmail}))return say('t-msg','La génération sécurisée du code est indisponible dans ce navigateur.');
+    completeLocalLogin('teacher-login',code,teacherEmail,{passSnapshot:storedPass,linkEmail:linkEmail});
  }
 }
-function teacherLogout(){ tch = null; rm(K.tch); clearOtpVerified('teacher'); renderAll(); }
+function teacherLogout(){ tch = null; rm(K.tch); renderAll(); }
 
 var dirRegMode = false;
 function setDirMode(reg){
@@ -2691,21 +2640,19 @@ function dirSubmit(){
     if (!email || email.indexOf('@') === -1) return say('dir-msg', 'E-mail invalide.');
     if (directors[code]) return say('dir-msg', 'Ce code existe déjà.');
     if (pass !== $('dir-confirm').value) return say('dir-msg', 'Les mots de passe ne correspondent pas.');
-    if(!beginOtp('director-register',code,email,{pass:hash(pass),email:email}))return say('dir-msg','La génération sécurisée du code est indisponible dans ce navigateur.');
+    completeLocalLogin('director-register',code,email,{pass:hash(pass),email:email});
  } else {
     var dData = directors[code];
     if (!dData || !passOk(dData.pass, pass)) return say('dir-msg', 'Code ou mot de passe incorrect.');
-    var directorEmail=String(dData.email||'').trim();
-    if(!directorEmail||directorEmail.indexOf('@')===-1)return say('dir-msg','Aucune adresse e-mail vérifiable n’est enregistrée pour ce compte. Contacte le super-administrateur.');
-    if(!beginOtp('director-login',code,directorEmail,{passSnapshot:dData.pass}))return say('dir-msg','La génération sécurisée du code est indisponible dans ce navigateur.');
+    completeLocalLogin('director-login',code,dData.email||'',{passSnapshot:dData.pass});
  }
 }
-function dirLogout(){ dir = null; rm(K.dir); clearOtpVerified('director'); renderAll(); }
+function dirLogout(){ dir = null; rm(K.dir); renderAll(); }
 
 function masterLogout(){
  stu = null; tch = null; dir = null;
  rm(K.stu); rm(K.tch); rm(K.dir);
- rm(K.otpVerified);otpVerifiedSessions={};
+ if(typeof window.zestFirebaseSignOut==='function')window.zestFirebaseSignOut();
  resetLive(); renderAll();
 }
 
@@ -2969,13 +2916,14 @@ function renderYayaScanHistory(){
 
 function renderAll(){
  try {
-    var isConnected = !!(stu || tch || dir);
+    var isLocalConnected = !!(stu || tch || dir);
+    var isConnected = isLocalConnected || !!window.zestFirebaseUser;
     var badge = $('badge'); if(badge) badge.textContent = isConnected ? '🟢' : '';
     renderHeaderProfile();
 
-    show('conn-active-box', isConnected);
+    show('conn-active-box', isLocalConnected);
     show('conn-forms-container', !isConnected);
-    if (isConnected) {
+    if (isLocalConnected) {
       var connText = '';
       if (stu) connText = 'Connecté en tant qu’élève : <b>' + stu + '</b>';
       else if (tch) connText = tch === 'ADMIN' ? 'Connecté en tant que Super Admin' : 'Connecté en tant que professeur (Classe : <b>' + tch + '</b>)';
@@ -2984,7 +2932,7 @@ function renderAll(){
       if (activeTextEl) activeTextEl.innerHTML = connText;
     }
 
-    show('portail-locked', !isConnected);
+    show('portail-locked', !isLocalConnected);
     show('portail-student', !!stu);
     show('portail-teacher', !!tch);
     show('portail-direction', !!dir);
@@ -4905,11 +4853,12 @@ if(location.protocol==='file:'){
     getAuth,
     GoogleAuthProvider,
     signInWithPopup,
-    sendSignInLinkToEmail
+    sendSignInLinkToEmail,
+    isSignInWithEmailLink,
+    signInWithEmailLink,
+    onAuthStateChanged,
+    signOut
   } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
-
-  // Remplace les valeurs par celles de ton projet Firebase si nécessaire.
   const firebaseConfig = {
     apiKey: "AIzaSyCpBCHLo7LRqYfmiBBbb7bPfoWkrb9FQAE",
     authDomain: "zest-bd035.firebaseapp.com",
@@ -4923,13 +4872,18 @@ if(location.protocol==='file:'){
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const googleProvider = new GoogleAuthProvider();
-  const analytics = getAnalytics(app);
 
   const authMessage = document.getElementById("firebase-auth-message");
   const googleSignInButton = document.getElementById("firebase-google-button");
   const headerGoogleSignInButton = document.getElementById("firebase-header-google-button");
   const emailSignInButton = document.getElementById("firebase-email-button");
   const emailInput = document.getElementById("firebase-email");
+  const signOutButton = document.getElementById("firebase-signout-button");
+  const authPanel = document.getElementById("firebase-auth-panel");
+  const authSession = document.getElementById("firebase-auth-session");
+  const authUserLabel = document.getElementById("firebase-auth-user");
+  const sessionMessage = document.getElementById("firebase-session-message");
+  const headerUserLabel = document.getElementById("firebase-header-user");
 
   function showAuthMessage(message, isSuccess) {
     if (!authMessage) return;
@@ -4939,9 +4893,9 @@ if(location.protocol==='file:'){
 
   async function signInWithGoogle() {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      alert(`Bienvenue, ${result.user.displayName || "sur Zest"} !`);
-      showAuthMessage("", true);
+      await signInWithPopup(auth, googleProvider);
+      showAuthMessage("Connexion Google réussie.", true);
+      if (typeof window.switchTab === "function") window.switchTab("accueil");
     } catch (error) {
       console.error("La connexion Google a échoué :", error);
       showAuthMessage("La connexion Google a échoué. Réessaie ou utilise le lien par e-mail.", false);
@@ -4972,13 +4926,13 @@ if(location.protocol==='file:'){
       try {
         await sendSignInLinkToEmail(auth, email, actionCodeSettings);
         try {
-          localStorage.setItem("zest-signin-email", email);
+          localStorage.setItem("emailForSignIn", email);
         } catch (storageError) {
           console.error("Impossible de mémoriser l’adresse e-mail :", storageError);
-          showAuthMessage("Le lien a été envoyé, mais l’adresse e-mail n’a pas pu être mémorisée dans ce navigateur.", false);
+          showAuthMessage("Le lien a été envoyé. Vérifie ta boîte mail et tes spams. L’adresse n’a pas pu être mémorisée : tu devras la saisir au retour.", false);
           return;
         }
-        showAuthMessage("Lien de connexion envoyé. Consulte ta boîte e-mail.", true);
+        showAuthMessage("Lien de connexion envoyé. Vérifie ta boîte mail ainsi que tes spams.", true);
       } catch (error) {
         console.error("L’envoi du lien de connexion a échoué :", error);
         showAuthMessage("Impossible d’envoyer le lien de connexion. Vérifie l’adresse et réessaie.", false);
@@ -4987,6 +4941,87 @@ if(location.protocol==='file:'){
       }
     });
   }
+
+  window.zestFirebaseSignOut = async function () {
+    try {
+      await signOut(auth);
+      if (sessionMessage) sessionMessage.textContent = "";
+    } catch (error) {
+      console.error("La déconnexion Firebase a échoué :", error);
+      if (sessionMessage) sessionMessage.textContent = "Impossible de te déconnecter. Réessaie.";
+    }
+  };
+
+  if (signOutButton) {
+    signOutButton.addEventListener("click", async function () {
+      signOutButton.disabled = true;
+      try {
+        await window.zestFirebaseSignOut();
+      } finally {
+        signOutButton.disabled = false;
+      }
+    });
+  }
+
+  onAuthStateChanged(auth, function (user) {
+    window.zestFirebaseUser = user;
+    const isSignedIn = Boolean(user);
+    const identity = user && (user.displayName || user.email || user.uid);
+    if (authPanel) authPanel.classList.toggle("hide", isSignedIn);
+    if (authSession) authSession.classList.toggle("hide", !isSignedIn);
+    if (authUserLabel) authUserLabel.textContent = identity ? "Connecté en tant que " + identity : "";
+    if (headerUserLabel) {
+      headerUserLabel.textContent = identity ? "👤 " + identity : "";
+      headerUserLabel.classList.toggle("hide", !isSignedIn);
+    }
+    if (sessionMessage) sessionMessage.textContent = "";
+    if (typeof window.renderAll === "function") window.renderAll();
+    if (isSignedIn) {
+      const connectionTab = document.getElementById("tab-connexion");
+      if (connectionTab && !connectionTab.classList.contains("hide") && typeof window.switchTab === "function") {
+        window.switchTab("accueil");
+      }
+    }
+  }, function (error) {
+    console.error("La vérification de la session Firebase a échoué :", error);
+    showAuthMessage("Impossible de vérifier la session. Recharge la page et réessaie.", false);
+  });
+
+  async function completeEmailLinkSignIn() {
+    if (!isSignInWithEmailLink(auth, window.location.href)) return;
+
+    let email = "";
+    try {
+      email = localStorage.getItem("emailForSignIn") || "";
+    } catch (error) {
+      console.error("Impossible de lire l’adresse e-mail mémorisée :", error);
+    }
+    if (!email) {
+      email = window.prompt("Confirme ton adresse e-mail pour terminer la connexion :") || "";
+    }
+    email = email.trim();
+    if (!email) {
+      showAuthMessage("Saisis ton adresse e-mail pour terminer la connexion.", false);
+      return;
+    }
+
+    try {
+      await signInWithEmailLink(auth, email, window.location.href);
+      try {
+        localStorage.removeItem("emailForSignIn");
+      } catch (error) {
+        console.error("Impossible d’effacer l’adresse e-mail mémorisée :", error);
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showAuthMessage("Connexion par e-mail réussie.", true);
+      if (typeof window.switchTab === "function") window.switchTab("accueil");
+    } catch (error) {
+      console.error("La validation du lien de connexion a échoué :", error);
+      showAuthMessage("Le lien de connexion est invalide ou expiré. Demande-en un nouveau.", false);
+    }
+  }
+
+  completeEmailLinkSignIn();
 </script>
 </body>
 </html>
