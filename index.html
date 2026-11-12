@@ -492,7 +492,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
     <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
    </svg>
   </button>
-  <button class="btn sm header-provider google" type="button" title="Continuer avec Google (simulation)" aria-label="Continuer avec Google (simulation)" onclick="headerProvider('Google')">
+  <button class="btn sm header-provider google" id="firebase-header-google-button" type="button" title="Continuer avec Google" aria-label="Continuer avec Google">
    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
   </button>
  </div>
@@ -843,6 +843,16 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  <div class="card">
   <h2>🔑 Espace de Connexion</h2>
   <p class="sub">Connecte-toi ci-dessous. Si tu es déjà connecté, tu dois d'abord te déconnecter pour changer de compte.</p>
+
+  <div class="box" id="firebase-auth-panel" style="margin-top:16px">
+   <span class="tag">Connexion Firebase</span>
+   <h3>Connexion rapide</h3>
+   <button class="btn full" id="firebase-google-button" type="button">Continuer avec Google</button>
+   <label for="firebase-email" class="sub" style="display:block;margin-top:12px">Ou recevoir un lien magique par e-mail :</label>
+   <input class="inp" id="firebase-email" type="email" placeholder="Ton adresse e-mail" autocomplete="email" required>
+   <button class="btn grad full" id="firebase-email-button" type="button">M’envoyer un lien de connexion</button>
+   <p class="msg" id="firebase-auth-message" role="status" aria-live="polite"></p>
+  </div>
 
   <div id="conn-active-box" class="hide box center" style="background:#10b98111;border-color:#10b981;padding:20px">
    <h3 style="color:#10b981">✅ Session active détectée</h3>
@@ -4888,6 +4898,95 @@ if(location.protocol==='file:'){
  offlineStatus.textContent=serviceWorkerUnavailable?'Mode hors ligne indisponible dans cette fenêtre intégrée. Ouvre Zest dans un onglet ou un navigateur normal.':'Ce navigateur ne prend pas en charge le mode hors ligne.';
  offlineStatus.classList.remove('hide');
 }
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    sendSignInLinkToEmail
+  } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
+
+  // Remplace les valeurs par celles de ton projet Firebase si nécessaire.
+  const firebaseConfig = {
+    apiKey: "AIzaSyCpBCHLo7LRqYfmiBBbb7bPfoWkrb9FQAE",
+    authDomain: "zest-bd035.firebaseapp.com",
+    projectId: "zest-bd035",
+    storageBucket: "zest-bd035.firebasestorage.app",
+    messagingSenderId: "285403067987",
+    appId: "1:285403067987:web:afdb3ef4700453f75038a6",
+    measurementId: "G-57X0HG40VN"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
+  const analytics = getAnalytics(app);
+
+  const authMessage = document.getElementById("firebase-auth-message");
+  const googleSignInButton = document.getElementById("firebase-google-button");
+  const headerGoogleSignInButton = document.getElementById("firebase-header-google-button");
+  const emailSignInButton = document.getElementById("firebase-email-button");
+  const emailInput = document.getElementById("firebase-email");
+
+  function showAuthMessage(message, isSuccess) {
+    if (!authMessage) return;
+    authMessage.textContent = message;
+    authMessage.className = isSuccess ? "msg ok" : "msg";
+  }
+
+  async function signInWithGoogle() {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      alert(`Bienvenue, ${result.user.displayName || "sur Zest"} !`);
+      showAuthMessage("", true);
+    } catch (error) {
+      console.error("La connexion Google a échoué :", error);
+      showAuthMessage("La connexion Google a échoué. Réessaie ou utilise le lien par e-mail.", false);
+    }
+  }
+
+  if (googleSignInButton) {
+    googleSignInButton.addEventListener("click", signInWithGoogle);
+  }
+  if (headerGoogleSignInButton) {
+    headerGoogleSignInButton.addEventListener("click", signInWithGoogle);
+  }
+
+  if (emailSignInButton && emailInput) {
+    emailSignInButton.addEventListener("click", async function () {
+      const email = emailInput.value.trim();
+      if (!email || !emailInput.checkValidity()) {
+        emailInput.reportValidity();
+        return;
+      }
+
+      const actionCodeSettings = {
+        url: window.location.href,
+        handleCodeInApp: true
+      };
+
+      emailSignInButton.disabled = true;
+      try {
+        await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+        try {
+          localStorage.setItem("zest-signin-email", email);
+        } catch (storageError) {
+          console.error("Impossible de mémoriser l’adresse e-mail :", storageError);
+          showAuthMessage("Le lien a été envoyé, mais l’adresse e-mail n’a pas pu être mémorisée dans ce navigateur.", false);
+          return;
+        }
+        showAuthMessage("Lien de connexion envoyé. Consulte ta boîte e-mail.", true);
+      } catch (error) {
+        console.error("L’envoi du lien de connexion a échoué :", error);
+        showAuthMessage("Impossible d’envoyer le lien de connexion. Vérifie l’adresse et réessaie.", false);
+      } finally {
+        emailSignInButton.disabled = false;
+      }
+    });
+  }
 </script>
 </body>
 </html>
