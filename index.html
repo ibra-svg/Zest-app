@@ -1452,8 +1452,8 @@ function renderHeaderProfile(){
  if(avatar){avatar.classList.toggle('is-online',!!session);avatar.classList.toggle('is-offline',!session);avatar.setAttribute('aria-label','Yaya, la mascotte de Zest, '+(session?'en ligne':'hors ligne'));avatar.title=session?'Yaya est en ligne':'Yaya est hors ligne';}
  if(homePresence){homePresence.textContent=session?'🟢 En ligne':'🌙 Hors ligne';homePresence.className='tag '+(session?'g':'v');}
  var homeTitle=$('home-profile-title'),homeCopy=$('home-profile-copy');
- if(homeTitle)homeTitle.textContent=session?'Mon profil & paramètres':'Connexion et profil';
- if(homeCopy)homeCopy.textContent=stu?'Bienvenue, '+stu+' ! Consulte ton profil, tes points et tes paramètres.':session?'Gère ton profil et tes paramètres de compte.':'Connecte-toi pour accéder à ton profil et à tes paramètres.';
+ if(homeTitle)homeTitle.textContent=stu?'Mon profil & paramètres':firebaseUser?'Compte Firebase':'Connexion et profil';
+ if(homeCopy)homeCopy.textContent=stu?'Bienvenue, '+stu+' ! Consulte ton profil, tes points et tes paramètres.':firebaseUser?'Connecté en tant que '+(firebaseUser.displayName||firebaseUser.email||'utilisateur Firebase')+'. Les profils de rôle ne sont pas encore migrés.':'Connecte-toi pour accéder à ton profil et à tes paramètres.';
  if(session&&session!==avatarBubbleSession)showAvatarBubble(getAvatarGreeting(),4000);
  avatarBubbleSession=session;
 }
