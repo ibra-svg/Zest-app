@@ -149,11 +149,13 @@ td{padding:12px;border-top:1px solid var(--bd)}
 .yaya-teaching-avatar{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:linear-gradient(145deg,#fef3c7,#f9a8d4);font-size:23px;box-shadow:0 3px 10px rgba(236,72,153,.2)}
 .yaya-teaching-bubble{position:relative;margin:0;padding:11px 13px;border:1px solid var(--bd);border-radius:13px;background:var(--card);color:var(--txt);box-shadow:0 4px 14px rgba(0,0,0,.08);line-height:1.5}
 .yaya-teaching-bubble::before{content:"";position:absolute;top:12px;left:-6px;width:10px;height:10px;transform:rotate(-45deg);border-left:1px solid var(--bd);border-top:1px solid var(--bd);background:var(--card)}
-.yaya-flashcard-coach{position:fixed;left:16px;bottom:18px;z-index:45;display:flex;align-items:center;gap:11px;width:min(390px,calc(100vw - 32px));padding:12px 15px;border:1px solid var(--bd);border-radius:18px;background:color-mix(in srgb,var(--card) 94%,transparent);color:var(--txt);box-shadow:0 10px 32px rgba(0,0,0,.24);opacity:0;visibility:hidden;transform:translateY(12px);transition:opacity .25s ease,transform .25s ease,visibility .25s}
+.yaya-flashcard-coach{position:fixed;left:16px;bottom:18px;z-index:45;display:flex;align-items:center;gap:11px;width:min(390px,calc(100vw - 32px));padding:12px 15px;border:1px solid var(--bd);border-radius:18px;background:color-mix(in srgb,var(--card) 94%,transparent);color:var(--txt);box-shadow:0 10px 32px rgba(0,0,0,.24);opacity:0;visibility:hidden;transform:translateY(12px)}
 .yaya-flashcard-coach.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
+body.yaya-home:not(.yaya-animations-disabled) .yaya-flashcard-coach{transition:opacity .25s ease,transform .25s ease,visibility .25s}
 .yaya-flashcard-avatar{display:flex;align-items:center;justify-content:center;width:46px;height:46px;flex:0 0 46px;border-radius:50%;background:linear-gradient(145deg,#fef3c7,#f9a8d4);font-size:29px}
 .yaya-flashcard-message{margin:0;font-size:13px;line-height:1.45}
-.yaya-intro-mascot{display:flex;align-items:center;justify-content:center;width:112px;height:112px;margin:0 auto 18px;border:1px solid #f9a8d4;border-radius:50%;background:linear-gradient(145deg,#fef3c7,#f9a8d4);font-size:68px;box-shadow:0 12px 32px rgba(236,72,153,.25);animation:zest-celebrate .75s ease-in-out 2}
+.yaya-intro-mascot{display:flex;align-items:center;justify-content:center;width:112px;height:112px;margin:0 auto 18px;border:1px solid #f9a8d4;border-radius:50%;background:linear-gradient(145deg,#fef3c7,#f9a8d4);font-size:68px;box-shadow:0 12px 32px rgba(236,72,153,.25)}
+body.yaya-home:not(.yaya-animations-disabled) .yaya-intro-mascot{animation:zest-celebrate .75s ease-in-out 2}
 .yaya-intro-copy{max-width:440px;margin:10px auto 20px;font-size:16px;line-height:1.65}
 .zp-badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.zp-b{text-align:center}.zp-b.lock{filter:grayscale(1);opacity:.45}.zp-b .e{font-size:38px}
 .zp-chk{display:block;padding:6px 4px;font-size:14px;cursor:pointer}
@@ -162,6 +164,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 @keyframes zest-celebrate{0%,100%{transform:scale(1)}35%{transform:scale(1.035)}65%{transform:scale(.99)}}
 .mn-celebrate{animation:zest-celebrate .75s ease-in-out 2;border-color:#f59e0b!important;box-shadow:0 0 0 4px #f59e0b44,0 12px 36px #f59e0b33!important}
 .header-profile{position:fixed;top:15px;right:15px;z-index:9999;display:flex;align-items:center;gap:10px;min-width:0;max-width:calc(100vw - 30px);background:var(--card);padding:8px 15px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.yaya-motion-toggle{min-height:36px;flex:0 0 auto;padding:0 10px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--bd);border-radius:20px;background:var(--card);color:var(--txt);font-size:12px;font-weight:700;cursor:pointer}
 .header-avatar{width:46px;height:46px;flex:0 0 46px;display:flex;align-items:center;justify-content:center;padding:4px;border:4px solid #64748b;border-radius:50%;background:linear-gradient(145deg,#fef3c7,#f9a8d4);color:#0f172a;font-size:27px;box-shadow:0 4px 14px rgba(236,72,153,.25);user-select:none;transition:border-color .3s ease,box-shadow .3s ease}
 .header-avatar.is-online{border-color:#4caf50;box-shadow:0 0 0 2px #4caf5033,0 4px 14px rgba(236,72,153,.25)}
 .header-avatar.is-offline{border-color:#64748b;box-shadow:0 0 0 2px #64748b33,0 4px 14px rgba(236,72,153,.25)}
@@ -171,8 +174,10 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 .zest-weather-icon{font-size:18px;animation:weatherFloat 3s ease-in-out infinite}
 @keyframes weatherFloat{50%{transform:translateY(-2px)}}
 .yaya-ai-loading{display:flex;align-items:center;justify-content:center;gap:12px;min-height:120px;font-weight:750}
-.yaya-ai-loading .mascot{font-size:36px;animation:weatherFloat .8s ease-in-out infinite}
-.yaya-ai-loading .loading-dots::after{content:"";animation:yayaLoadingDots 1.2s steps(4,end) infinite}
+.yaya-ai-loading .mascot{font-size:36px}
+.yaya-ai-loading .loading-dots::after{content:"…"}
+body.yaya-home:not(.yaya-animations-disabled) .yaya-ai-loading .mascot{animation:weatherFloat .8s ease-in-out infinite}
+body.yaya-home:not(.yaya-animations-disabled) .yaya-ai-loading .loading-dots::after{content:"";animation:yayaLoadingDots 1.2s steps(4,end) infinite}
 @keyframes yayaLoadingDots{0%{content:""}25%{content:"."}50%{content:".."}75%,100%{content:"..."}}
 .yaya-energy-widget{display:flex;align-items:center;gap:7px;padding:5px 9px;border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--txt);cursor:pointer}
 .yaya-energy-widget:hover{border-color:#f59e0b}
@@ -181,13 +186,13 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 .yaya-energy-widget progress::-webkit-progress-value{background:var(--energy-color,#22c55e);border-radius:99px;transition:width .35s ease,background .25s ease}
 .yaya-energy-widget progress::-moz-progress-bar{background:var(--energy-color,#22c55e);border-radius:99px;transition:width .35s ease}
 .yaya-energy-value{min-width:48px;font-size:12px;font-weight:800;text-align:right}
-.header-avatar.is-critical{animation:yayaShake .65s ease-in-out infinite}
-.header-avatar.is-winking{animation:yayaWink .55s ease}
+body.yaya-home:not(.yaya-animations-disabled) .header-avatar.is-critical{animation:yayaShake .65s ease-in-out infinite}
+body.yaya-home:not(.yaya-animations-disabled) .header-avatar.is-winking{animation:yayaWink .55s ease}
 @keyframes yayaShake{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-2px) rotate(-4deg)}40%{transform:translateX(2px) rotate(4deg)}60%{transform:translateX(-2px) rotate(-3deg)}80%{transform:translateX(2px) rotate(3deg)}}
 @keyframes yayaWink{50%{transform:scale(1.15) rotate(-8deg)}}
 .yaya-streak-badge{position:absolute;top:-6px;right:68px;z-index:1;padding:2px 6px;border-radius:99px;background:#fff7ed;color:#c2410c;font-size:11px;font-weight:900;box-shadow:0 2px 8px #0002}
 .yaya-food-fly{position:fixed;z-index:10001;pointer-events:none;font-size:30px;transition:transform .65s cubic-bezier(.2,.8,.2,1),opacity .65s ease}
-.yaya-eat-smile{animation:yayaEat .8s ease}
+body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat .8s ease}
 @keyframes yayaEat{50%{transform:scale(1.28) rotate(8deg);filter:drop-shadow(0 0 8px #facc15)}}
 .xp-progress-wrap{display:flex;align-items:center;gap:12px;margin:12px 0;padding:12px 16px;border-radius:18px;background:var(--box)}
 .xp-ring{width:58px;height:58px;transform:rotate(-90deg);flex:0 0 auto}
@@ -463,7 +468,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
 @media(min-width:761px){.breadcrumb.is-dictionary{display:flex}}
 </style>
 </head>
-<body class="dark">
+<body class="dark yaya-home">
 
 <div class="header-profile">
  <span class="yaya-streak-badge hide" id="yaya-streak-badge" aria-label="Série de jours connectés"></span>
@@ -472,6 +477,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
  <button class="yaya-energy-widget" id="yaya-energy-widget" type="button" onclick="openYayaShop()" aria-label="Ouvrir la boutique de Yaya">
   <span aria-hidden="true">⚡</span><progress id="yaya-energy-progress" max="200" value="100" aria-label="Énergie de Yaya"></progress><span class="yaya-energy-value" id="yaya-energy-value">100/200</span>
  </button>
+ <button class="yaya-motion-toggle" id="yaya-motion-toggle" type="button" onclick="toggleYayaAnimations()" aria-label="Animations de Yaya" aria-pressed="true" title="Désactiver les animations de Yaya"><span id="yaya-motion-toggle-icon" aria-hidden="true">⏸️</span><span>Animations</span></button>
 </div>
 <header>
  <div class="logo" onclick="switchTab('accueil')"><b>Z</b><div><h1 id="brand-title">Zest</h1><small id="brand-sub">Apprends le néerlandais sans stress !</small></div></div>
@@ -697,6 +703,7 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
     <select class="inp" id="quiz-theme">
      <option value="all">🌟 Mélange général (Tout)</option>
      <option value="Grammaire">📋 Grammaire & Verbes (Zijn/Hebben/'t Kofschip)</option>
+     <option value="Pronoms & déterminants">🧩 Pronoms & déterminants</option>
      <option value="École">🎒 École & Matériel</option>
      <option value="Nourriture">🍎 Nourriture & Boissons</option>
      <option value="Fêtes religieuses">🎨 Culture & Fêtes</option>
@@ -722,10 +729,13 @@ body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-se
    <div id="quiz-life-gate" class="quiz-life-gate hide" role="dialog" aria-modal="true" aria-labelledby="quiz-life-title">
     <div class="card center">
      <h2 id="quiz-life-title">Plus de cœurs ! Révise pour continuer.</h2>
-     <p class="sub">Lis le mot néerlandais et sa traduction, puis récupère un cœur.</p>
+     <p class="sub">Lis le mot néerlandais et sa traduction. Récupérer 1 cœur coûte 30 ⚡ ; 2 cœurs coûtent 20 ⚡.</p>
      <div class="box"><b id="life-review-nl"></b><p id="life-review-fr" class="sub hide"></p></div>
      <button class="btn" id="life-review-flip" type="button" onclick="flipLifeReview()">Voir la traduction</button>
-     <button class="btn green hide" id="life-review-restore" type="button" onclick="restoreQuizLife()">Récupérer un cœur et continuer</button>
+     <p class="msg" id="life-review-status" role="status" aria-live="polite"></p>
+     <button class="btn green hide" id="life-review-restore" type="button" onclick="restoreQuizLife(1)">Récupérer 1 cœur et continuer (-30 ⚡)</button>
+     <button class="btn green hide" id="life-review-restore-two" type="button" onclick="restoreQuizLife(2)">Récupérer 2 cœurs et continuer (-20 ⚡)</button>
+     <button class="btn" type="button" onclick="resetLive()">Quitter le quiz</button>
     </div>
    </div>
    <div style="background:var(--bd);height:6px;border-radius:99px;margin-bottom:14px;overflow:hidden"><div id="l-timer" style="background:var(--accent);height:100%;width:100%;transition:width 1s linear"></div></div>
@@ -1221,6 +1231,21 @@ function esc(s){ return String(s || '').replace(/[&<>"']/g, function(c){ return 
 function ld(k, d){ try { var v = JSON.parse(localStorage.getItem(k)); return v === null || v === undefined ? d : v; } catch(e){ return d; } }
 function sv(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 function rm(k){ try { localStorage.removeItem(k); } catch(e){} }
+var YAYA_MOTION_DISABLED_KEY='zest-yaya-animations-disabled',yayaMotionDisabled=ld(YAYA_MOTION_DISABLED_KEY,false)===true;
+function isYayaAnimationEnabled(){return !yayaMotionDisabled&&document.body.classList.contains('yaya-home');}
+function updateYayaMotionControl(){
+ document.body.classList.toggle('yaya-animations-disabled',yayaMotionDisabled);
+ var button=$('yaya-motion-toggle'),icon=$('yaya-motion-toggle-icon');if(!button)return;
+ button.setAttribute('aria-pressed',String(!yayaMotionDisabled));
+ button.title=yayaMotionDisabled?'Activer les animations de Yaya':'Désactiver les animations de Yaya';
+ if(icon)icon.textContent=yayaMotionDisabled?'▶️':'⏸️';
+}
+function toggleYayaAnimations(){
+ yayaMotionDisabled=!yayaMotionDisabled;
+ sv(YAYA_MOTION_DISABLED_KEY,yayaMotionDisabled);
+ updateYayaMotionControl();
+}
+updateYayaMotionControl();
 var successAnimationLast=0,successAnimationRun=0,successAnimationTimer=0;
 function triggerSuccessAnimation(){
  if(document.body.classList.contains('low-perf')||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -1326,7 +1351,7 @@ rm('zest-otp-verified-sessions-v1');
 
 function me(){ return stu ? ld(K.users, {})[stu] : null; }
 function saveMe(fn){ var u = ld(K.users, {}); if (stu && u[stu]) { fn(u[stu]); sv(K.users, u); } }
-var YAYA_ENERGY_KEY='yayaEnergy',YAYA_ENERGY_MAX=200;
+var YAYA_ENERGY_KEY='yayaEnergy',YAYA_ENERGY_MAX=200,YAYA_QUIZ_LIFE_COST=30,YAYA_QUIZ_TWO_LIVES_COST=20;
 var yayaEnergy=Math.max(0,Math.min(YAYA_ENERGY_MAX,Number(ld(YAYA_ENERGY_KEY,100))||0));
 var yayaEnergyAlertTimer=null;
 var yayaShopItems=[
@@ -1499,6 +1524,7 @@ function buyYayaFood(itemId){
  if(status)status.textContent='Miam ! Yaya a repris '+gain+' énergie. Achat : '+item.name+' ('+item.cost+' XP).';
 }
 function animateYayaMeal(item){
+ if(!isYayaAnimationEnabled())return;
  var avatar=$('header-avatar'),button=document.querySelector('[data-food-id="'+item.id+'"]');
  if(!avatar||!button)return;
  var from=button.getBoundingClientRect(),to=avatar.getBoundingClientRect(),food=document.createElement('span');
@@ -1556,7 +1582,7 @@ if(headerAvatar){
  headerAvatar.tabIndex=0;headerAvatar.setAttribute('role','button');headerAvatar.setAttribute('aria-label','Caresser Yaya');
  function petYaya(){
   if(yayaEnergy<50){showYayaEnergyMessage('Une petite collation me ferait du bien !',4500);return;}
-  headerAvatar.classList.remove('is-winking');void headerAvatar.offsetWidth;headerAvatar.classList.add('is-winking');
+  if(isYayaAnimationEnabled()){headerAvatar.classList.remove('is-winking');void headerAvatar.offsetWidth;headerAvatar.classList.add('is-winking');}
   showAvatarBubble('💖 Hihi ! Merci pour la caresse !',2200);
  }
  headerAvatar.addEventListener('click',petYaya);
@@ -1612,7 +1638,7 @@ function createYayaTeaching(emoji,message){
  var teaching=document.createElement('div');teaching.className='yaya-teaching';
  var mascot=document.createElement('span');mascot.className='yaya-teaching-avatar';mascot.textContent=emoji;mascot.setAttribute('aria-hidden','true');
  var bubble=document.createElement('p');bubble.className='yaya-teaching-bubble';bubble.textContent=message;
- if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+ if(isYayaAnimationEnabled()&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   bubble.textContent='';bubble.setAttribute('aria-label',message);
   var position=0,typeTimer=setInterval(function(){position++;bubble.textContent=message.slice(0,position);if(position>=message.length)clearInterval(typeTimer);},16);
  }
@@ -1748,6 +1774,7 @@ if(networkConnection){
 
 function switchTab(t){
  try {
+    document.body.classList.toggle('yaya-home',t==='accueil');
     if(t!=='cours-gram')$('tab-cours-gram').classList.remove('grammar-immersive');
     if(t!=='flash'&&typeof stopFlashcardAudio==='function')stopFlashcardAudio();
     setMobileNavOpen(false);
@@ -2779,6 +2806,64 @@ var baseQ = [
  {q:'Que signifie « De appel » ?', cat:'Nourriture', options:['La pomme','La poire','La banane','L’orange'], correct:0},
  {q:'Quel mois célèbre-t-on la Toussaint en Belgique ?', cat:'Fêtes religieuses', options:['Novembre','Décembre','Janvier','Mars'], correct:0}
 ];
+baseQ = baseQ.concat([
+ {q:'Exercice 1. Emma heeft een boek. ... leest ... boek. (Elle lit son livre.)',cat:'Pronoms & déterminants',exercice:1,options:['Zij — haar','Haar — zij','Hij — zijn','Zich — haar'],correct:0,answer:'Zij — haar',explication:'Zij est le pronom sujet qui remplace Emma ; haar accompagne boek et indique la possession.'},
+ {q:'Exercice 1. De leraar helpt Emma. De leraar helpt ... (Le professeur l’aide.)',cat:'Pronoms & déterminants',exercice:1,options:['hem','haar','zich','hun'],correct:1,answer:'haar',explication:'Haar remplace Emma comme pronom personnel complément.'},
+ {q:'Exercice 1. Hij wast ... (Il se lave.)',cat:'Pronoms & déterminants',exercice:1,options:['hem','zich','haar','ons'],correct:1,answer:'zich',explication:'Le pronom réfléchi associé au sujet hij est zich.'},
+ {q:'Exercice 1. ... wonen in België. (Nous habitons en Belgique.)',cat:'Pronoms & déterminants',exercice:1,options:['Wij','Ons','Onze','Hun'],correct:0,answer:'Wij',explication:'Wij est un pronom personnel sujet correspondant à « nous ».'},
+ {q:'Exercice 1. Emma ziet de leraar. Emma ziet ... (Emma le voit.)',cat:'Pronoms & déterminants',exercice:1,options:['hem','zich','haar','ons'],correct:0,answer:'hem',explication:'Hem remplace le nom masculin de leraar comme complément.'},
+ {q:'Exercice 1. Jullie hebben een huis. Dit is ... huis. (C’est votre maison.)',cat:'Pronoms & déterminants',exercice:1,options:['jullie','hun','ons','zijn'],correct:0,answer:'jullie',explication:'Jullie est le déterminant possessif qui accompagne le nom huis.'},
+ {q:'Exercice 1. Ik was ... (Je me lave.)',cat:'Pronoms & déterminants',exercice:1,options:['zich','me','mij','ons'],correct:1,answer:'me',explication:'Le pronom réfléchi associé au sujet ik est me.'},
+ {q:'Exercice 1. Het boek is blauw. ... is blauw. (Il est bleu.)',cat:'Pronoms & déterminants',exercice:1,options:['Hij','Het','Hem','Zijn'],correct:1,answer:'Het',explication:'Het est le pronom sujet neutre qui reprend het boek.'},
+ {q:'Exercice 1. Emma en de leraar wonen in België. ... wonen in België. (Ils habitent en Belgique.)',cat:'Pronoms & déterminants',exercice:1,options:['Zij','Haar','Hen','Zich'],correct:0,answer:'Zij',explication:'Zij est ici le pronom sujet pluriel qui reprend Emma et de leraar.'},
+ {q:'Exercice 1. ... boek is blauw. (Ce livre-ci est bleu.)',cat:'Pronoms & déterminants',exercice:1,options:['Dit','Deze','Dat','Die'],correct:0,answer:'Dit',explication:'Dit désigne un nom en het au singulier situé ici.'},
+ {q:'Exercice 2. ... huis (het, singulier, notre) is groot.',cat:'Pronoms & déterminants',exercice:2,options:['ons','onze','hun','mijn'],correct:0,answer:'ons',explication:'Ons s’emploie avec un nom en het au singulier : ons huis.'},
+ {q:'Exercice 2. ... school (de, singulier, notre) is groot.',cat:'Pronoms & déterminants',exercice:2,options:['onze','ons','hun','jullie'],correct:0,answer:'onze',explication:'Onze s’emploie avec un nom en de au singulier : onze school.'},
+ {q:'Exercice 2. ... huizen (de, pluriel, nos) zijn groot.',cat:'Pronoms & déterminants',exercice:2,options:['onze','ons','hun','haar'],correct:0,answer:'onze',explication:'Onze s’emploie avec tous les noms au pluriel : onze huizen.'},
+ {q:'Exercice 2. ... jongen (de, singulier, ici) speelt voetbal.',cat:'Pronoms & déterminants',exercice:2,options:['deze','die','dit','dat'],correct:0,answer:'deze',explication:'Deze désigne ici un nom en de au singulier.'},
+ {q:'Exercice 2. ... fiets (de, singulier, là-bas) is blauw.',cat:'Pronoms & déterminants',exercice:2,options:['deze','die','dit','dat'],correct:1,answer:'die',explication:'Die désigne là-bas un nom en de au singulier.'},
+ {q:'Exercice 2. ... boek (het, singulier, ici) is blauw.',cat:'Pronoms & déterminants',exercice:2,options:['deze','die','dit','dat'],correct:2,answer:'dit',explication:'Dit désigne ici un nom en het au singulier.'},
+ {q:'Exercice 2. ... huis (het, singulier, là-bas) is groot.',cat:'Pronoms & déterminants',exercice:2,options:['deze','die','dit','dat'],correct:3,answer:'dat',explication:'Dat désigne là-bas un nom en het au singulier.'},
+ {q:'Exercice 2. ... boeken (de, pluriel, ici) zijn blauw.',cat:'Pronoms & déterminants',exercice:2,options:['deze','die','dit','dat'],correct:0,answer:'deze',explication:'Deze désigne ici un nom au pluriel.'},
+ {q:'Exercice 3. Traduis : « Ce garçon-ci se lave dans cette maison-là. » → ...',cat:'Pronoms & déterminants',exercice:3,options:['Deze jongen wast zich in dat huis.','Die jongen wast hem in deze huis.','Dit jongen wast zich in die huis.','Deze jongen wast hem in dit huis.'],correct:0,answer:'Deze jongen wast zich in dat huis.',explication:'Deze s’accorde avec de jongen ; dat avec het huis ; zich est le réfléchi de hij.'},
+ {q:'Exercice 3. Traduis : « Ce professeur-là se lave dans cette école-ci. » → ...',cat:'Pronoms & déterminants',exercice:3,options:['Die leraar wast zich in deze school.','Deze leraar wast hem in die school.','Dat leraar wast zich in dit school.','Die leraar wast haar in deze school.'],correct:0,answer:'Die leraar wast zich in deze school.',explication:'Die désigne de leraar là-bas ; deze désigne de school ici ; zich correspond au sujet hij.'},
+ {q:'Exercice 3. Traduis : « Nous nous lavons dans cette maison-ci. » → ...',cat:'Pronoms & déterminants',exercice:3,options:['Wij wassen ons in dit huis.','Wij wassen zich in dat huis.','Ons wassen wij in deze huis.','Wij wassen je in die huis.'],correct:0,answer:'Wij wassen ons in dit huis.',explication:'Ons est le réfléchi de wij ; dit accompagne het huis situé ici.'},
+ {q:'Exercice 3. Traduis : « Vous vous lavez dans cette maison-là. » → ...',cat:'Pronoms & déterminants',exercice:3,options:['Jullie wassen je in dat huis.','Jullie wassen zich in dit huis.','Jullie wassen ons in die huis.','Jullie wassen hem in dat huis.'],correct:0,answer:'Jullie wassen je in dat huis.',explication:'Je est le réfléchi de jullie ; dat accompagne het huis situé là-bas.'}
+]);
+baseQ.forEach(function(question){
+ if(question.cat==='Pronoms & déterminants')question.question=question.q;
+});
+baseQ=baseQ.concat(baseQ.filter(function(question){return question.cat==='Pronoms & déterminants';}).map(function(question){
+ return {q:question.q,cat:'Grammaire',options:question.options.slice(),correct:question.correct,answer:question.answer,explication:question.explication};
+}));
+baseQ=baseQ.concat([
+ {q:'Que signifie « Het schrift » ?',cat:'École',options:['Le livre','Le cahier','Le crayon','Le sac à dos'],correct:1},
+ {q:'Que signifie « De gom » ?',cat:'École',options:['La règle','La trousse','La gomme','La colle'],correct:2},
+ {q:'Que signifie « De liniaal » ?',cat:'École',options:['Le tableau','Le cahier','Les ciseaux','La règle'],correct:3},
+ {q:'Que signifie « De schaar » ?',cat:'École',options:['La colle','Les ciseaux','La trousse','La gomme'],correct:1},
+ {q:'Que signifie « Het bord » dans une classe ?',cat:'École',options:['Le bureau','Le tableau','Le classeur','Le crayon'],correct:1},
+ {q:'Que signifie « De pennenzak » ?',cat:'École',options:['Le sac à dos','Le cahier','La trousse','La règle'],correct:2},
+ {q:'Que signifie « De agenda » ?',cat:'École',options:['Le dictionnaire','Le tableau','La colle','L’agenda'],correct:3},
+ {q:'Que signifie « Het woordenboek » ?',cat:'École',options:['Le dictionnaire','Le devoir','Le cahier','Le classeur'],correct:0},
+ {q:'Que signifie « De lijm » ?',cat:'École',options:['La gomme','La colle','La règle','Les ciseaux'],correct:1},
+ {q:'Que signifie « De map » ?',cat:'École',options:['La trousse','Le tableau','Le classeur','Le stylo'],correct:2},
+ {q:'Que signifie « De stift » ?',cat:'École',options:['Le crayon','Le dictionnaire','Le sac à dos','Le marqueur'],correct:3},
+ {q:'Que signifie « De rekenmachine » ?',cat:'École',options:['La calculatrice','La règle','La gomme','La trousse'],correct:0},
+ {q:'Que signifie « Het ontbijt » ?',cat:'Nourriture',options:['Le dîner','Le petit-déjeuner','Le goûter','Le dessert'],correct:1},
+ {q:'Que signifie « De lunch » ?',cat:'Nourriture',options:['Le petit-déjeuner','Le souper','Le déjeuner','La boisson'],correct:2},
+ {q:'Que signifie « Het avondeten » ?',cat:'Nourriture',options:['Le déjeuner','Le petit-déjeuner','Le goûter','Le souper'],correct:3},
+ {q:'Que signifie « De soep » ?',cat:'Nourriture',options:['Le riz','La soupe','Le fromage','Le pain'],correct:1},
+ {q:'Que signifie « Het ei » ?',cat:'Nourriture',options:['La pomme de terre','La tomate','L’œuf','La banane'],correct:2},
+ {q:'Que signifie « De kip » ?',cat:'Nourriture',options:['Le poisson','Le pain','Le fromage','Le poulet'],correct:3},
+ {q:'Que signifie « De vis » ?',cat:'Nourriture',options:['Le poisson','Le poulet','L’œuf','Le riz'],correct:0},
+ {q:'Que signifie « De rijst » ?',cat:'Nourriture',options:['La soupe','Le riz','Le pain','La pomme de terre'],correct:1},
+ {q:'Que signifie « De aardappel » ?',cat:'Nourriture',options:['La tomate','La pomme','La pomme de terre','La carotte'],correct:2},
+ {q:'Que signifie « De banaan » ?',cat:'Nourriture',options:['La pomme','La tomate','La pomme de terre','La banane'],correct:3},
+ {q:'Que signifie « Het sap » ?',cat:'Nourriture',options:['Le jus','Le lait','L’eau','Le thé'],correct:0},
+ {q:'Que signifie « De thee » ?',cat:'Nourriture',options:['Le café','Le thé','Le jus','Le lait'],correct:1},
+ {q:'Que signifie « De koffie » ?',cat:'Nourriture',options:['Le thé','L’eau','Le café','Le jus'],correct:2},
+ {q:'Que signifie « De frisdrank » ?',cat:'Nourriture',options:['Le lait','Le café','La soupe','Le soda'],correct:3}
+]);
 
 function prepLive(){
  var s = me();
@@ -2810,6 +2895,7 @@ function joinLiveGuest(){
 }
 
 function startQuizSession(teacherCode){
+ document.body.classList.add('quiz-in-progress');
  quizRunId='quiz:'+Date.now()+':'+(++quizRunSequence);
  if(!pendingQuiz&&location.hash.indexOf('#zest-challenge=')===0)pendingQuiz=readFriendChallenge();
  var themeEl = $('quiz-theme');
@@ -2871,8 +2957,10 @@ function nextQ(){
 function answer(i){
  clearInterval(timerInterval);
  var q = Q[cur];
- if(i===q.correct){updateLiveYayaReaction('🥳','Yeah ! Bien joué !');vibrateQuizResult(true);}
- else{updateLiveYayaReaction('😬',(i<0?'Oups, le temps est écoulé ! ':'Zut, presque ! ')+'La bonne réponse était : '+q.options[q.correct]+'.');vibrateQuizResult(false);}
+ var explanation=q.explication?' '+q.explication:'';
+ var feedbackMessage=i===q.correct?'Yeah ! Bien joué !'+explanation:(i<0?'Oups, le temps est écoulé ! ':'Zut, presque ! ')+'La bonne réponse était : '+(q.answer||q.options[q.correct])+'.'+explanation;
+ updateLiveYayaReaction(i===q.correct?'🥳':'😬',feedbackMessage);
+ vibrateQuizResult(i===q.correct);
  var opts = document.querySelectorAll('.opt');
  opts.forEach(function(btn, idx){
     btn.style.pointerEvents = 'none';
@@ -2903,11 +2991,12 @@ function answer(i){
 
  setTimeout(function(){
     cur++; nextQ();
-  }, 1000);
+  }, i!==q.correct?Math.max(5000,feedbackMessage.length*16+200):(q.explication?Math.max(2600,feedbackMessage.length*16+200):1000));
 }
 
 function endQuiz(){
  clearInterval(timerInterval);
+ document.body.classList.remove('quiz-in-progress');
  reactToYayaEnergy(null,true);
  show('quiz-life-gate',false);
  show('live-game', false); show('live-end', true);
@@ -3006,26 +3095,36 @@ function showLifeReviewGate(){
  var gate=$('quiz-life-gate');
  if(!gate)return;
  lifeReviewCard=flashcardsList[Math.floor(Math.random()*flashcardsList.length)]||null;
- var nl=$('life-review-nl'),fr=$('life-review-fr'),flip=$('life-review-flip'),restore=$('life-review-restore');
+ var nl=$('life-review-nl'),fr=$('life-review-fr'),flip=$('life-review-flip'),restore=$('life-review-restore'),restoreTwo=$('life-review-restore-two'),status=$('life-review-status');
  if(nl)nl.textContent=lifeReviewCard?lifeReviewCard.nl:'Geen probleem';
  if(fr){fr.textContent=lifeReviewCard?lifeReviewCard.fr:'Pas de problème';fr.classList.add('hide');}
  if(flip){flip.classList.remove('hide');flip.disabled=false;}
  if(restore)restore.classList.add('hide');
+ if(restoreTwo)restoreTwo.classList.add('hide');
+ if(status)status.textContent='Énergie de Yaya : '+yayaEnergy+' ⚡. Il faut 30 ⚡ pour 1 cœur ou 20 ⚡ pour 2 cœurs.';
  gate.classList.remove('hide');
 }
 function flipLifeReview(){
  if(!lifeReviewCard)return;
- var fr=$('life-review-fr'),flip=$('life-review-flip'),restore=$('life-review-restore');
+ var fr=$('life-review-fr'),flip=$('life-review-flip'),restore=$('life-review-restore'),restoreTwo=$('life-review-restore-two');
  if(fr){fr.textContent=lifeReviewCard.fr;fr.classList.remove('hide');}
  if(flip)flip.classList.add('hide');
  if(restore)restore.classList.remove('hide');
+ if(restoreTwo)restoreTwo.classList.remove('hide');
 }
-function restoreQuizLife(){
+function restoreQuizLife(heartCount){
  if(!lifeReviewCard||quizLives>0)return;
- quizLives=1;lifeReviewCard=null;
+ var hearts=heartCount===2?2:1,cost=hearts===2?YAYA_QUIZ_TWO_LIVES_COST:YAYA_QUIZ_LIFE_COST;
+ if(yayaEnergy<cost){
+  var status=$('life-review-status');
+  if(status)status.textContent='Pas assez d’énergie : il faut '+cost+' ⚡ pour récupérer '+hearts+' cœur'+(hearts>1?'s':'')+'. Yaya en a '+yayaEnergy+' ; quitte le quiz pour aller la recharger.';
+  return;
+ }
+ setYayaEnergy(yayaEnergy-cost);
+ quizLives=Math.min(3,quizLives+hearts);lifeReviewCard=null;
  show('quiz-life-gate',false);updateQuizLives();nextQ();
 }
-function resetLive(){ pendingQuiz = null; clearInterval(timerInterval); show('quiz-life-gate',false);show('live-end', false); show('live-game', false); show('live-lobby', true); prepLive(); }
+function resetLive(){ pendingQuiz = null; clearInterval(timerInterval);document.body.classList.remove('quiz-in-progress');show('quiz-life-gate',false);show('live-end', false); show('live-game', false); show('live-lobby', true); prepLive(); }
 
 /* Dictionnaire & Grammaire */
 var W = [
@@ -3135,6 +3234,18 @@ var W = [
  ['De toets',"L'interrogation / Le test",'École','Morgen hebben we een moeilijke toets.'],
  ['De leraar','Le professeur','École','De leraar legt de les uit.'],
  ['Het lokaal','La salle de classe','École','Ons lokaal is op de tweede verdieping.'],
+ ['Het schrift','Le cahier','École','Ik schrijf in mijn schrift.'],
+ ['De gom','La gomme','École','Mijn gom ligt in mijn pennenzak.'],
+ ['De liniaal','La règle','École','De liniaal ligt in mijn rugzak.'],
+ ['De schaar','Les ciseaux','École','De schaar ligt in de pennenzak.'],
+ ['Het bord','Le tableau','École','De leraar schrijft op het bord.'],
+ ['De pennenzak','La trousse','École','Mijn pennenzak ligt in mijn rugzak.'],
+ ['De agenda',"L'agenda",'École','Mijn agenda ligt in mijn rugzak.'],
+ ['Het woordenboek','Le dictionnaire','École','Ik zoek een woord in het woordenboek.'],
+ ['De lijm','La colle','École','De lijm ligt naast het schrift.'],
+ ['De map','Le classeur','École','Mijn map ligt in mijn rugzak.'],
+ ['De stift','Le marqueur','École','Ik schrijf met een stift op het bord.'],
+ ['De rekenmachine','La calculatrice','École','De rekenmachine ligt op de tafel.'],
  ['Het weer','La météo','Météo','Yaya kijkt naar het weer.'],
  ['Zonnig','Ensoleillé','Météo','Vandaag is het zonnig.'],
  ['Bewolkt','Nuageux','Météo','Het is bewolkt buiten.'],
@@ -3152,6 +3263,20 @@ var W = [
  ['De chocolade','Le chocolat','Nourriture','Belgische chocolade is wereldberoemd.'],
  ['De frietjes','Les frites','Nourriture','Op vrijdag eten we vaak frietjes.'],
  ['De groenten','Les légumes','Nourriture','Groenten eten is belangrijk.'],
+ ['Het ontbijt','Le petit-déjeuner','Nourriture','Het ontbijt is belangrijk.'],
+ ['De lunch','Le déjeuner','Nourriture','De lunch is om twaalf uur.'],
+ ['Het avondeten','Le souper','Nourriture','Het avondeten is klaar.'],
+ ['De soep','La soupe','Nourriture','De soep is warm.'],
+ ['Het ei',"L'œuf",'Nourriture','Het ei ligt op tafel.'],
+ ['De kip','Le poulet','Nourriture','Wij eten kip met rijst.'],
+ ['De vis','Le poisson','Nourriture','De vis is vers.'],
+ ['De rijst','Le riz','Nourriture','Rijst met groenten is lekker.'],
+ ['De aardappel','La pomme de terre','Nourriture','Een aardappel ligt op tafel.'],
+ ['De banaan','La banane','Nourriture','Ik eet een banaan.'],
+ ['Het sap','Le jus','Nourriture','Ik drink sap bij het ontbijt.'],
+ ['De thee','Le thé','Nourriture','Ik drink thee.'],
+ ['De koffie','Le café','Nourriture','Ik drink koffie.'],
+ ['De frisdrank','Le soda','Nourriture','Frisdrank is koud.'],
  ['Het voetbal','Le football','Loisirs','Wij spelen graag voetbal na school.'],
  ['Het boek','Le livre','Loisirs','Ik lees een spannend boek.'],
  ['De muziek','La musique','Loisirs','Luisteren naar muziek in de bus.'],
@@ -3280,7 +3405,7 @@ function vocabularyTopics(word){
  return topics.filter(function(topic,index){return topic&&topics.indexOf(topic)===index;});
 }
 function isFlashcardEligible(word){
- return word[2]!=='Grammaire'||vocabularyTopics(word).indexOf('Résolutions')>=0;
+ return !!(word&&word[0]&&word[1]);
 }
 function topicWordCount(topic,flashOnly){
  return W.filter(function(word){return (!flashOnly||isFlashcardEligible(word))&&(topic==='all'||vocabularyTopics(word).indexOf(topic)>=0);}).length;
@@ -4431,6 +4556,7 @@ var _sw=window.switchTab;
 window.switchTab=function(t){
   var tab=g('tab-mondes'),nb=g('nav-mondes');
   if(t==='mondes'){
+    document.body.classList.remove('yaya-home');
     setMobileNavOpen(false);
     var all=document.querySelectorAll('.tab');for(var i=0;i<all.length;i++)all[i].classList.add('hide');
     if(tab)tab.classList.remove('hide');
