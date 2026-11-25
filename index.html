@@ -210,12 +210,6 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat 
 .avatar-bubble::before{content:"";position:absolute;top:-6px;left:15px;width:11px;height:11px;transform:rotate(45deg);border-top:1px solid var(--bd);border-left:1px solid var(--bd);border-radius:2px 0 0;background:var(--card)}
 .avatar-bubble.is-visible,.header-profile:hover .avatar-bubble,.header-profile:focus-within .avatar-bubble{opacity:1;visibility:visible;transform:translateY(0)}
 .header-greeting{max-width:300px;color:var(--sub);font-size:13px;font-weight:650}
-.header-auth{display:flex;align-items:center;gap:5px}
-.header-auth .btn{margin:0;padding:9px 12px;font-size:12px;white-space:nowrap}
-.header-provider{width:40px;height:40px;min-width:40px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;background:var(--box)!important;color:var(--txt)!important;border:1px solid var(--bd)!important}
-.header-provider svg{display:block}
-.header-provider.google svg{width:18px;height:18px}
-.header-provider.apple svg{width:18px;height:18px}
 .offline-badge{width:max-content;max-width:100%;margin:8px 0 12px;padding:6px 10px;border:1px solid var(--bd);border-radius:999px;background:color-mix(in srgb,var(--box) 76%,transparent);color:var(--sub);font-size:12px}
 .cards-section{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
 .card-today{margin:0;padding:13px 16px;background:linear-gradient(135deg,#4f46e533,#ec489933);border-color:var(--accent)}
@@ -267,12 +261,8 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat 
  .yaya-energy-value{min-width:42px;font-size:11px}
  .avatar-bubble{max-width:min(240px,calc(100vw - 20px))}
  .header-greeting{display:block;max-width:min(42vw,155px);font-size:10px;line-height:1.25}
- .header-auth{gap:4px}
- .header-auth .btn{padding:8px 9px;font-size:11px}
  .dictionary-category-review{align-items:stretch;flex-direction:column}
  .dictionary-category-review .btn{width:100%}
- .header-provider{display:inline-flex;min-width:36px;justify-content:center}
- .header-provider span{display:none}
  main{padding:16px 12px calc(82px + env(safe-area-inset-bottom))}
  .card{padding:18px;border-radius:16px}
  .grid2,.grid3,.opts,.zp-badges{grid-template-columns:minmax(0,1fr)}
@@ -408,7 +398,6 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat 
   cursor:pointer;
  }
  .header-profile{margin:0}
- .header-auth{flex-wrap:wrap}
  main{width:100%;max-width:1100px;margin:0 auto;padding:24px}
  footer{width:100%}
 }
@@ -493,45 +482,45 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat 
 .auth-heading{text-align:center;margin:0 0 24px}
 .auth-heading h2{margin:0 0 8px;font-size:clamp(26px,5vw,34px);letter-spacing:-.03em}
 .auth-heading p{margin:0}
-.auth-google-button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;margin:0;border:1px solid #d1d5db;border-radius:12px;background:#fff;color:#1f2937;font-size:15px;font-weight:700;box-shadow:0 2px 6px rgba(15,23,42,.08);cursor:pointer}
-.auth-google-button:hover{background:#f9fafb;box-shadow:0 5px 14px rgba(15,23,42,.12)}
-.auth-google-button svg{width:20px;height:20px;flex:0 0 auto}
-.auth-divider{display:flex;align-items:center;gap:14px;margin:22px 0;color:var(--sub);font-size:12px;font-weight:800;letter-spacing:.1em}
-.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:var(--bd)}
 .auth-role-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 18px}
 .auth-role-pill{min-height:48px;padding:8px 10px;border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--txt);font-size:13px;font-weight:700;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}
 .auth-role-pill:hover{border-color:var(--accent)}
 .auth-role-pill.on{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--accent) 25%,transparent)}
-.auth-role{padding:0;border:0;background:transparent}
-.auth-role>p{margin:0 0 16px}
 .auth-mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 18px;border:1px solid var(--bd);border-radius:13px;background:var(--box)}
 .auth-mode-tab{min-height:42px;padding:9px 12px;border:0;border-radius:9px;background:transparent;color:var(--sub);font-size:14px;font-weight:700;cursor:pointer;transition:background .18s ease,color .18s ease,box-shadow .18s ease}
 .auth-mode-tab.on{background:var(--card);color:var(--accent);box-shadow:0 2px 8px rgba(15,23,42,.1)}
 .auth-form{margin:0}
 .auth-form>.sub{margin:0 0 14px;line-height:1.55}
-.auth-input{position:relative;margin:0 0 12px}
-.auth-input-icon{position:absolute;top:50%;left:14px;z-index:1;transform:translateY(-50%);font-size:16px;line-height:1;pointer-events:none}
-.auth-input .inp{--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / .5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;min-height:46px;margin:0;padding:12px 14px 12px 42px;border:1px solid #d1d5db;border-radius:10px;background:var(--card);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-.auth-input .inp:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2);outline:none}
 .auth-form .msg:empty{display:none}
-#firebase-auth-message:empty{display:none}
-.auth-form .msg:not(.ok):not(:empty),#firebase-auth-message:not(.ok):not(:empty){display:flex;align-items:flex-start;gap:7px;min-height:0;margin:10px 0;padding:10px 12px;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:10px;background:#fef2f2;color:#b91c1c;line-height:1.45}
-.auth-form .msg:not(.ok):not(:empty):before,#firebase-auth-message:not(.ok):not(:empty):before{content:"⚠️";flex:0 0 auto}
-.auth-form .msg.ok,#firebase-auth-message.ok{min-height:0;margin:10px 0;padding:10px 12px;border:1px solid #86efac;border-radius:10px;background:#f0fdf4;color:#166534}
+.auth-form .msg:not(.ok):not(:empty){display:flex;align-items:flex-start;gap:7px;min-height:0;margin:10px 0;padding:10px 12px;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:10px;background:#fef2f2;color:#b91c1c;line-height:1.45}
+.auth-form .msg:not(.ok):not(:empty):before:before{content:"⚠️";flex:0 0 auto}
+.auth-form .msg.ok{min-height:0;margin:10px 0;padding:10px 12px;border:1px solid #86efac;border-radius:10px;background:#f0fdf4;color:#166534}
 .auth-submit{min-height:48px;margin:4px 0 0;border-radius:12px;font-size:15px;letter-spacing:.01em}
-.auth-magic{margin-top:12px;border:1px solid var(--bd);border-radius:12px;background:var(--card)}
-.auth-magic summary{padding:11px 14px;color:var(--sub);font-size:13px;font-weight:700;cursor:pointer}
-.auth-magic-body{padding:0 14px 12px}
-.auth-magic-body label{display:block;margin:0 0 6px}
-.auth-magic-body .inp{margin-bottom:4px;border-radius:10px}
-.auth-magic-body .btn{min-height:44px;border-radius:10px}
 #firebase-auth-session{margin-top:18px!important;border-radius:16px!important}
 body.dark .auth-card{background:color-mix(in srgb,#0f172a 96%,transparent)}
-body.dark .auth-google-button{border-color:#334155;background:#fff;color:#1f2937}
-body.dark .auth-magic{background:var(--card)}
-body.dark .auth-form .msg:not(.ok):not(:empty),body.dark #firebase-auth-message:not(.ok):not(:empty){border-color:#7f1d1d;border-left-color:#f87171;background:#450a0a;color:#fecaca}
-body.dark .auth-form .msg.ok,body.dark #firebase-auth-message.ok{border-color:#166534;background:#052e16;color:#bbf7d0}
+body.dark .auth-form .msg:not(.ok):not(:empty){border-color:#7f1d1d;border-left-color:#f87171;background:#450a0a;color:#fecaca}
+body.dark .auth-form .msg.ok{border-color:#166534;background:#052e16;color:#bbf7d0}
 @media(max-width:420px){.auth-card{padding:20px 16px}.auth-role-switch{gap:6px}.auth-role-pill{padding:8px 5px;font-size:12px}}
+.auth-label{display:block;margin:0 0 6px;color:var(--txt);font-size:14px;font-weight:700}
+.auth-hint{margin:-6px 0 14px;color:var(--sub);font-size:12px;line-height:1.4}
+#tab-connexion .auth-field{display:block;width:100%;min-height:48px;margin:0 0 14px;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;background:var(--card);color:var(--txt);font-size:16px;line-height:1.3;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+#tab-connexion .auth-field:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2);outline:none}
+body.dark #tab-connexion .auth-field{border-color:#475569}
+.auth-field-group>.sub{margin:0 0 14px;line-height:1.55}
+.auth-resend{display:block;margin:0 0 14px;padding:4px 0}
+.auth-notice{margin:0 0 18px;padding:22px 18px;border:2px solid #22c55e;border-radius:14px;background:#f0fdf4;color:#14532d;text-align:center}
+.auth-notice-title{margin:0 0 8px;font-size:clamp(18px,5vw,21px);font-weight:800;line-height:1.3;text-wrap:balance}
+.auth-notice-text{margin:0 0 16px;font-size:16px;font-weight:600;line-height:1.55}
+body.dark .auth-notice{background:#052e16;color:#bbf7d0}
+.auth-forgot{display:block;margin:-4px 0 14px;padding:4px 0}
+.auth-notice-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.auth-notice-text strong{overflow-wrap:anywhere}
+.auth-notice .msg:empty{display:none}
+.auth-notice .msg{margin:0 0 14px;padding:10px 12px;border-radius:10px;font-weight:600;line-height:1.45}
+.auth-notice .msg.ok{border:1px solid #86efac;background:#f0fdf4;color:#166534}
+.auth-notice .msg:not(.ok):not(:empty){border:1px solid #fecaca;background:#fef2f2;color:#b91c1c}
+body.dark .auth-notice .msg.ok{border-color:#166534;background:#052e16;color:#bbf7d0}
+body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background:#450a0a;color:#fecaca}
 </style>
 </head>
 <body class="dark yaya-home">
@@ -553,11 +542,6 @@ body.dark .auth-form .msg.ok,body.dark #firebase-auth-message.ok{border-color:#1
   <span class="zest-weather-icon" id="zest-weather-icon" aria-hidden="true">🌤️</span><span id="zest-weather-label">Météo Bruxelles</span>
  </button>
  <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" onclick="toggleMobileNav()">☰ Menu</button>
- <div class="header-auth" id="header-auth">
-  <button class="btn sm header-provider google" id="firebase-header-google-button" type="button" title="Continuer avec Google" aria-label="Continuer avec Google">
-   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-  </button>
- </div>
  <nav id="site-nav" class="mobile-collapsed">
   <button class="nav on" id="nav-accueil" onclick="switchTab('accueil')">🏠 Accueil</button>
   <button class="nav" id="nav-vocabulaire" onclick="switchTab('vocabulaire')">📚 Dictionnaire</button>
@@ -908,105 +892,63 @@ body.dark .auth-form .msg.ok,body.dark #firebase-auth-message.ok{border-color:#1
  <div class="card auth-card tw-bg-white tw-rounded-xl tw-shadow-lg">
   <div class="auth-heading">
    <h2>Bienvenue sur Zest</h2>
-   <p class="sub">Retrouve ton espace et continue à apprendre à ton rythme.</p>
+   <p class="sub">Connecte-toi ou crée ton compte pour retrouver ton espace et ta progression, sur tous tes appareils.</p>
   </div>
 
   <div id="firebase-auth-panel">
-   <button class="auth-google-button tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-3 tw-rounded-md tw-bg-white tw-px-4 tw-py-3 tw-font-semibold tw-text-gray-800 tw-shadow-sm" id="firebase-google-button" type="button">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-    Continuer avec Google
-   </button>
-   <details class="auth-magic">
-    <summary>Ou recevoir un lien magique par e-mail</summary>
-    <div class="auth-magic-body">
-     <label for="firebase-email" class="sub">Adresse e-mail</label>
-     <div class="auth-input">
-      <span class="auth-input-icon" aria-hidden="true">✉️</span>
-      <input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="firebase-email" type="email" placeholder="Ton adresse e-mail" autocomplete="email" required>
-     </div>
-     <p class="msg auth-feedback" id="firebase-auth-message" role="status" aria-live="polite"></p>
-     <button class="btn grad full" id="firebase-email-button" type="button">M’envoyer un lien de connexion</button>
+   <div class="auth-mode-tabs" role="tablist" aria-label="Connexion ou inscription">
+    <button class="auth-mode-tab on" type="button" role="tab" aria-selected="true" aria-controls="auth-login-form" id="auth-tab-login" onclick="setAuthMode('login')">Se connecter</button>
+    <button class="auth-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="auth-signup-form" id="auth-tab-signup" onclick="setAuthMode('signup')">Créer un compte</button>
+   </div>
+
+   <!-- Message affiché après l'inscription -->
+   <div id="auth-verify-notice" class="auth-notice hide" role="status" aria-live="polite">
+    <p class="auth-notice-title">✅ Ton compte a bien été créé !</p>
+    <p class="auth-notice-text">Un e-mail de confirmation vient d’être envoyé à <strong id="auth-notice-email"></strong>. Clique sur le lien dans le mail pour activer ton compte avant de te connecter.</p>
+    <p class="msg" id="auth-notice-msg" role="status" aria-live="polite"></p>
+    <div class="auth-notice-actions">
+     <button class="btn" id="auth-notice-resend-btn" type="button">Renvoyer l’e-mail de confirmation</button>
+     <button class="btn grad" type="button" onclick="setAuthMode('login')">Aller à la connexion</button>
     </div>
-   </details>
-  </div>
-
-  <div class="auth-divider tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-gray-500" aria-hidden="true"><span>OU</span></div>
-
-  <div class="auth-role-switch" id="auth-role-switch" role="tablist" aria-label="Choisir son espace">
-   <button class="auth-role-pill on" type="button" role="tab" aria-selected="true" aria-controls="auth-role-student" id="auth-role-tab-student" onclick="setAuthRole('student')">🎓 Élève</button>
-   <button class="auth-role-pill" type="button" role="tab" aria-selected="false" aria-controls="auth-role-teacher" id="auth-role-tab-teacher" onclick="setAuthRole('teacher')">👨‍🏫 Professeur</button>
-   <button class="auth-role-pill" type="button" role="tab" aria-selected="false" aria-controls="auth-role-direction" id="auth-role-tab-direction" onclick="setAuthRole('direction')">🏛️ Direction</button>
-  </div>
-
-  <div id="auth-role-student" class="auth-role" role="tabpanel" aria-labelledby="auth-role-tab-student">
-   <p class="sub">Retrouve ta progression, tes points et ton avatar avec ton pseudo.</p>
-   <div class="auth-mode-tabs" role="tablist" aria-label="Connexion ou inscription">
-    <button class="auth-mode-tab on" type="button" role="tab" aria-selected="true" aria-controls="student-login-form" id="auth-student-tab-login" onclick="setAuthMode('student','login')">Se connecter</button>
-    <button class="auth-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="student-signup-form" id="auth-student-tab-signup" onclick="setAuthMode('student','signup')">S’inscrire</button>
    </div>
-   <form id="student-login-form" class="auth-form" role="tabpanel" aria-labelledby="auth-student-tab-login" novalidate>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">👤</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-login-id" type="text" placeholder="Ton pseudo" aria-label="Ton pseudo" autocomplete="username" maxlength="40"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-login-pass" type="password" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="current-password"></div>
-    <p class="msg" id="student-login-msg" role="alert" aria-live="assertive"></p>
-    <button class="btn grad full auth-submit tw-w-full" id="student-login-btn" type="submit">Se connecter</button>
-   </form>
-   <form id="student-signup-form" class="auth-form hide" role="tabpanel" aria-labelledby="auth-student-tab-signup" novalidate>
-    <p class="sub">Crée ton profil élève. Si ton professeur t’a donné un code de classe, ajoute-le pour rejoindre sa classe.</p>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">👤</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-signup-id" type="text" placeholder="Choisis ton pseudo (2 à 20 caractères)" aria-label="Choisis ton pseudo (2 à 20 caractères)" autocomplete="username" maxlength="40"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">✉️</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-signup-email" type="email" placeholder="Ton e-mail (facultatif)" aria-label="Ton e-mail (facultatif)" autocomplete="email"></div>
-    <label class="sub" for="student-signup-birthday" style="display:block;margin:2px 0 4px">Date de naissance (facultatif)</label>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">📅</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-signup-birthday" type="date" aria-label="Date de naissance" autocomplete="bday"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🏫</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-signup-code" type="text" placeholder="Code de ta classe (facultatif)" aria-label="Code de ta classe (facultatif)" autocomplete="off" maxlength="20"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-signup-pass" type="password" placeholder="Mot de passe (6 caractères minimum)" aria-label="Mot de passe (6 caractères minimum)" autocomplete="new-password"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="student-signup-pass2" type="password" placeholder="Confirme le mot de passe" aria-label="Confirme le mot de passe" autocomplete="new-password"></div>
-    <p class="msg" id="student-signup-msg" role="alert" aria-live="assertive"></p>
-    <button class="btn grad full auth-submit tw-w-full" id="student-signup-btn" type="submit">Créer mon compte élève</button>
-   </form>
-  </div>
 
-  <div id="auth-role-teacher" class="auth-role hide" role="tabpanel" aria-labelledby="auth-role-tab-teacher">
-   <p class="sub">Suis tes élèves, publie des quiz et épingle des annonces pour ta classe.</p>
-   <div class="auth-mode-tabs" role="tablist" aria-label="Connexion ou inscription">
-    <button class="auth-mode-tab on" type="button" role="tab" aria-selected="true" aria-controls="teacher-login-form" id="auth-teacher-tab-login" onclick="setAuthMode('teacher','login')">Se connecter</button>
-    <button class="auth-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="teacher-signup-form" id="auth-teacher-tab-signup" onclick="setAuthMode('teacher','signup')">S’inscrire</button>
-   </div>
-   <form id="teacher-login-form" class="auth-form" role="tabpanel" aria-labelledby="auth-teacher-tab-login" novalidate>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🏫</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="teacher-login-id" type="text" placeholder="Code de ta classe" aria-label="Code de ta classe" autocomplete="username" maxlength="40"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="teacher-login-pass" type="password" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="current-password"></div>
-    <p class="msg" id="teacher-login-msg" role="alert" aria-live="assertive"></p>
-    <button class="btn grad full auth-submit tw-w-full" id="teacher-login-btn" type="submit">Se connecter</button>
+   <!-- Se connecter -->
+   <form id="auth-login-form" class="auth-form" role="tabpanel" aria-labelledby="auth-tab-login" method="post" action="#" onsubmit="return false" novalidate>
+    <label class="auth-label" for="login-email">Adresse e-mail</label>
+    <input class="inp auth-field" id="login-email" type="email" placeholder="ton.email@exemple.be" autocomplete="username" autocapitalize="none" spellcheck="false" inputmode="email">
+    <label class="auth-label" for="login-pass">Mot de passe</label>
+    <input class="inp auth-field" id="login-pass" type="password" placeholder="Ton mot de passe" autocomplete="current-password">
+    <button class="link auth-forgot" id="auth-forgot-btn" type="button">Mot de passe oublié ?</button>
+    <p class="msg" id="login-msg" role="alert" aria-live="assertive"></p>
+    <button class="link auth-resend hide" id="auth-resend-btn" type="button">Renvoyer l’e-mail de confirmation</button>
+    <button class="btn grad full auth-submit tw-w-full" id="login-btn" type="submit">Se connecter</button>
    </form>
-   <form id="teacher-signup-form" class="auth-form hide" role="tabpanel" aria-labelledby="auth-teacher-tab-signup" novalidate>
-    <p class="sub">Le code de classe est l’identifiant de ton espace : tes élèves le saisiront à leur inscription pour rejoindre ta classe.</p>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🏫</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="teacher-signup-id" type="text" placeholder="Code de classe à créer (ex. : 3A-MARTIN)" aria-label="Code de classe à créer" autocomplete="username" maxlength="40"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">✉️</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="teacher-signup-email" type="email" placeholder="Ton e-mail" aria-label="Ton e-mail" autocomplete="email"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="teacher-signup-pass" type="password" placeholder="Mot de passe (6 caractères minimum)" aria-label="Mot de passe (6 caractères minimum)" autocomplete="new-password"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="teacher-signup-pass2" type="password" placeholder="Confirme le mot de passe" aria-label="Confirme le mot de passe" autocomplete="new-password"></div>
-    <p class="msg" id="teacher-signup-msg" role="alert" aria-live="assertive"></p>
-    <button class="btn grad full auth-submit tw-w-full" id="teacher-signup-btn" type="submit">Créer mon espace professeur</button>
-   </form>
-  </div>
 
-  <div id="auth-role-direction" class="auth-role hide" role="tabpanel" aria-labelledby="auth-role-tab-direction">
-   <p class="sub">Consulte la progression globale de l’établissement, classe par classe.</p>
-   <div class="auth-mode-tabs" role="tablist" aria-label="Connexion ou inscription">
-    <button class="auth-mode-tab on" type="button" role="tab" aria-selected="true" aria-controls="direction-login-form" id="auth-direction-tab-login" onclick="setAuthMode('direction','login')">Se connecter</button>
-    <button class="auth-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="direction-signup-form" id="auth-direction-tab-signup" onclick="setAuthMode('direction','signup')">S’inscrire</button>
-   </div>
-   <form id="direction-login-form" class="auth-form" role="tabpanel" aria-labelledby="auth-direction-tab-login" novalidate>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🏛️</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="direction-login-id" type="text" placeholder="Nom de l’établissement" aria-label="Nom de l’établissement" autocomplete="username" maxlength="40"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="direction-login-pass" type="password" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="current-password"></div>
-    <p class="msg" id="direction-login-msg" role="alert" aria-live="assertive"></p>
-    <button class="btn grad full auth-submit tw-w-full" id="direction-login-btn" type="submit">Se connecter</button>
-   </form>
-   <form id="direction-signup-form" class="auth-form hide" role="tabpanel" aria-labelledby="auth-direction-tab-signup" novalidate>
-    <p class="sub">Crée l’espace de ton établissement pour suivre l’ensemble des classes.</p>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🏛️</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="direction-signup-id" type="text" placeholder="Nom de l’établissement" aria-label="Nom de l’établissement" autocomplete="username" maxlength="40"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">✉️</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="direction-signup-email" type="email" placeholder="E-mail de la direction" aria-label="E-mail de la direction" autocomplete="email"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="direction-signup-pass" type="password" placeholder="Mot de passe (6 caractères minimum)" aria-label="Mot de passe (6 caractères minimum)" autocomplete="new-password"></div>
-    <div class="auth-input"><span class="auth-input-icon" aria-hidden="true">🔒</span><input class="inp tw-w-full tw-rounded-md tw-border tw-border-gray-300 focus:tw-ring-2 focus:tw-ring-blue-500" id="direction-signup-pass2" type="password" placeholder="Confirme le mot de passe" aria-label="Confirme le mot de passe" autocomplete="new-password"></div>
-    <p class="msg" id="direction-signup-msg" role="alert" aria-live="assertive"></p>
-    <button class="btn grad full auth-submit tw-w-full" id="direction-signup-btn" type="submit">Créer l’espace direction</button>
+   <!-- Créer un compte -->
+   <form id="auth-signup-form" class="auth-form hide" role="tabpanel" aria-labelledby="auth-tab-signup" method="post" action="#" onsubmit="return false" novalidate>
+    <label class="auth-label" for="signup-name">Prénom ou pseudo</label>
+    <input class="inp auth-field" id="signup-name" type="text" placeholder="2 à 20 caractères" autocomplete="nickname" maxlength="20" autocorrect="off" spellcheck="false">
+
+    <p class="auth-label" id="signup-role-label">Rôle</p>
+    <div class="auth-role-switch" id="auth-role-switch" role="radiogroup" aria-labelledby="signup-role-label">
+     <button class="auth-role-pill on" type="button" role="radio" aria-checked="true" id="auth-role-tab-student" onclick="setAuthRole('student')">🎓 Élève</button>
+     <button class="auth-role-pill" type="button" role="radio" aria-checked="false" id="auth-role-tab-teacher" onclick="setAuthRole('teacher')">👨‍🏫 Professeur</button>
+     <button class="auth-role-pill" type="button" role="radio" aria-checked="false" id="auth-role-tab-direction" onclick="setAuthRole('direction')">🏛️ Direction</button>
+    </div>
+    <p class="sub" id="signup-role-hint" aria-live="polite"></p>
+
+    <label class="auth-label" for="signup-email">Adresse e-mail</label>
+    <input class="inp auth-field" id="signup-email" type="email" placeholder="ton.email@exemple.be" autocomplete="email" autocapitalize="none" spellcheck="false" inputmode="email">
+    <label class="auth-label" for="signup-pass">Mot de passe</label>
+    <input class="inp auth-field" id="signup-pass" type="password" placeholder="6 caractères minimum" autocomplete="new-password">
+    <label class="auth-label" for="signup-pass2">Confirmation du mot de passe</label>
+    <input class="inp auth-field" id="signup-pass2" type="password" placeholder="Retape le mot de passe" autocomplete="new-password">
+
+    <label class="auth-label" for="signup-code" id="signup-code-label">Code de ta classe (facultatif)</label>
+    <input class="inp auth-field" id="signup-code" type="text" placeholder="Donné par ton professeur" autocomplete="off" maxlength="20" autocapitalize="characters" autocorrect="off" spellcheck="false">
+
+    <p class="msg" id="signup-msg" role="alert" aria-live="assertive"></p>
+    <button class="btn grad full auth-submit tw-w-full" id="signup-btn" type="submit">Créer mon compte</button>
    </form>
   </div>
 
@@ -1021,13 +963,6 @@ body.dark .auth-form .msg.ok,body.dark #firebase-auth-message.ok{border-color:#1
 
 <!-- PORTAIL -->
 <section id="tab-portail" class="tab hide" style="max-width:760px;margin:0 auto">
- <div id="portail-locked" class="card center">
-  <span class="tag">🔒 Espace Sécurisé</span>
-  <h2>Accès restreint</h2>
-  <p class="sub" id="portail-locked-text">Connecte-toi avec ton profil élève, professeur ou direction pour accéder à cet espace.</p>
-  <button class="btn grad" onclick="switchTab('connexion')">Aller à l'espace Connexion 🔑</button>
- </div>
-
  <div id="portail-student" class="card hide">
   <div class="row" style="border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:16px">
    <div><span class="tag">Espace élève</span>   <h2 id="e-title" style="font-size:26px">Mon profil & paramètres</h2><span class="tag v" id="student-title-display"></span></div>
@@ -2652,18 +2587,9 @@ function renderAll(){
     var badge = $('badge'); if(badge) badge.textContent = isConnected ? '🟢' : '';
     renderHeaderProfile();
 
-    show('portail-locked', !(stu || tch || dir));
     show('portail-student', !!stu);
     show('portail-teacher', !!tch);
     show('portail-direction', !!dir);
-
-    var lockedText = $('portail-locked-text');
-    if (lockedText) {
-      var fbUser = window.zestFirebaseUser;
-      lockedText.textContent = fbUser
-        ? 'Tu es connecté avec Firebase (' + (fbUser.displayName || fbUser.email || 'compte') + '). Pour accéder à ta progression, connecte-toi aussi avec ton profil élève, professeur ou direction.'
-        : 'Connecte-toi avec ton profil élève, professeur ou direction pour accéder à cet espace.';
-    }
 
     renderClanQuest();
     renderAnnouncement();
@@ -4674,20 +4600,18 @@ if(location.protocol==='file:'){
  offlineStatus.classList.remove('hide');
 }
 </script>
-<!-- AUTHENTIFICATION LOCALE : profils élève, professeur et direction -->
+<!-- PROFILS ZEST : validation, profils locaux, progression et session (l’authentification et Firestore sont gérés dans le module Firebase plus bas) -->
 <script>
 (function(){
  'use strict';
 
- /* ===== Configuration ===== */
- var ADMIN_CODE = 'ADMIN';
- /* Mot de passe du compte super admin (code de classe « ADMIN » dans l’onglet Professeur).
-    Laisse vide pour désactiver ce compte ; renseigne-le pour l’activer. */
- var ADMIN_PASSWORD = '';
  var MIN_PASSWORD = 6;
- var PBKDF2_ITERATIONS = 100000;
+ var ADMIN_RESERVED = 'ADMIN';
+ var PENDING_KEY = 'zest-pending-profiles';
+ var SYNC_KEY = 'zest-sync-meta';
  var RESERVED = ['__proto__', 'constructor', 'prototype', 'tostring', 'valueof', 'hasownproperty'];
  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+ var rawSv = window.sv;     /* écriture locale « brute » : ne déclenche pas la synchronisation cloud */
 
  /* ===== Utilitaires ===== */
  function clean(v){ return String(v == null ? '' : v).trim().replace(/\s+/g, ' '); }
@@ -4695,58 +4619,50 @@ if(location.protocol==='file:'){
  function raw(id){ var e = $(id); return e ? e.value : ''; }
  function has(o, k){ return Object.prototype.hasOwnProperty.call(o, k); }
  function isReserved(v){ return RESERVED.indexOf(String(v).toLowerCase()) >= 0; }
+ function parseJson(s, d){ try{ var v = JSON.parse(s); return v === null || v === undefined ? d : v; }catch(e){ return d; } }
  function findKey(store, id){
   if(has(store, id)) return id;
   var low = id.toLowerCase(), keys = Object.keys(store);
   for(var i = 0; i < keys.length; i++){ if(keys[i].toLowerCase() === low) return keys[i]; }
   return null;
  }
- function setBusy(btn, busy){ if(btn) btn.disabled = !!busy; }
- function toAccount(r){
-  if(typeof r === 'string') return {pass: r};              /* très ancien format : mot de passe seul */
-  return (r && typeof r === 'object') ? r : {};
+ function uniqueKey(store, base){
+  var k = base, n = 2;
+  while(findKey(store, k)){ k = base + ' ' + n; n++; }
+  return k;
+ }
+ function findKeyByUid(store, uid){
+  var found = null;
+  Object.keys(store).some(function(k){
+   var a = store[k];
+   if(a && typeof a === 'object' && a.fbUid === uid){ found = k; return true; }
+   return false;
+  });
+  return found;
+ }
+ function moveProfileData(oldKey, newKey){          /* données rattachées au pseudo : flashcards et scans de cours */
+  ['zest-srs-cards-', 'zest-scan-history-'].forEach(function(prefix){
+   try{
+    var v = localStorage.getItem(prefix + oldKey);
+    if(v !== null){ localStorage.setItem(prefix + newKey, v); localStorage.removeItem(prefix + oldKey); }
+   }catch(e){ console.error('[Zest] Migration de ' + prefix + oldKey + ' :', e); }
+  });
  }
 
- /* ===== Mots de passe (PBKDF2-SHA256 + sel aléatoire) ===== */
- function toHex(bytes){ return Array.prototype.map.call(bytes, function(b){ return ('0' + b.toString(16)).slice(-2); }).join(''); }
- function randomSalt(){ var a = new Uint8Array(16); crypto.getRandomValues(a); return toHex(a); }
- async function hashPassword(pass, salt){
-  if(!(window.crypto && crypto.subtle)) throw new Error('crypto-unavailable');
-  var enc = new TextEncoder();
-  var key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
-  var bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt:enc.encode(salt), iterations:PBKDF2_ITERATIONS}, key, 256);
-  return toHex(new Uint8Array(bits));
- }
- async function setPassword(acc, pass){
-  acc.passSalt = randomSalt();
-  acc.passHash = await hashPassword(pass, acc.passSalt);
-  delete acc.pass;
- }
- /* Retourne 'ok', 'bad' ou 'none' (profil sans mot de passe) */
- async function checkPassword(acc, pass){
-  if(typeof acc.passHash === 'string' && typeof acc.passSalt === 'string'){
-   return (await hashPassword(pass, acc.passSalt)) === acc.passHash ? 'ok' : 'bad';
-  }
-  if(typeof acc.pass === 'string' && acc.pass !== '') return acc.pass === pass ? 'ok' : 'bad';   /* ancien format, migré à la connexion */
-  return 'none';
- }
- function errorText(error){
-  if(error && error.message === 'crypto-unavailable') return 'Ton navigateur bloque le chiffrement des mots de passe. Ouvre Zest en HTTPS (ou sur localhost).';
-  return 'Une erreur est survenue. Réessaie, ou recharge la page.';
- }
-
- /* ===== Rôles ===== */
- function validatePseudo(v){
-  if(v.length < 2 || v.length > 20) return 'Le pseudo doit contenir entre 2 et 20 caractères.';
-  if(!/^[\p{L}\p{N}_.\- ]+$/u.test(v)) return 'Le pseudo ne peut contenir que des lettres, chiffres, espaces, « . », « - » et « _ ».';
-  if(isReserved(v)) return 'Ce pseudo n’est pas disponible.';
-  if(isProfanePseudo(v)) return '🚫 Pseudo refusé par le filtre de modération.';
+ /* ===== Validation ===== */
+ function validateName(v, label){
+  label = label || 'prénom ou pseudo';
+  if(v.length < 2 || v.length > 20) return 'Le ' + label + ' doit contenir entre 2 et 20 caractères.';
+  if(!/^[\p{L}\p{N}_.\- ]+$/u.test(v)) return 'Le ' + label + ' ne peut contenir que des lettres, chiffres, espaces, « . », « - » et « _ ».';
+  if(isReserved(v)) return 'Ce ' + label + ' n’est pas disponible.';
+  if(isProfanePseudo(v)) return '🚫 Ce ' + label + ' est refusé par le filtre de modération.';
   return '';
  }
+ function validatePseudo(v){ return validateName(v, 'pseudo'); }
  function validateClassCode(v){
   if(v.length < 2 || v.length > 20) return 'Le code de classe doit contenir entre 2 et 20 caractères.';
   if(!/^[\p{L}\p{N}_.\- ]+$/u.test(v)) return 'Le code de classe ne peut contenir que des lettres, chiffres, espaces, « . », « - » et « _ ».';
-  if(isReserved(v) || v.toUpperCase() === ADMIN_CODE) return 'Ce code de classe n’est pas disponible.';
+  if(isReserved(v) || v.toUpperCase() === ADMIN_RESERVED) return 'Ce code de classe n’est pas disponible.';
   if(isProfanePseudo(v)) return '🚫 Code refusé par le filtre de modération.';
   return '';
  }
@@ -4756,132 +4672,245 @@ if(location.protocol==='file:'){
   if(isReserved(v)) return 'Ce nom n’est pas disponible.';
   return '';
  }
+
+ /* ===== Rôles : le rôle est stocké dans Firestore sous « eleve », « professeur » ou « direction » ===== */
  var ROLES = {
-  student:   {store:K.users,     session:ZEST_SESSION_KEYS.student,   validate:validatePseudo,    normalize:function(v){ return v; },                    unknown:'Aucun compte trouvé avec ces informations. Veuillez créer un compte.', taken:'Ce pseudo est déjà pris.',                  emailRequired:false},
-  teacher:   {store:K.teachers,  session:ZEST_SESSION_KEYS.teacher,   validate:validateClassCode, normalize:function(v){ return v.toUpperCase(); },     unknown:'Aucun compte trouvé avec ces informations. Veuillez créer un compte.', taken:'Ce code de classe existe déjà.',            emailRequired:true},
-  direction: {store:K.directors, session:ZEST_SESSION_KEYS.direction, validate:validateSchoolName, normalize:function(v){ return v; },                    unknown:'Aucun compte trouvé avec ces informations. Veuillez créer un compte.', taken:'Cet établissement existe déjà.',            emailRequired:true}
+  student: {
+   store: K.users, session: ZEST_SESSION_KEYS.student, cloud: 'eleve', label: 'Élève', fallbackName: 'Élève',
+   validate: validatePseudo, normalize: function(v){ return v; },
+   hint: 'Élève : suis ta progression, gagne des points et personnalise ton avatar.',
+   codeLabel: 'Code de ta classe (facultatif)', codePlaceholder: 'Donné par ton professeur', codeMax: 20, codeCaps: 'characters'
+  },
+  teacher: {
+   store: K.teachers, session: ZEST_SESSION_KEYS.teacher, cloud: 'professeur', label: 'Professeur', fallbackName: 'CLASSE',
+   validate: validateClassCode, normalize: function(v){ return v.toUpperCase(); },
+   hint: 'Professeur : suis tes élèves, publie des quiz et épingle des annonces pour ta classe.',
+   codeLabel: 'Code de ta classe (facultatif)', codePlaceholder: 'Généré automatiquement si vide', codeMax: 20, codeCaps: 'characters'
+  },
+  direction: {
+   store: K.directors, session: ZEST_SESSION_KEYS.direction, cloud: 'direction', label: 'Direction', fallbackName: 'Établissement',
+   validate: validateSchoolName, normalize: function(v){ return v; },
+   hint: 'Direction : consulte la progression globale de l’établissement, classe par classe.',
+   codeLabel: 'Nom de l’établissement (facultatif)', codePlaceholder: 'Ex. : Institut Saint-Joseph', codeMax: 40, codeCaps: 'sentences'
+  }
  };
+ var signupRole = 'student';
+ function roleFromCloud(v){
+  var found = null;
+  Object.keys(ROLES).some(function(r){ if(ROLES[r].cloud === v){ found = r; return true; } return false; });
+  return found;
+ }
 
- /* ===== Affichage : choix du rôle et du mode ===== */
+ /* ===== Interface : onglets Se connecter / Créer un compte, choix du rôle ===== */
  window.setAuthRole = function(role){
+  if(!has(ROLES, role)) return;
+  signupRole = role;
+  var cfg = ROLES[role];
   Object.keys(ROLES).forEach(function(r){
-   show('auth-role-' + r, r === role);
    var tab = $('auth-role-tab-' + r);
-   if(tab){tab.classList.toggle('on',r===role);tab.setAttribute('aria-selected',String(r===role));}
+   if(tab){ tab.classList.toggle('on', r === role); tab.setAttribute('aria-checked', String(r === role)); }
   });
+  var hint = $('signup-role-hint'); if(hint) hint.textContent = cfg.hint;
+  var lab = $('signup-code-label'); if(lab) lab.textContent = cfg.codeLabel;
+  var inp = $('signup-code');
+  if(inp){ inp.placeholder = cfg.codePlaceholder; inp.maxLength = cfg.codeMax; inp.setAttribute('autocapitalize', cfg.codeCaps); }
+  say('signup-msg', '');
  };
- window.setAuthMode = function(role, mode){
-  show(role + '-login-form', mode === 'login');
-  show(role + '-signup-form', mode === 'signup');
-  var l = $('auth-' + role + '-tab-login'), s = $('auth-' + role + '-tab-signup');
-  if(l){l.classList.toggle('on',mode==='login');l.setAttribute('aria-selected',String(mode==='login'));}
-  if(s){s.classList.toggle('on',mode==='signup');s.setAttribute('aria-selected',String(mode==='signup'));}
-  say(role + '-login-msg', ''); say(role + '-signup-msg', '');
+ window.setAuthMode = function(mode){
+  var login = mode !== 'signup';
+  show('auth-login-form', login);
+  show('auth-signup-form', !login);
+  show('auth-verify-notice', false);
+  show('auth-resend-btn', false);
+  [['auth-tab-login', login], ['auth-tab-signup', !login]].forEach(function(pair){
+   var b = $(pair[0]);
+   if(b){ b.classList.toggle('on', pair[1]); b.setAttribute('aria-selected', String(pair[1])); }
+  });
+  say('login-msg', ''); say('signup-msg', ''); say('auth-notice-msg', '');
+ };
+ function showVerifyNotice(email){
+  var e = $('auth-notice-email'); if(e) e.textContent = email || '';
+  say('auth-notice-msg', '');
+  show('auth-login-form', false);
+  show('auth-signup-form', false);
+  show('auth-verify-notice', true);
+ }
+
+ /* ===== Inscription : lecture et validation du formulaire ===== */
+ function generateClassCode(name){
+  var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', store = ld(K.teachers, {}), code, tries = 0;
+  var base = name.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'CLASSE';
+  do{
+   var suffix = '';
+   for(var i = 0; i < 3; i++) suffix += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+   code = base + '-' + suffix; tries++;
+  }while(findKey(store, code) && tries < 20);
+  return code;
+ }
+ function readSignup(){
+  var role = signupRole;
+  var name = val('signup-name'), email = val('signup-email').toLowerCase();
+  var p1 = raw('signup-pass'), p2 = raw('signup-pass2'), extra = val('signup-code');
+  var err = validateName(name);
+  if(err) return {error: err};
+  if(!email) return {error: 'Renseigne ton adresse e-mail.'};
+  if(!EMAIL_RE.test(email)) return {error: 'Cette adresse e-mail n’est pas valide.'};
+  if(p1.length < MIN_PASSWORD) return {error: 'Le mot de passe doit contenir au moins ' + MIN_PASSWORD + ' caractères.'};
+  if(p1 !== p2) return {error: 'Les deux mots de passe ne correspondent pas.'};
+  var classCode = '';
+  if(role === 'student'){
+   if(extra){
+    var ce = validateClassCode(extra.toUpperCase());
+    if(ce) return {error: ce.replace('Le code de classe', 'Le code de classe saisi')};
+    classCode = findKey(ld(K.teachers, {}), extra) || extra.toUpperCase();
+   }
+  }else if(role === 'teacher'){
+   if(extra){
+    var te = validateClassCode(extra.toUpperCase());
+    if(te) return {error: te};
+    classCode = extra.toUpperCase();
+    if(findKey(ld(K.teachers, {}), classCode)) return {error: 'Ce code de classe existe déjà.'};
+   }else{
+    classCode = generateClassCode(name);
+   }
+  }else{
+   classCode = extra || name;
+   var se = validateSchoolName(classCode);
+   if(se) return {error: se};
+  }
+  return {role: role, name: name, email: email, password: p1, classCode: classCode};
+ }
+ function initialProgress(role, email, classCode){
+  if(role !== 'student') return {};
+  return {email: email, teacherCode: classCode || '', totalScore: 0, spent: 0, gamesPlayed: 0, skin: '🦊', owned: [], mistakes: {}, pseudoChanges: 0, createdAt: Date.now()};
+ }
+
+ /* ===== Données en attente : secours si le document Firestore n’a pas pu être créé à l’inscription ===== */
+ function savePending(uid, data){ var p = ld(PENDING_KEY, {}); p[uid] = data; rawSv(PENDING_KEY, p); }
+ function readPending(uid){ var p = ld(PENDING_KEY, {}); return has(p, uid) ? p[uid] : null; }
+ function dropPending(uid){ var p = ld(PENDING_KEY, {}); if(has(p, uid)){ delete p[uid]; rawSv(PENDING_KEY, p); } }
+ function defaultProfileFor(user, pending){
+  if(pending && has(ROLES, pending.r)){
+   return {role: pending.r, name: clean(pending.n) || ROLES[pending.r].fallbackName, classCode: String(pending.c || '')};
+  }
+  var base = clean((user && user.displayName) || String((user && user.email) || '').split('@')[0]).slice(0, 20);
+  if(validatePseudo(base)) base = ROLES.student.fallbackName;
+  return {role: 'student', name: base, classCode: ''};
+ }
+
+ /* ===== Suivi de la synchronisation cloud (par compte, sur cet appareil) ===== */
+ function readMeta(uid){ var m = ld(SYNC_KEY, {}); return has(m, uid) && m[uid] && typeof m[uid] === 'object' ? m[uid] : {}; }
+ function writeMeta(uid, o){ var m = ld(SYNC_KEY, {}); m[uid] = o; rawSv(SYNC_KEY, m); }
+ function markDirty(uid){ writeMeta(uid, {ts: Date.now(), dirty: true}); }
+ function markSynced(uid, ts, force){
+  var cur = readMeta(uid);
+  if(!force && cur.dirty && Number(cur.ts) > Number(ts)) return;        /* une modification plus récente attend encore d’être envoyée */
+  writeMeta(uid, {ts: Number(ts) || Date.now(), dirty: false});
+ }
+
+ /* Ce qui est envoyé dans Firestore : le profil de l’élève, ses flashcards (répétition espacée) et l’historique des cours scannés. */
+ function collectProgress(){
+  if(!stu) return null;
+  var u = ld(K.users, {})[stu];
+  if(!u) return null;
+  var progress = JSON.parse(JSON.stringify(u));
+  delete progress.fbUid;
+  return {
+   progress: progress,
+   classCode: String(u.teacherCode || ''),
+   data: {srs: ld('zest-srs-cards-' + stu, {}), scanHistory: ld('zest-scan-history-' + stu, [])}
+  };
+ }
+
+ /* Chaque écriture locale de la progression déclenche l’envoi (différé) vers Firestore. */
+ window.sv = function(k, v){
+  rawSv.apply(this, arguments);
+  try{
+   var c = window.zestCloud;
+   if(c && c.active && stu && (k === K.users || k === 'zest-srs-cards-' + stu || k === 'zest-scan-history-' + stu)){
+    markDirty(c.uid);
+    c.schedule();
+   }
+  }catch(e){ console.warn('[Zest] Planification de la synchronisation :', e); }
  };
 
- /* ===== Session ===== */
- function startSession(role, key, persist){
+ /* ===== Session locale ===== */
+ function setSession(role, key){
   stu = null; tch = null; dir = null;
   Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
   if(role === 'student') stu = key; else if(role === 'teacher') tch = key; else dir = key;
-  if(persist) sv(ROLES[role].session, key);
-  Object.keys(ROLES).forEach(function(r){
-   ['login', 'signup'].forEach(function(m){ var f = $(r + '-' + m + '-form'); if(f) f.reset(); say(r + '-' + m + '-msg', ''); });
-   window.setAuthMode(r, 'login');                              /* on revient sur « Connexion » pour la prochaine fois */
-  });
+  sv(ROLES[role].session, key);
   applyUltimateBranding();
-  switchTab('portail');
+  renderAll();
+ }
+ function clearSession(){
+  if(!(stu || tch || dir)) return;
+  stu = null; tch = null; dir = null;
+  Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
+  applyUltimateBranding();
+  renderAll();
+ }
+
+ /* Charge le profil Firestore (users/{uid}) dans l’application et ouvre la session correspondante. */
+ function applyCloudProfile(uid, email, d){
+  var role = roleFromCloud(d && d.role);
+  if(!role) return null;
+  var cfg = ROLES[role], store = ld(cfg.store, {}), key = findKeyByUid(store, uid);
+  var meta = readMeta(uid), cloudTs = Number(d.progressTs) || 0;
+  /* Modifications faites hors ligne et plus récentes que la sauvegarde cloud : on les garde et on les enverra. */
+  var keepLocal = role === 'student' && !!key && !!meta.dirty && Number(meta.ts) > cloudTs;
+
+  var wanted = cfg.normalize(clean(role === 'student' ? d.displayName : (d.classCode || d.displayName)));
+  if(cfg.validate(wanted)) wanted = cfg.fallbackName;
+  if(!key){
+   key = uniqueKey(store, wanted);
+   store[key] = {};
+  }else if(!keepLocal && key !== wanted){                   /* renommé depuis un autre appareil */
+   var others = Object.assign({}, store); delete others[key];
+   var nk = uniqueKey(others, wanted);
+   if(nk !== key){ store[nk] = store[key]; delete store[key]; moveProfileData(key, nk); key = nk; }
+  }
+
+  if(role === 'student'){
+   if(!keepLocal){
+    var progress = parseJson(d.progressJson, {});
+    store[key] = Object.assign(initialProgress('student', email, ''), progress, {email: email, teacherCode: String(d.classCode || progress.teacherCode || ''), fbUid: uid});
+    var data = parseJson(d.dataJson, {});
+    rawSv('zest-srs-cards-' + key, data && data.srs && typeof data.srs === 'object' ? data.srs : {});
+    rawSv('zest-scan-history-' + key, data && Array.isArray(data.scanHistory) ? data.scanHistory : []);
+    markSynced(uid, cloudTs, true);
+   }else{
+    store[key].fbUid = uid; store[key].email = email;
+   }
+  }else{
+   var prev = store[key] && typeof store[key] === 'object' ? store[key] : {};
+   store[key] = Object.assign({}, prev, {email: email, displayName: clean(d.displayName), createdAt: prev.createdAt || Date.now(), fbUid: uid});
+  }
+  rawSv(cfg.store, store);
+  dropPending(uid);
+  setSession(role, key);
+  return {role: role, key: key, keepLocal: keepLocal};
+ }
+
+ /* Secours hors ligne : rouvre le profil déjà présent sur cet appareil pour ce compte. */
+ function attachLocalOnly(uid){
+  var roles = Object.keys(ROLES);
+  for(var i = 0; i < roles.length; i++){
+   var key = findKeyByUid(ld(ROLES[roles[i]].store, {}), uid);
+   if(key){ setSession(roles[i], key); return {role: roles[i], key: key, keepLocal: false}; }
+  }
+  return null;
  }
 
  window.zestLogout = async function(){
-  stu = null; tch = null; dir = null;
-  Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
-  if(window.zestFirebaseUser && typeof window.zestFirebaseSignOut === 'function'){
+  try{ if(window.zestCloud) await window.zestCloud.flush(); }
+  catch(e){ console.error('[Zest] Synchronisation avant déconnexion :', e); }
+  if(typeof window.zestFirebaseSignOut === 'function'){
    try{ await window.zestFirebaseSignOut(); }catch(e){ console.error('[Zest] Déconnexion Firebase :', e); }
   }
-  applyUltimateBranding();
+  clearSession();
   switchTab('connexion');
  };
-
- /* ===== Connexion ===== */
- async function login(role){
-  var cfg = ROLES[role], msg = role + '-login-msg', btn = $(role + '-login-btn');
-  var id = val(role + '-login-id'), pass = raw(role + '-login-pass');
-  if(!id || !pass) return say(msg, 'Renseigne ton identifiant et ton mot de passe.');
-  setBusy(btn, true);
-  try{
-   if(role === 'teacher' && id.toUpperCase() === ADMIN_CODE){
-    if(!ADMIN_PASSWORD) return say(msg, 'Le compte super admin n’est pas configuré.');
-    if(pass !== ADMIN_PASSWORD) return say(msg, 'Mot de passe incorrect.');
-    return startSession('teacher', ADMIN_CODE, false);          /* session admin jamais mémorisée */
-   }
-   var store = ld(cfg.store, {}), key = findKey(store, id);
-   if(!key) return say(msg, cfg.unknown);
-   var acc = toAccount(store[key]), changed = false;
-   var status = await checkPassword(acc, pass);
-   if(status === 'bad') return say(msg, 'Mot de passe incorrect.');
-   if(status === 'none'){
-    if(pass.length < MIN_PASSWORD) return say(msg, 'Ce profil n’a plus de mot de passe. Saisis celui que tu veux utiliser à partir de maintenant (' + MIN_PASSWORD + ' caractères minimum).');
-    if(!confirm('Ce profil n’a plus de mot de passe.\nUtiliser celui que tu viens de saisir comme nouveau mot de passe ?')) return say(msg, '');
-    await setPassword(acc, pass); changed = true;
-   }else if(!acc.passHash){
-    await setPassword(acc, pass); changed = true;                /* migration d’un ancien mot de passe en clair */
-   }
-   if(changed){ store[key] = acc; sv(cfg.store, store); }
-   startSession(role, key, true);
-  }catch(error){
-   console.error('[Zest] Connexion locale (' + role + ') :', error);
-   say(msg, errorText(error));
-  }finally{
-   setBusy(btn, false);
-  }
- }
-
- /* ===== Création de compte ===== */
- async function signup(role){
-  var cfg = ROLES[role], msg = role + '-signup-msg', btn = $(role + '-signup-btn');
-  var id = cfg.normalize(val(role + '-signup-id')), email = val(role + '-signup-email');
-  var p1 = raw(role + '-signup-pass'), p2 = raw(role + '-signup-pass2');
-  var birthday = '', code = '';
-  var err = cfg.validate(id);
-  if(err) return say(msg, err);
-  if(!email && cfg.emailRequired) return say(msg, 'Renseigne une adresse e-mail.');
-  if(email && !EMAIL_RE.test(email)) return say(msg, 'Cette adresse e-mail n’est pas valide.');
-  if(role === 'student'){
-   birthday = val('student-signup-birthday');
-   if(birthday && (isNaN(new Date(birthday).getTime()) || new Date(birthday) > new Date() || birthday < '1900-01-01')) return say(msg, 'La date de naissance n’est pas valide.');
-   code = val('student-signup-code');
-   if(code){
-    var codeErr = validateClassCode(code.toUpperCase());
-    if(codeErr) return say(msg, codeErr.replace('Le code de classe', 'Le code de classe saisi'));
-    var teacherKey = findKey(ld(K.teachers, {}), code);
-    code = teacherKey || code.toUpperCase();
-   }
-  }
-  if(p1.length < MIN_PASSWORD) return say(msg, 'Le mot de passe doit contenir au moins ' + MIN_PASSWORD + ' caractères.');
-  if(p1 !== p2) return say(msg, 'Les deux mots de passe ne correspondent pas.');
-  var store = ld(cfg.store, {});
-  if(findKey(store, id)) return say(msg, cfg.taken);
-  setBusy(btn, true);
-  try{
-   var acc;
-   if(role === 'student'){
-    acc = {email:email, birthday:birthday, teacherCode:code, totalScore:0, spent:0, gamesPlayed:0, skin:'🦊', owned:[], mistakes:{}, pseudoChanges:0, createdAt:Date.now()};
-   }else{
-    acc = {email:email, createdAt:Date.now()};
-   }
-   await setPassword(acc, p1);
-   store = ld(cfg.store, {});                                    /* relecture : évite d’écraser une écriture concurrente */
-   if(findKey(store, id)) return say(msg, cfg.taken);
-   store[id] = acc; sv(cfg.store, store);
-   startSession(role, id, true);
-  }catch(error){
-   console.error('[Zest] Création de compte (' + role + ') :', error);
-   say(msg, errorText(error));
-  }finally{
-   setBusy(btn, false);
-  }
- }
 
  /* ===== Changement de pseudo (1re modification gratuite, ensuite 200 points) ===== */
  window.changeStudentPseudo = function(){
@@ -4900,28 +4929,45 @@ if(location.protocol==='file:'){
   if(cost && !confirm('Changer de pseudo coûte 200 points. Continuer ?')) return;
   u.pseudoChanges = changes + 1;
   if(cost) u.spent = (Number(u.spent) || 0) + cost;
-  delete users[old]; users[np] = u; sv(K.users, users);
-  ['zest-scan-history-', 'zest-srs-cards-'].forEach(function(prefix){        /* données rattachées au pseudo */
-   try{
-    var v = localStorage.getItem(prefix + old);
-    if(v !== null){ localStorage.setItem(prefix + np, v); localStorage.removeItem(prefix + old); }
-   }catch(e){ console.error('[Zest] Migration de ' + prefix + old + ' :', e); }
-  });
-  stu = np; sv(ROLES.student.session, np);
+  delete users[old]; users[np] = u;
+  moveProfileData(old, np);
+  stu = np;
+  sv(ROLES.student.session, np);
+  sv(K.users, users);                                  /* déclenche aussi l’envoi de la progression vers Firestore */
+  if(typeof window.zestFirebaseSyncProfile === 'function') window.zestFirebaseSyncProfile('student', np, u.teacherCode || '');
   if(input) input.value = '';
   renderAll();
   say(msg, 'Pseudo modifié : ' + np + (cost ? ' (−200 points)' : ''), true);
  };
 
- /* ===== Branchements ===== */
- Object.keys(ROLES).forEach(function(role){
-  var lf = $(role + '-login-form'), sf = $(role + '-signup-form');
-  if(lf) lf.addEventListener('submit', function(e){ e.preventDefault(); login(role); });
-  if(sf) sf.addEventListener('submit', function(e){ e.preventDefault(); signup(role); });
- });
- var birthdayInput = $('student-signup-birthday');
- if(birthdayInput){ var d = new Date(); birthdayInput.max = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+ window.zestLocal = {
+  readSignup: readSignup, initialProgress: initialProgress,
+  savePending: savePending, readPending: readPending, dropPending: dropPending, defaultProfileFor: defaultProfileFor,
+  applyCloudProfile: applyCloudProfile, attachLocalOnly: attachLocalOnly,
+  collectProgress: collectProgress, markSynced: markSynced, readMeta: readMeta,
+  roleToCloud: function(r){ return has(ROLES, r) ? ROLES[r].cloud : null; },
+  roleLabel: function(r){ return has(ROLES, r) ? ROLES[r].label : ''; },
+  clearSession: clearSession, showVerifyNotice: showVerifyNotice
+ };
 
+ /* ===== Plus d’écran « Accès restreint » : sans session, l’onglet Profil renvoie vers la connexion ===== */
+ var baseSwitchTab = window.switchTab;
+ window.switchTab = function(t){
+  var args = Array.prototype.slice.call(arguments);
+  if(t === 'portail' && !(stu || tch || dir)) args[0] = 'connexion';
+  return baseSwitchTab.apply(this, args);
+ };
+
+ /* ===== Branchements ===== */
+ /* Garde-fou : si le module Firebase n’a pas pu se charger, on évite l’envoi natif du formulaire (e-mail/mot de passe dans l’URL). */
+ [['auth-login-form', 'login-msg'], ['auth-signup-form', 'signup-msg']].forEach(function(pair){
+  var f = $(pair[0]);
+  if(f) f.addEventListener('submit', function(e){
+   e.preventDefault();
+   if(!window.zestAuthReady) say(pair[1], 'Le service de connexion n’a pas pu se charger. Vérifie ta connexion Internet puis recharge la page.');
+  });
+ });
+ window.setAuthRole('student');
  window.addEventListener('load', function(){ applyUltimateBranding(); renderAll(); });
 })();
 </script>
@@ -4929,14 +4975,21 @@ if(location.protocol==='file:'){
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import {
     getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    sendSignInLinkToEmail,
-    isSignInWithEmailLink,
-    signInWithEmailLink,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    sendEmailVerification,
+    sendPasswordResetEmail,
+    updateProfile,
     onAuthStateChanged,
     signOut
   } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
   import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
   const firebaseConfig = {
     apiKey: "AIzaSyCxXFAD4vbOqkqT83HrhjS6HPS-pw5FSNU",
@@ -4951,66 +5004,83 @@ if(location.protocol==='file:'){
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   auth.languageCode = "fr";
+  const db = getFirestore(app);
 
   // Analytics est facultatif : s’il n’est pas supporté (navigateur, cookies bloqués, hors ligne…),
-  // il ne doit surtout pas empêcher le reste de la connexion de fonctionner.
+  // il ne doit surtout pas empêcher la connexion de fonctionner.
   isAnalyticsSupported().then(function (supported) {
     if (supported) getAnalytics(app);
   }).catch(function (error) {
     console.warn("[Zest · Firebase] Analytics désactivé :", error);
   });
-  const googleProvider = new GoogleAuthProvider();
 
-  const authMessage = document.getElementById("firebase-auth-message");
-  const authMagicDetails = document.querySelector(".auth-magic");
-  const googleSignInButton = document.getElementById("firebase-google-button");
-  const headerGoogleSignInButton = document.getElementById("firebase-header-google-button");
-  const emailSignInButton = document.getElementById("firebase-email-button");
-  const emailInput = document.getElementById("firebase-email");
-  const signOutButton = document.getElementById("firebase-signout-button");
-  const authPanel = document.getElementById("firebase-auth-panel");
-  const authSession = document.getElementById("firebase-auth-session");
-  const authUserLabel = document.getElementById("firebase-auth-user");
-  const sessionMessage = document.getElementById("firebase-session-message");
-  const headerUserLabel = document.getElementById("firebase-header-user");
+  const byId = function (id) { return document.getElementById(id); };
+  const loginForm = byId("auth-login-form");
+  const signupForm = byId("auth-signup-form");
+  const loginButton = byId("login-btn");
+  const signupButton = byId("signup-btn");
+  const forgotButton = byId("auth-forgot-btn");
+  const resendButton = byId("auth-resend-btn");
+  const noticeResendButton = byId("auth-notice-resend-btn");
+  const signOutButton = byId("firebase-signout-button");
+  const authPanel = byId("firebase-auth-panel");
+  const authSession = byId("firebase-auth-session");
+  const authUserLabel = byId("firebase-auth-user");
+  const sessionMessage = byId("firebase-session-message");
+  const headerUserLabel = byId("firebase-header-user");
 
-  function showAuthMessage(message, isSuccess) {
-    if (!authMessage) return;
-    authMessage.textContent = message;
-    authMessage.className = "msg auth-feedback" + (isSuccess ? " ok" : "");
-    if (!isSuccess && authMagicDetails) authMagicDetails.open = true;
+  const MSG_UNVERIFIED = "Ton adresse e-mail n’est pas encore confirmée. Vérifie ta boîte mail (et tes spams) et clique sur le lien de validation avant de te connecter.";
+  const MSG_NO_PROFILE = "Impossible de charger ton profil. Vérifie ta connexion Internet et réessaie.";
+
+  // true pendant une inscription / connexion : l’observateur de session n’interfère pas.
+  let authBusy = false;
+  // Identifiants de la dernière inscription ou connexion refusée (e-mail non confirmé), gardés en mémoire
+  // uniquement, pour pouvoir renvoyer l’e-mail de confirmation.
+  let pendingVerification = null;
+
+  function setMsg(id, message, isSuccess) {
+    if (typeof window.say === "function") { window.say(id, message, isSuccess); return; }
+    const el = byId(id);
+    if (el) { el.textContent = message; el.className = "msg" + (isSuccess ? " ok" : ""); }
+  }
+
+  function setResendVisible(visible) {
+    if (resendButton) resendButton.classList.toggle("hide", !visible);
   }
 
   // Message lisible (en français) pour un code d’erreur Firebase, avec le code entre parenthèses.
   function describeFirebaseError(error, fallback) {
     const code = (error && error.code) || "";
     const host = window.location.hostname || window.location.protocol;
+    const credentialsMessage = "Aucun compte trouvé ou mot de passe incorrect.";
     const messages = {
-      "auth/operation-not-allowed": "La connexion par lien e-mail n’est pas activée. Console Firebase › Authentication › Méthode de connexion › E-mail/Mot de passe : active aussi « Lien envoyé par e-mail (connexion sans mot de passe) ».",
-      "auth/unauthorized-continue-uri": "Le domaine « " + host + " » n’est pas autorisé. Console Firebase › Authentication › Paramètres › Domaines autorisés : ajoute-le.",
-      "auth/unauthorized-domain": "Le domaine « " + host + " » n’est pas autorisé. Console Firebase › Authentication › Paramètres › Domaines autorisés : ajoute-le.",
-      "auth/invalid-continue-uri": "L’adresse de la page n’est pas une URL valide pour Firebase. Ouvre Zest via http(s), pas depuis un fichier local.",
-      "auth/missing-continue-uri": "L’URL de retour du lien est manquante.",
-      "auth/invalid-email": "L’adresse e-mail n’est pas valide (ou ne correspond pas à celle du lien).",
-      "auth/user-not-found": "Aucun compte trouvé avec ces informations. Veuillez créer un compte.",
-      "auth/invalid-credential": "Aucun compte trouvé avec ces informations. Veuillez créer un compte.",
-      "auth/wrong-password": "Aucun compte trouvé avec ces informations. Veuillez créer un compte.",
+      "auth/user-not-found": credentialsMessage,
+      "auth/invalid-credential": credentialsMessage,
+      "auth/wrong-password": credentialsMessage,
+      "auth/email-already-in-use": "Cette adresse e-mail est déjà utilisée.",
+      "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères.",
+      "auth/invalid-email": "L’adresse e-mail n’est pas valide.",
+      "auth/missing-password": "Renseigne ton mot de passe.",
+      "auth/operation-not-allowed": "La connexion par e-mail et mot de passe n’est pas activée. Console Firebase › Authentication › Méthode de connexion : active « E-mail/Mot de passe ».",
+      "auth/user-disabled": "Ce compte a été désactivé. Contacte ton établissement.",
       "auth/too-many-requests": "Trop de tentatives. Patiente quelques minutes avant de réessayer.",
       "auth/quota-exceeded": "Le quota d’e-mails Firebase est dépassé pour aujourd’hui. Réessaie plus tard.",
       "auth/network-request-failed": "Problème de réseau. Vérifie ta connexion Internet.",
       "auth/invalid-api-key": "La clé API Firebase est refusée. Vérifie la clé et ses restrictions dans la console Google Cloud.",
       "auth/api-key-not-valid": "La clé API Firebase est refusée. Vérifie la clé et ses restrictions dans la console Google Cloud.",
       "auth/configuration-not-found": "Firebase Authentication n’est pas initialisé pour ce projet. Console Firebase › Authentication › clique sur « Commencer ».",
-      "auth/invalid-action-code": "Le lien est invalide, expiré ou déjà utilisé. Demande-en un nouveau.",
-      "auth/expired-action-code": "Le lien a expiré. Demande-en un nouveau.",
-      "auth/popup-blocked": "Ton navigateur a bloqué la fenêtre Google. Autorise les pop-ups pour ce site."
+      "permission-denied": "Accès refusé à la base de données. Les règles Firestore doivent autoriser chaque utilisateur à lire et écrire son propre document « users/{uid} ».",
+      "unavailable": "Base de données momentanément indisponible. Vérifie ta connexion Internet.",
+      "failed-precondition": "Cloud Firestore n’est pas encore créé pour ce projet. Console Firebase › Firestore Database › Créer une base de données."
     };
     let base = messages[code];
     if (!base && code.indexOf("requests-from-referer") !== -1) {
       base = "Cette adresse (« " + host + " ») est bloquée par les restrictions de la clé API. Console Google Cloud › Identifiants : autorise ce référent.";
     }
     base = base || fallback;
-    if (code === "auth/user-not-found" || code === "auth/invalid-credential" || code === "auth/wrong-password") return base;
+    // Pas de code technique affiché pour les erreurs de saisie courantes.
+    const quiet = ["auth/user-not-found", "auth/invalid-credential", "auth/wrong-password", "auth/email-already-in-use", "auth/weak-password", "auth/invalid-email", "auth/missing-password"];
+    if (quiet.indexOf(code) !== -1) return base;
     return code ? base + " [" + code + "]" : base;
   }
 
@@ -5033,67 +5103,356 @@ if(location.protocol==='file:'){
     console.error(error);
   }
 
-  function showAuthPanel() {
-    if (typeof window.switchTab === "function") window.switchTab("connexion");
+  // ===== Cloud Firestore : un document par utilisateur, users/{uid} =====
+  function profileRef(uid) { return doc(db, "users", uid); }
+
+  function buildProfileDoc(user, role, displayName, classCode) {
+    const progress = window.zestLocal.initialProgress(role, user.email || "", classCode);
+    return {
+      uid: user.uid,
+      email: user.email || "",
+      displayName: displayName,
+      role: window.zestLocal.roleToCloud(role),
+      classCode: classCode || "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      totalScore: 0,
+      gamesPlayed: 0,
+      progressJson: JSON.stringify(progress),
+      dataJson: "{}",
+      progressTs: 0
+    };
   }
 
-  async function signInWithGoogle() {
+  // Le document users/{uid} n’existe pas (écriture refusée à l’inscription, compte ancien…) : on le crée.
+  async function createMissingProfile(user) {
+    const base = window.zestLocal.defaultProfileFor(user, window.zestLocal.readPending(user.uid));
+    const data = buildProfileDoc(user, base.role, base.name, base.classCode);
     try {
-      await signInWithPopup(auth, googleProvider);
-      showAuthMessage("Connexion Google réussie.", true);
-      if (typeof window.switchTab === "function") window.switchTab("accueil");
+      await setDoc(profileRef(user.uid), data);
     } catch (error) {
-      logFirebaseError("signInWithPopup (Google)", error);
-      showAuthPanel();
-      if (error && error.code === "auth/popup-closed-by-user") {
-        showAuthMessage("La fenêtre Google a été fermée avant la fin de la connexion.", false);
-        return;
-      }
-      showAuthMessage(describeFirebaseError(error, "La connexion Google a échoué. Réessaie ou utilise le lien par e-mail."), false);
+      logFirebaseError("setDoc users/" + user.uid + " (profil manquant)", error);
     }
+    return data; // même si l’écriture a échoué, le profil fonctionne localement
   }
 
-  if (googleSignInButton) {
-    googleSignInButton.addEventListener("click", signInWithGoogle);
-  }
-  if (headerGoogleSignInButton) {
-    headerGoogleSignInButton.addEventListener("click", signInWithGoogle);
-  }
+  // Envoi de la progression (profil élève, flashcards, scans de cours) vers users/{uid}.
+  function byteLength(text) { return new TextEncoder().encode(text).length; }
 
-  if (emailSignInButton && emailInput) {
-    emailSignInButton.addEventListener("click", async function () {
-      const email = emailInput.value.trim();
-      if (!email || !emailInput.checkValidity()) {
-        emailInput.reportValidity();
-        return;
-      }
+  const cloud = {
+    active: false,
+    uid: null,
+    timer: null,
+    running: false,
+    again: false,
+    lastSnapshot: null,
+    start: function (uid) {
+      this.active = true;
+      this.uid = uid;
+      this.again = false;
+      this.lastSnapshot = null;
+    },
+    stop: function () {
+      this.active = false;
+      this.uid = null;
+      clearTimeout(this.timer);
+      this.timer = null;
+    },
+    snapshot: function () {
+      const payload = window.zestLocal.collectProgress();
+      return payload ? JSON.stringify(payload) : null;
+    },
+    schedule: function () {
+      if (!this.active) return;
+      clearTimeout(this.timer);
+      this.timer = setTimeout(function () { cloud.push(); }, 2000);
+    },
+    flush: async function () {
+      if (!this.active) return;
+      clearTimeout(this.timer);
+      this.timer = null;
+      await this.push();
+    },
+    push: async function () {
+      if (!this.active) return;
+      if (this.running) { this.again = true; return; }
+      const payload = window.zestLocal.collectProgress();
+      if (!payload) return;
+      const uid = this.uid;
+      const ts = Date.now();
+      const snapshot = JSON.stringify(payload);
+      if (snapshot === this.lastSnapshot) { window.zestLocal.markSynced(uid, ts); return; }
 
-      const actionCodeSettings = {
-        url: window.location.href,
-        handleCodeInApp: true
-      };
-
-      emailSignInButton.disabled = true;
-      showAuthMessage("Envoi du lien en cours…", true);
-      try {
-        await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-        try {
-          localStorage.setItem("emailForSignIn", email);
-        } catch (storageError) {
-          console.error("Impossible de mémoriser l’adresse e-mail :", storageError);
-          showAuthMessage("Le lien a été envoyé. Vérifie ta boîte mail et tes spams. L’adresse n’a pas pu être mémorisée : tu devras la saisir au retour.", false);
+      let progressJson = JSON.stringify(payload.progress);
+      let dataJson = JSON.stringify(payload.data);
+      if (byteLength(progressJson) + byteLength(dataJson) > 900000) {
+        // Un document Firestore est limité à 1 Mo : on écarte d’abord l’historique des cours scannés.
+        dataJson = JSON.stringify({ srs: payload.data.srs, scanHistory: [] });
+        if (byteLength(progressJson) + byteLength(dataJson) > 900000) {
+          console.error("[Zest · Firebase] Progression trop volumineuse pour un document Firestore : synchronisation ignorée.");
           return;
         }
-        showAuthMessage("Lien de connexion envoyé. Vérifie ta boîte mail ainsi que tes spams.", true);
-      } catch (error) {
-        logFirebaseError("sendSignInLinkToEmail", error, { email: email, actionCodeSettings: actionCodeSettings });
-        showAuthMessage(describeFirebaseError(error, "Impossible d’envoyer le lien de connexion. Vérifie l’adresse et réessaie."), false);
-      } finally {
-        emailSignInButton.disabled = false;
       }
+      this.running = true;
+      try {
+        await setDoc(profileRef(uid), {
+          progressJson: progressJson,
+          dataJson: dataJson,
+          totalScore: Number(payload.progress.totalScore) || 0,
+          gamesPlayed: Number(payload.progress.gamesPlayed) || 0,
+          classCode: payload.classCode,
+          progressTs: ts,
+          updatedAt: serverTimestamp()
+        }, { mergeFields: ["progressJson", "dataJson", "totalScore", "gamesPlayed", "classCode", "progressTs", "updatedAt"] });
+        this.lastSnapshot = snapshot;
+        window.zestLocal.markSynced(uid, ts);
+        if (sessionMessage) sessionMessage.textContent = "";
+      } catch (error) {
+        logFirebaseError("synchronisation de la progression (users/" + uid + ")", error);
+        if (sessionMessage) sessionMessage.textContent = "La sauvegarde dans le cloud n’a pas abouti : " + describeFirebaseError(error, "erreur inconnue.");
+      } finally {
+        this.running = false;
+        if (this.again) { this.again = false; this.schedule(); }
+      }
+    }
+  };
+  window.zestCloud = cloud;
+
+  // ===== Ouverture de la session : lecture de users/{uid}, puis ouverture directe de l’espace =====
+  let activeUid = null;
+  let inflight = null;
+  let inflightUid = null;
+
+  function goToSpace() {
+    if (typeof window.switchTab === "function") window.switchTab("portail");
+  }
+
+  async function doOpenSession(user) {
+    let data = null;
+    let readFailed = false;
+    try {
+      const snapshot = await getDoc(profileRef(user.uid));
+      if (snapshot.exists()) data = snapshot.data();
+    } catch (error) {
+      readFailed = true;
+      logFirebaseError("getDoc users/" + user.uid, error);
+    }
+    if (!data && !readFailed) data = await createMissingProfile(user);
+
+    let result = null;
+    if (data) result = window.zestLocal.applyCloudProfile(user.uid, user.email || "", data);
+    else result = window.zestLocal.attachLocalOnly(user.uid);   // secours hors ligne
+    if (!result) return false;
+
+    activeUid = user.uid;
+    cloud.start(user.uid);
+    if (result.keepLocal) cloud.schedule();
+    else cloud.lastSnapshot = cloud.snapshot();
+    return true;
+  }
+
+  function openSession(user, navigate) {
+    if (activeUid === user.uid) {
+      if (navigate) goToSpace();
+      return Promise.resolve(true);
+    }
+    if (!inflight || inflightUid !== user.uid) {
+      inflightUid = user.uid;
+      inflight = doOpenSession(user).finally(function () { inflight = null; inflightUid = null; });
+    }
+    return inflight.then(function (ok) {
+      if (ok && navigate) goToSpace();
+      return ok;
     });
   }
 
+  function updateSessionBox(user) {
+    const signedIn = Boolean(user);
+    const role = window.stu ? "student" : window.tch ? "teacher" : window.dir ? "direction" : null;
+    const name = signedIn ? (window.stu || window.tch || window.dir || user.email || "") : "";
+    const identity = signedIn
+      ? name + (role ? " · " + window.zestLocal.roleLabel(role) : "") + (user.email ? " (" + user.email + ")" : "")
+      : "";
+    if (authPanel) authPanel.classList.toggle("hide", signedIn);
+    if (authSession) authSession.classList.toggle("hide", !signedIn);
+    if (authUserLabel) authUserLabel.textContent = identity ? "Connecté en tant que " + identity : "";
+    if (headerUserLabel) {
+      headerUserLabel.textContent = name ? "👤 " + name : "";
+      headerUserLabel.classList.toggle("hide", !signedIn);
+    }
+  }
+
+  // ===== Inscription : compte, profil Firestore, e-mail de confirmation, puis déconnexion immédiate =====
+  async function handleSignup(event) {
+    event.preventDefault();
+    if (authBusy) return;
+    const data = window.zestLocal.readSignup();
+    if (data.error) { setMsg("signup-msg", data.error, false); return; }
+
+    authBusy = true;
+    signupButton.disabled = true;
+    setMsg("signup-msg", "Création du compte en cours…", true);
+    let created = null;
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      created = credential.user;
+      window.zestLocal.savePending(created.uid, { r: data.role, n: data.name, c: data.classCode });
+      try {
+        await updateProfile(created, { displayName: data.name });
+      } catch (profileError) {
+        logFirebaseError("updateProfile", profileError);
+      }
+      try {
+        await setDoc(profileRef(created.uid), buildProfileDoc(created, data.role, data.name, data.classCode));
+        window.zestLocal.dropPending(created.uid);
+      } catch (firestoreError) {
+        // Non bloquant : le profil sera recréé à la première connexion à partir des données gardées sur l’appareil.
+        logFirebaseError("setDoc users/" + created.uid, firestoreError);
+      }
+      await sendEmailVerification(created);
+
+      pendingVerification = { email: data.email, password: data.password };
+      const loginEmail = byId("login-email");
+      if (loginEmail) loginEmail.value = data.email;
+      signupForm.reset();
+      window.setAuthRole("student");
+      setMsg("signup-msg", "", true);
+      window.zestLocal.showVerifyNotice(data.email);
+    } catch (error) {
+      if (created) {
+        logFirebaseError("sendEmailVerification", error, { email: data.email });
+        pendingVerification = { email: data.email, password: data.password };
+        setMsg("signup-msg", "Ton compte a été créé, mais l’e-mail de confirmation n’a pas pu être envoyé. Va dans « Se connecter » pour en demander un nouveau. Détail : " + describeFirebaseError(error, "erreur inconnue."), false);
+      } else {
+        logFirebaseError("createUserWithEmailAndPassword", error, { email: data.email });
+        setMsg("signup-msg", describeFirebaseError(error, "La création du compte a échoué. Réessaie."), false);
+      }
+    } finally {
+      if (created) {
+        // L’utilisateur doit d’abord cliquer sur le lien reçu par e-mail : on le déconnecte tout de suite.
+        try { await signOut(auth); } catch (signOutError) { console.error("[Zest · Firebase] signOut après inscription :", signOutError); }
+      }
+      authBusy = false;
+      signupButton.disabled = false;
+    }
+  }
+
+  // ===== Connexion : refusée tant que l’adresse e-mail n’est pas confirmée =====
+  async function handleLogin(event) {
+    event.preventDefault();
+    if (authBusy) return;
+    const email = (byId("login-email").value || "").trim().toLowerCase();
+    const password = byId("login-pass").value || "";
+    setResendVisible(false);
+    if (!email || !password) { setMsg("login-msg", "Renseigne ton adresse e-mail et ton mot de passe.", false); return; }
+
+    authBusy = true;
+    loginButton.disabled = true;
+    setMsg("login-msg", "Connexion en cours…", true);
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const user = credential.user;
+      if (user.emailVerified !== true) {
+        pendingVerification = { email: email, password: password };
+        await signOut(auth);
+        setMsg("login-msg", MSG_UNVERIFIED, false);
+        setResendVisible(true);
+        return;
+      }
+      pendingVerification = null;
+      const opened = await openSession(user, true);
+      if (!opened) {
+        await signOut(auth);
+        setMsg("login-msg", MSG_NO_PROFILE, false);
+        return;
+      }
+      loginForm.reset();
+      setMsg("login-msg", "", true);
+    } catch (error) {
+      logFirebaseError("signInWithEmailAndPassword", error, { email: email });
+      setMsg("login-msg", describeFirebaseError(error, "La connexion a échoué. Réessaie."), false);
+    } finally {
+      authBusy = false;
+      loginButton.disabled = false;
+    }
+  }
+
+  // ===== Renvoi de l’e-mail de confirmation (depuis le message d’inscription ou après une connexion refusée) =====
+  async function handleResend(source) {
+    const messageId = source === "notice" ? "auth-notice-msg" : "login-msg";
+    if (authBusy) return;
+    if (!pendingVerification) {
+      setMsg(messageId, "Saisis ton e-mail et ton mot de passe, puis clique sur « Se connecter » pour recevoir un nouvel e-mail.", false);
+      return;
+    }
+    const credentials = pendingVerification;
+    authBusy = true;
+    if (resendButton) resendButton.disabled = true;
+    if (noticeResendButton) noticeResendButton.disabled = true;
+    setMsg(messageId, "Envoi de l’e-mail de confirmation…", true);
+    let signedIn = false;
+    try {
+      const credential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+      signedIn = true;
+      if (credential.user.emailVerified === true) {
+        // Confirmé entre-temps : on termine simplement la connexion.
+        pendingVerification = null;
+        setResendVisible(false);
+        const opened = await openSession(credential.user, true);
+        if (opened) {
+          signedIn = false;
+          loginForm.reset();
+          setMsg(messageId, "", true);
+        } else {
+          setMsg(messageId, MSG_NO_PROFILE, false);
+        }
+        return;
+      }
+      await sendEmailVerification(credential.user);
+      setMsg(messageId, "E-mail de confirmation renvoyé à " + credentials.email + ". Pense à vérifier tes spams.", true);
+    } catch (error) {
+      logFirebaseError("sendEmailVerification (renvoi)", error, { email: credentials.email });
+      setMsg(messageId, describeFirebaseError(error, "Impossible de renvoyer l’e-mail. Réessaie dans quelques minutes."), false);
+    } finally {
+      if (signedIn) {
+        try { await signOut(auth); } catch (signOutError) { console.error("[Zest · Firebase] signOut après renvoi :", signOutError); }
+      }
+      authBusy = false;
+      if (resendButton) resendButton.disabled = false;
+      if (noticeResendButton) noticeResendButton.disabled = false;
+    }
+  }
+
+  // ===== Mot de passe oublié =====
+  async function handleForgot() {
+    if (authBusy) return;
+    const emailInput = byId("login-email");
+    const email = (emailInput.value || "").trim().toLowerCase();
+    setResendVisible(false);
+    if (!email) { setMsg("login-msg", "Saisis ton adresse e-mail ci-dessus, puis clique sur « Mot de passe oublié ? ».", false); return; }
+    if (!emailInput.checkValidity()) { setMsg("login-msg", "L’adresse e-mail n’est pas valide.", false); return; }
+
+    authBusy = true;
+    forgotButton.disabled = true;
+    setMsg("login-msg", "Envoi de l’e-mail de réinitialisation…", true);
+    const done = "Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé. Pense à vérifier tes spams.";
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMsg("login-msg", done, true);
+    } catch (error) {
+      if (error && error.code === "auth/user-not-found") {
+        setMsg("login-msg", done, true);   // on ne révèle pas si l’adresse a un compte
+      } else {
+        logFirebaseError("sendPasswordResetEmail", error, { email: email });
+        setMsg("login-msg", describeFirebaseError(error, "Impossible d’envoyer l’e-mail de réinitialisation. Réessaie."), false);
+      }
+    } finally {
+      authBusy = false;
+      forgotButton.disabled = false;
+    }
+  }
+
+  // ===== Déconnexion et synchronisation du profil =====
   window.zestFirebaseSignOut = async function () {
     try {
       await signOut(auth);
@@ -5101,6 +5460,23 @@ if(location.protocol==='file:'){
     } catch (error) {
       console.error("La déconnexion Firebase a échoué :", error);
       if (sessionMessage) sessionMessage.textContent = "Impossible de te déconnecter. Réessaie.";
+      throw error;
+    }
+  };
+
+  // Appelée après un changement de pseudo : met à jour le nom enregistré dans Firestore (et dans le compte).
+  window.zestFirebaseSyncProfile = async function (role, name) {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      await setDoc(profileRef(user.uid), { displayName: name, updatedAt: serverTimestamp() }, { merge: true });
+    } catch (error) {
+      logFirebaseError("mise à jour du nom (users/" + user.uid + ")", error);
+    }
+    try {
+      await updateProfile(user, { displayName: name });
+    } catch (error) {
+      console.warn("[Zest · Firebase] Mise à jour du displayName impossible :", error);
     }
   };
 
@@ -5108,77 +5484,62 @@ if(location.protocol==='file:'){
     signOutButton.addEventListener("click", async function () {
       signOutButton.disabled = true;
       try {
-        await window.zestFirebaseSignOut();
+        await window.zestLogout();
       } finally {
         signOutButton.disabled = false;
       }
     });
   }
 
-  onAuthStateChanged(auth, function (user) {
-    window.zestFirebaseUser = user;
-    const isSignedIn = Boolean(user);
-    const identity = user && (user.displayName || user.email || user.uid);
-    if (authPanel) authPanel.classList.toggle("hide", isSignedIn);
-    if (authSession) authSession.classList.toggle("hide", !isSignedIn);
-    if (authUserLabel) authUserLabel.textContent = identity ? "Connecté en tant que " + identity : "";
-    if (headerUserLabel) {
-      headerUserLabel.textContent = identity ? "👤 " + identity : "";
-      headerUserLabel.classList.toggle("hide", !isSignedIn);
-    }
-    if (sessionMessage) sessionMessage.textContent = "";
-    if (typeof window.renderAll === "function") window.renderAll();
-    if (isSignedIn) {
-      const connectionTab = document.getElementById("tab-connexion");
-      if (connectionTab && !connectionTab.classList.contains("hide") && typeof window.switchTab === "function") {
-        window.switchTab("accueil");
+  // ===== Session : seul un compte dont l’e-mail est confirmé ouvre l’application =====
+  onAuthStateChanged(auth, async function (user) {
+    const verified = Boolean(user && user.emailVerified === true);
+    window.zestFirebaseUser = verified ? user : null;
+
+    if (user && !verified) {
+      // E-mail non confirmé : jamais de session (sauf pendant l’inscription / la connexion en cours, qui s’en chargent).
+      if (!authBusy) {
+        try { await signOut(auth); } catch (error) { console.error("[Zest · Firebase] signOut (e-mail non confirmé) :", error); }
       }
+      return;
     }
-  }, function (error) {
-    console.error("La vérification de la session Firebase a échoué :", error);
-    showAuthMessage("Impossible de vérifier la session. Recharge la page et réessaie.", false);
-  });
-
-  async function completeEmailLinkSignIn() {
-    if (!isSignInWithEmailLink(auth, window.location.href)) return;
-
-    let email = "";
-    try {
-      email = localStorage.getItem("emailForSignIn") || "";
-    } catch (error) {
-      console.error("Impossible de lire l’adresse e-mail mémorisée :", error);
-    }
-    if (!email) {
-      email = window.prompt("Confirme ton adresse e-mail pour terminer la connexion :") || "";
-    }
-    email = email.trim();
-    if (!email) {
-      showAuthMessage("Saisis ton adresse e-mail pour terminer la connexion.", false);
+    if (!user) {
+      activeUid = null;
+      cloud.stop();
+      if (window.zestLocal) window.zestLocal.clearSession();
+      updateSessionBox(null);
+      if (typeof window.renderAll === "function") window.renderAll();
       return;
     }
 
-    try {
-      await signInWithEmailLink(auth, email, window.location.href);
-      try {
-        localStorage.removeItem("emailForSignIn");
-      } catch (error) {
-        console.error("Impossible d’effacer l’adresse e-mail mémorisée :", error);
+    const opened = await openSession(user, false);
+    if (!opened) {
+      console.error("[Zest · Firebase] Impossible d’ouvrir la session de", user.uid);
+      if (!authBusy) {
+        try { await signOut(auth); } catch (error) { console.error("[Zest · Firebase] signOut (profil introuvable) :", error); }
       }
-      window.history.replaceState({}, document.title, window.location.pathname);
-      showAuthMessage("Connexion par e-mail réussie.", true);
-      if (typeof window.switchTab === "function") window.switchTab("accueil");
-    } catch (error) {
-      logFirebaseError("signInWithEmailLink", error);
-      // On nettoie l’URL (oobCode, apiKey…) pour ne pas les réinjecter dans un prochain envoi de lien.
-      window.history.replaceState({}, document.title, window.location.pathname);
-      showAuthPanel();
-      showAuthMessage(describeFirebaseError(error, "Le lien de connexion est invalide ou expiré. Demande-en un nouveau."), false);
+      return;
     }
-  }
-
-  completeEmailLinkSignIn().catch(function (error) {
-    logFirebaseError("completeEmailLinkSignIn", error);
+    updateSessionBox(user);
+    if (typeof window.renderAll === "function") window.renderAll();
+  }, function (error) {
+    console.error("La vérification de la session Firebase a échoué :", error);
+    setMsg("login-msg", "Impossible de vérifier la session. Recharge la page et réessaie.", false);
   });
+
+  // La progression part aussi quand l’onglet se masque ou se ferme, et dès que le réseau revient.
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") cloud.flush();
+  });
+  window.addEventListener("pagehide", function () { cloud.flush(); });
+  window.addEventListener("online", function () { cloud.schedule(); });
+
+  if (loginForm) loginForm.addEventListener("submit", handleLogin);
+  if (signupForm) signupForm.addEventListener("submit", handleSignup);
+  if (forgotButton) forgotButton.addEventListener("click", handleForgot);
+  if (resendButton) resendButton.addEventListener("click", function () { handleResend("login"); });
+  if (noticeResendButton) noticeResendButton.addEventListener("click", function () { handleResend("notice"); });
+  window.zestAuthReady = true;
 </script>
 </body>
 </html>
