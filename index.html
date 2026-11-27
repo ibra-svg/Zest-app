@@ -4738,6 +4738,256 @@ var WORLDS=[
  {id:'w6vak',n:'Vacances & projets',e:'🏖️',k:'v',d:P("de vakantie=les vacances|de zee=la mer|het strand=la plage|de reis=le voyage|het hotel=l'hôtel|de bergen=les montagnes|het cadeau=le cadeau|volgende zomer=l'été prochain")},
  {id:'w6lees',n:'Compréhension de texte',e:'📖',k:'read',text:'Hallo, ik ben Lea. Ik ben elf jaar en ik woon in Brugge. In de zomer ga ik met mijn familie naar Spanje. We zwemmen elke dag in de zee.',d:[['Quel âge a Lea ?',['10 ans','11 ans','12 ans'],1],['Où habite Lea ?',['À Bruges','À Gand','À Namur'],0],["Où ira Lea en été ?",['En Espagne','En France','En Italie'],0],['Que fait la famille chaque jour ?',['Elle nage dans la mer','Elle fait du vélo','Elle visite un musée'],0]]},
  {id:'w6schrijf',n:'Écrire une carte postale',e:'✉️',k:'write',d:[]}]}];
+
+function makeCapQuestion(type,prompt,answer,explication,choices,words){
+  var question={type:type,prompt:prompt,answer:answer,explication:explication};
+  if(choices)question.choices=choices;
+  if(words)question.words=words;
+  return question;
+}
+var CAP_PALIERS=[
+ {id:1,title:'Salutations, politesse et se présenter',emoji:'👋',levels:{
+  facile:[
+   makeCapQuestion('mcq','Que signifie « hallo » ?','Bonjour','« Hallo » est une salutation courante, utilisable à presque tout moment de la journée.',['Bonjour','Merci','Au revoir']),
+   makeCapQuestion('mcq','Que signifie « goedemorgen » ?','Bonjour (le matin)','« Goedemorgen » signifie bonjour le matin. « Morgen » veut dire matin.',['Bonjour (le matin)','Bonsoir','S’il te plaît']),
+   makeCapQuestion('mcq','Que signifie « alsjeblieft » ?','S’il te plaît','« Alsjeblieft » sert à dire s’il te plaît; dans un autre contexte, il peut aussi accompagner un objet offert.',['S’il te plaît','Au revoir','Enchanté']),
+   makeCapQuestion('mcq','Que signifie « dank je wel » ?','Merci','« Dank je wel » est une formule polie pour remercier quelqu’un.',['Merci','Pardon','Bonjour']),
+   makeCapQuestion('mcq','Que signifie « tot ziens » ?','Au revoir','« Tot ziens » signifie au revoir, littéralement « à bientôt / à la prochaine ».',['Au revoir','Comment vas-tu ?','S’il te plaît']),
+   makeCapQuestion('mcq','Quel article convient : ___ jongen (le garçon) ?','de','« Jongen » est un nom commun en néerlandais et prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ meisje (la fille) ?','het','« Meisje » se termine par « -je » : c’est un diminutif et les diminutifs prennent toujours « het ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ naam (le nom) ?','de','« Naam » est un nom commun qui prend « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ kind (l’enfant) ?','het','« Kind » prend l’article « het ». Il ne faut pas le confondre avec « meisje », qui est un diminutif.',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ gesprek (la conversation) ?','het','« Gesprek » est un nom neutre : on dit « het gesprek ».',['de','het'])
+  ],
+  moyen:[
+   makeCapQuestion('fill','Complète : Ik ___ Mila. (Je m’appelle Mila.)','heet','Avec le sujet « ik », le verbe « heten » se conjugue « heet » : « Ik heet Mila ».',['heet','heten','heet jij']),
+   makeCapQuestion('fill','Complète la question : Hoe ___ je? (Comment t’appelles-tu ?)','heet','Dans « Hoe heet je? », le verbe « heten » est « heet » avec « je ».',['heet','hebt','ben']),
+   makeCapQuestion('fill','Complète : ___ gaat het met jou? (Comment vas-tu ?)','Hoe','« Hoe gaat het met jou? » est la formule habituelle pour demander comment quelqu’un va.',['Hoe','Waar','Wie']),
+   makeCapQuestion('fill','Complète la réponse : Goed, ___ je! (Bien, merci !)','dank','L’expression complète est « Goed, dank je! » : « dank » signifie merci.',['dank','dag','heet']),
+   makeCapQuestion('fill','Complète : Ik woon ___ Brussel. (J’habite à Bruxelles.)','in','Devant le nom d’une ville, on emploie généralement « in » : « in Brussel ».',['in','op','naar']),
+   makeCapQuestion('order','Remets les mots en ordre : « Je m’appelle Noor. »','Ik heet Noor.','La phrase déclarative suit l’ordre sujet, verbe, complément : « Ik » + « heet » + « Noor ».',null,['heet','Noor','Ik']),
+   makeCapQuestion('order','Remets les mots en ordre : « Comment t’appelles-tu ? »','Hoe heet jij?','Dans une question avec « hoe », le verbe vient après le mot interrogatif : « Hoe heet jij? ».',null,['jij','Hoe','heet']),
+   makeCapQuestion('order','Remets les mots en ordre : « J’habite à Gent. »','Ik woon in Gent.','On place le sujet avant le verbe, puis le lieu introduit par « in ».',null,['in','Gent','woon','Ik']),
+   makeCapQuestion('order','Remets les mots en ordre : « Bien, merci. »','Goed, dank je.','« Goed » signifie bien et « dank je » signifie merci.',null,['je','Goed,','dank']),
+   makeCapQuestion('order','Remets les mots en ordre : « À demain, ami ! »','Tot morgen, vriend!','« Tot morgen » signifie à demain; « vriend » signifie ami.',null,['vriend!','Tot','morgen,'])
+  ],
+  difficile:[
+   makeCapQuestion('input','Traduis en néerlandais : « Je m’appelle Lina. »','Ik heet Lina.','Pour dire son nom, on utilise « Ik heet… » : le verbe « heten » prend ici la forme « heet ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Bonjour, comment vas-tu ? »','Hallo, hoe gaat het met je?','La formule naturelle est « Hallo, hoe gaat het met je? ». « Hoe » signifie comment et « gaat het » signifie ça va.'),
+   makeCapQuestion('input','Traduis en néerlandais : « Je viens de Bruxelles. »','Ik kom uit Brussel.','« Kom uit » signifie venir de. Les noms de villes s’écrivent avec une majuscule.'),
+   makeCapQuestion('input','Traduis en néerlandais : « Je parle un peu néerlandais. »','Ik spreek een beetje Nederlands.','Le verbe « spreken » devient « spreek » avec « ik ». « Een beetje » signifie un peu.'),
+   makeCapQuestion('input','Traduis : « Je ne suis pas fatigué. »','Ik ben niet moe.','On nie le verbe ou l’adjectif avec « niet » : « niet moe ». « Geen » s’emploie plutôt devant un nom sans article défini.'),
+   makeCapQuestion('input','Traduis : « Je n’ai pas de frère. »','Ik heb geen broer.','« Broer » est un nom; pour dire qu’on n’en a pas, on emploie « geen » devant le nom.'),
+   makeCapQuestion('input','Traduis : « Nous ne sommes pas à la maison. »','Wij zijn niet thuis.','« Thuis » signifie à la maison. La négation porte sur le lieu : on place « niet » avant « thuis ».'),
+   makeCapQuestion('input','Conjugue « zijn » : « Ik ___ blij. » (Je suis content.)','Ik ben blij.','Au présent, « zijn » se conjugue « ik ben ». « Jij bent » et « hij/zij is » sont d’autres formes.'),
+   makeCapQuestion('input','Conjugue « wonen » : « Jij ___ in Gent. » (Tu habites à Gent.)','Jij woont in Gent.','Avec « jij » dans une phrase déclarative, le verbe prend généralement « -t » : « jij woont ».'),
+   makeCapQuestion('input','Conjugue « spreken » : « Wij ___ Nederlands. » (Nous parlons néerlandais.)','Wij spreken Nederlands.','Avec « wij », on utilise la forme plurielle à l’infinitif : « wij spreken ».')
+  ]
+ }},
+ {id:2,title:'Chiffres, jours, mois, couleurs et l’heure',emoji:'🕒',levels:{
+  facile:[
+   makeCapQuestion('mcq','Que signifie « twaalf » ?','Douze','« Twaalf » est le nombre douze.',['Douze','Deux','Vingt']),
+   makeCapQuestion('mcq','Quel jour signifie « woensdag » ?','Mercredi','Les jours de la semaine prennent une minuscule en néerlandais : « woensdag » veut dire mercredi.',['Mercredi','Mardi','Vendredi']),
+   makeCapQuestion('mcq','Quel mois signifie « april » ?','Avril','« April » signifie avril; comme les autres mois, il s’écrit avec une minuscule.',['Avril','Août','Décembre']),
+   makeCapQuestion('mcq','Que signifie « paars » ?','Violet','« Paars » est la couleur violette.',['Violet','Vert','Noir']),
+   makeCapQuestion('mcq','Que signifie « half drie » pour l’heure ?','2 h 30','En néerlandais, « half drie » signifie la moitié avant trois heures, donc 2 h 30.',['2 h 30','3 h 30','2 h 15']),
+   makeCapQuestion('mcq','Quel article convient : ___ dag (le jour) ?','de','« Dag » est un nom commun qui prend « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ jaar (l’année) ?','het','« Jaar » est un nom neutre : on dit « het jaar ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ maand (le mois) ?','de','« Maand » prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ uur (l’heure) ?','het','« Uur » prend l’article « het ».',['de','het']),
+   makeCapQuestion('mcq','Que signifie « kwart over vier » ?','4 h 15','« Kwart over vier » signifie un quart d’heure après quatre heures : 4 h 15.',['4 h 15','4 h 45','3 h 45'])
+  ],
+  moyen:[
+   makeCapQuestion('fill','Complète : Vandaag is het ___. (Aujourd’hui, nous sommes mardi.)','dinsdag','« Dinsdag » signifie mardi et les noms des jours s’écrivent avec une minuscule.',['dinsdag','donderdag','zondag']),
+   makeCapQuestion('fill','Complète : Mijn verjaardag is in ___. (Mon anniversaire est en mai.)','mei','Les noms des mois prennent une minuscule : « mei » signifie mai.',['mei','maart','juli']),
+   makeCapQuestion('fill','Complète : Het is ___ vijf. (Il est 4 h 30.)','half','Pour 4 h 30, on dit « half vijf » : la moitié avant cinq heures.',['half','kwart over','kwart voor']),
+   makeCapQuestion('fill','Complète : De lucht is ___. (Le ciel est bleu.)','blauw','« Blauw » signifie bleu et s’emploie ici comme adjectif après « is ».',['blauw','rood','geel']),
+   makeCapQuestion('fill','Complète : Het is ___ over zes. (Il est 6 h 10.)','tien','« Tien over zes » signifie dix minutes après six heures.',['tien','kwart','twintig']),
+   makeCapQuestion('order','Remets les mots en ordre : « Aujourd’hui, c’est lundi. »','Vandaag is het maandag.','Quand « vandaag » est placé au début, le verbe conjugué vient immédiatement après : « Vandaag is… ».',null,['het','maandag.','Vandaag','is']),
+   makeCapQuestion('order','Remets les mots en ordre : « Mon anniversaire est en juin. »','Mijn verjaardag is in juni.','On garde l’ordre sujet, verbe, puis le complément de temps introduit par « in ».',null,['in','juni.','Mijn','is','verjaardag']),
+   makeCapQuestion('order','Remets les mots en ordre : « Il est trois heures. »','Het is drie uur.','Pour donner l’heure pile, on dit « Het is » suivi du nombre et de « uur ».',null,['uur.','Het','drie','is']),
+   makeCapQuestion('order','Remets les mots en ordre : « Le crayon est rouge. »','Het potlood is rood.','« Het potlood » est le sujet neutre; l’adjectif attribut « rood » reste sans terminaison -e.',null,['rood.','is','Het','potlood']),
+   makeCapQuestion('order','Remets les mots en ordre : « À huit heures, je vais à l’école. »','Om acht uur ga ik naar school.','Quand un complément de temps ouvre la phrase, le verbe conjugué vient en deuxième position : « Om acht uur ga ik… ».',null,['ik','Om','naar','ga','school.','acht','uur'])
+  ],
+  difficile:[
+   makeCapQuestion('input','Traduis en néerlandais : « Il est huit heures. »','Het is acht uur.','Pour annoncer l’heure, on commence par « Het is », puis le nombre et « uur ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Aujourd’hui, c’est lundi. »','Vandaag is het maandag.','Avec « vandaag » en première position, le verbe « is » vient juste après, avant le sujet « het ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Le crayon rouge est sur la table. »','Het rode potlood ligt op de tafel.','« Potlood » prend « het ». Avec un article défini, l’adjectif reçoit généralement -e : « het rode potlood ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « J’ai trois stylos bleus. »','Ik heb drie blauwe pennen.','« Ik heb » signifie j’ai; l’adjectif prend -e devant le nom pluriel : « blauwe pennen ».'),
+   makeCapQuestion('input','Traduis : « Je n’ai pas de calendrier. »','Ik heb geen kalender.','Devant un nom comptable sans article défini, la négation s’exprime avec « geen ».'),
+   makeCapQuestion('input','Traduis : « Il n’est pas encore six heures. »','Het is nog geen zes uur.','Pour dire qu’une heure n’est pas encore atteinte, on utilise « nog geen » : pas encore six heures.'),
+   makeCapQuestion('input','Traduis : « Le mois de mai n’est pas froid. »','De maand mei is niet koud.','« Koud » est un adjectif; on nie l’adjectif avec « niet », placé avant lui.'),
+   makeCapQuestion('input','Conjugue « gaan » : « Ik ___ op maandag naar school. »','Ik ga op maandag naar school.','Au présent, « gaan » devient « ga » avec « ik ».'),
+   makeCapQuestion('input','Conjugue « zijn » : « De dagen ___ lang in juni. »','De dagen zijn lang in juni.','« De dagen » est pluriel; le verbe « zijn » prend donc la forme « zijn ».'),
+   makeCapQuestion('input','Conjugue « hebben » : « Jij ___ een groene agenda. »','Jij hebt een groene agenda.','Avec « jij » dans une phrase déclarative, « hebben » se conjugue « hebt ».')
+  ]
+ }},
+ {id:3,title:'La famille, le corps humain et les vêtements',emoji:'👪',levels:{
+  facile:[
+   makeCapQuestion('mcq','Que signifie « de broer » ?','Le frère','« Broer » signifie frère et prend l’article « de ».',['Le frère','La sœur','Le père']),
+   makeCapQuestion('mcq','Que signifie « de schouder » ?','L’épaule','« Schouder » signifie épaule.',['L’épaule','Le genou','La main']),
+   makeCapQuestion('mcq','Que signifie « de jurk » ?','La robe','« Jurk » signifie robe et prend « de ».',['La robe','Le pantalon','Le manteau']),
+   makeCapQuestion('mcq','Que signifie « de knie » ?','Le genou','« Knie » signifie genou.',['Le genou','Le nez','Le pied']),
+   makeCapQuestion('mcq','Que signifie « de handschoen » ?','Le gant','« Handschoen » signifie gant; « hand » veut dire main et « schoen » chaussure.',['Le gant','La chaussette','La chemise']),
+   makeCapQuestion('mcq','Quel article convient : ___ oog (l’œil) ?','het','« Oog » prend l’article neutre « het ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ arm (le bras) ?','de','« Arm » prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ T-shirt (le tee-shirt) ?','het','On dit couramment « het T-shirt »; le mot est neutre.',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ jas (le manteau) ?','de','« Jas » prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ gezicht (le visage) ?','het','« Gezicht » est neutre : « het gezicht ».',['de','het'])
+  ],
+  moyen:[
+   makeCapQuestion('fill','Complète : Mijn moeder draagt een ___ jas. (manteau rouge)','rode','Après « een » devant un nom commun singulier, l’adjectif prend généralement -e : « een rode jas ».',['rode','rood','roden']),
+   makeCapQuestion('fill','Complète : Ik heb twee ___. (deux sœurs)','zussen','Le pluriel de « zus » est « zussen », avec un double s.',['zussen','zus','zuster']),
+   makeCapQuestion('fill','Complète : Hij wast zijn ___. (ses mains)','handen','Le pluriel de « hand » est « handen ».',['handen','hands','handen']),
+   makeCapQuestion('fill','Complète : Zij draagt een warme ___. (un pull chaud)','trui','« Trui » signifie pull; après « een warme », le nom attendu est « trui ».',['trui','rok','schoen']),
+   makeCapQuestion('fill','Complète : Mijn opa heeft grijze ___. (cheveux gris)','haren','« Haar » devient « haren » au pluriel dans cette expression.',['haren','haar','hoofden']),
+   makeCapQuestion('order','Remets les mots en ordre : « Ma sœur porte une robe bleue. »','Mijn zus draagt een blauwe jurk.','Le verbe « dragen » se conjugue « draagt » avec « mijn zus »; l’adjectif devant « jurk » prend -e.',null,['een','Mijn','jurk.','draagt','blauwe','zus']),
+   makeCapQuestion('order','Remets les mots en ordre : « Le garçon a deux mains. »','De jongen heeft twee handen.','« De jongen » est singulier, donc « hebben » devient « heeft »; « hand » prend le pluriel « handen ».',null,['twee','heeft','De','handen.','jongen']),
+   makeCapQuestion('order','Remets les mots en ordre : « Mon père porte un manteau noir. »','Mijn vader draagt een zwarte jas.','Le sujet singulier commande « draagt »; l’adjectif après « een » prend la terminaison -e.',null,['zwarte','Mijn','jas.','een','vader','draagt']),
+   makeCapQuestion('order','Remets les mots en ordre : « Elle a mal au genou. »','Zij heeft pijn aan haar knie.','La tournure néerlandaise est « pijn aan … hebben »; avec « zij », on emploie « heeft ».',null,['haar','pijn','Zij','knie.','heeft','aan']),
+   makeCapQuestion('order','Remets les mots en ordre : « Nous portons des chaussures vertes. »','Wij dragen groene schoenen.','Avec « wij », le verbe reste à l’infinitif « dragen »; l’adjectif pluriel est « groene ».',null,['schoenen.','Wij','groene','dragen'])
+  ],
+  difficile:[
+   makeCapQuestion('input','Traduis en néerlandais : « Mon frère porte une chemise blanche. »','Mijn broer draagt een wit hemd.','« Broer » est le sujet; « dragen » devient « draagt ». « Hemd » est neutre et, après « een », l’adjectif attributif est « wit » sans -e.'),
+   makeCapQuestion('input','Traduis en néerlandais : « La fille a les cheveux bruns. »','Het meisje heeft bruin haar.','« Meisje » est un diminutif, donc « het meisje ». Les cheveux se disent « haar » comme nom collectif; « hebben » devient « heeft ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Nous voyons les mains de notre mère. »','Wij zien de handen van onze moeder.','Avec « wij », « zien » reste à l’infinitif. « Van onze moeder » signifie de notre mère.'),
+   makeCapQuestion('input','Traduis en néerlandais : « Elle porte un pantalon bleu et des chaussettes rouges. »','Zij draagt een blauwe broek en rode sokken.','« Draagt » s’accorde avec « zij ». Les adjectifs devant « broek » et « sokken » prennent -e.'),
+   makeCapQuestion('input','Traduis : « Je n’ai pas de manteau. »','Ik heb geen jas.','« Jas » est un nom introduit sans article défini; on emploie « geen » pour nier son existence.'),
+   makeCapQuestion('input','Traduis : « Mes mains ne sont pas froides. »','Mijn handen zijn niet koud.','On utilise « niet » pour nier l’adjectif « koud ». Le sujet pluriel « mijn handen » commande « zijn ».'),
+   makeCapQuestion('input','Traduis : « Le garçon ne porte pas de chaussures. »','De jongen draagt geen schoenen.','Devant le nom pluriel sans article, la négation est « geen ». Le verbe singulier est « draagt ».'),
+   makeCapQuestion('input','Conjugue « hebben » : « Mijn zus ___ blauwe ogen. »','Mijn zus heeft blauwe ogen.','« Mijn zus » est un sujet singulier; « hebben » devient « heeft ».'),
+   makeCapQuestion('input','Conjugue « dragen » : « Jullie ___ warme jassen. »','Jullie dragen warme jassen.','Avec « jullie », le verbe garde la forme plurielle « dragen ».'),
+   makeCapQuestion('input','Conjugue « zijn » : « De schoenen ___ te klein. »','De schoenen zijn te klein.','« De schoenen » est pluriel, donc la forme du verbe « zijn » est « zijn ».')
+  ]
+ }},
+ {id:4,title:'L’école, la classe et les fournitures scolaires',emoji:'🏫',levels:{
+  facile:[
+   makeCapQuestion('mcq','Que signifie « het schrift » ?','Le cahier','« Schrift » signifie cahier et prend « het ».',['Le cahier','La règle','Le tableau']),
+   makeCapQuestion('mcq','Que signifie « de gum » ?','La gomme','« Gum » signifie gomme; on dit « de gum ».',['La gomme','Le livre','La chaise']),
+   makeCapQuestion('mcq','Que signifie « het bord » ?','Le tableau','« Bord » signifie tableau (de classe) et prend « het ».',['Le tableau','Le crayon','La porte']),
+   makeCapQuestion('mcq','Que signifie « de leraar » ?','Le professeur','« Leraar » désigne un professeur et prend « de ».',['Le professeur','L’élève','La classe']),
+   makeCapQuestion('mcq','Que signifie « de stoel » ?','La chaise','« Stoel » signifie chaise.',['La chaise','La table','Le cartable']),
+   makeCapQuestion('mcq','Quel article convient : ___ potlood (le crayon) ?','het','« Potlood » est neutre : « het potlood ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ school (l’école) ?','de','« School » prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ boek (le livre) ?','het','« Boek » est un nom neutre : « het boek ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ klas (la classe) ?','de','« Klas » prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ liniaal (la règle) ?','de','« Liniaal » prend « de ».',['de','het'])
+  ],
+  moyen:[
+   makeCapQuestion('fill','Complète : Ik schrijf met een ___. (stylo)','pen','« Pen » signifie stylo; après « met een », on nomme l’objet utilisé.',['pen','boek','bord']),
+   makeCapQuestion('fill','Complète : De leerling leest een ___. (livre)','boek','« Boek » signifie livre; l’article indéfini est « een ».',['boek','gum','tafel']),
+   makeCapQuestion('fill','Complète : De leraar schrijft op het ___. (tableau)','bord','La tournure est « op het bord » : sur le tableau.',['bord','schrift','potlood']),
+   makeCapQuestion('fill','Complète : Wij zitten op een ___. (chaise)','stoel','« Stoel » signifie chaise; « op een stoel » signifie sur une chaise.',['stoel','school','schaar']),
+   makeCapQuestion('fill','Complète : Ik knip het papier met een ___. (ciseaux)','schaar','« Schaar » signifie paire de ciseaux; le nom s’emploie au singulier en néerlandais.',['schaar','liniaal','gum']),
+   makeCapQuestion('order','Remets les mots en ordre : « L’élève ouvre son livre. »','De leerling opent zijn boek.','« De leerling » est le sujet; « openen » devient « opent » à la troisième personne du singulier.',null,['zijn','opent','boek.','De','leerling']),
+   makeCapQuestion('order','Remets les mots en ordre : « Le crayon est dans le cartable. »','Het potlood zit in de boekentas.','La phrase suit sujet, verbe, complément; « in de boekentas » signifie dans le cartable.',null,['in','boekentas.','Het','zit','de','potlood']),
+   makeCapQuestion('order','Remets les mots en ordre : « Nous sommes dans la classe. »','Wij zijn in de klas.','Avec « wij », on utilise « zijn »; le lieu est introduit par « in ».',null,['de','Wij','klas.','zijn','in']),
+   makeCapQuestion('order','Remets les mots en ordre : « Elle écrit avec un crayon. »','Zij schrijft met een potlood.','Avec « zij » au singulier, « schrijven » devient « schrijft ».',null,['potlood.','met','Zij','een','schrijft']),
+   makeCapQuestion('order','Remets les mots en ordre : « Le professeur pose une question. »','De leraar stelt een vraag.','« Een vraag stellen » signifie poser une question; avec « de leraar », on dit « stelt ».',null,['vraag.','De','een','stelt','leraar'])
+  ],
+  difficile:[
+   makeCapQuestion('input','Traduis en néerlandais : « Mon livre est sur la table. »','Mijn boek ligt op de tafel.','« Boek » est neutre, mais ici il est précédé du possessif « mijn ». « Op de tafel » signifie sur la table.'),
+   makeCapQuestion('input','Traduis en néerlandais : « La professeure explique la leçon aux élèves. »','De lerares legt de les uit aan de leerlingen.','« Uitleggen » est un verbe séparable : « legt … uit ». « Aan de leerlingen » signifie aux élèves.'),
+   makeCapQuestion('input','Traduis en néerlandais : « Nous faisons nos devoirs après l’école. »','Wij doen ons huiswerk na school.','« Doen » avec « wij » reste « doen ». « Na school » signifie après l’école.'),
+   makeCapQuestion('input','Traduis en néerlandais : « Le cahier rouge est dans mon sac. »','Het rode schrift zit in mijn tas.','« Schrift » est neutre. Avec l’article défini « het », l’adjectif prend -e : « het rode schrift ».'),
+   makeCapQuestion('input','Traduis : « Je n’ai pas de règle. »','Ik heb geen liniaal.','On emploie « geen » pour nier un nom sans article défini : « geen liniaal ».'),
+   makeCapQuestion('input','Traduis : « Les élèves ne sont pas dans la cour. »','De leerlingen zijn niet op het plein.','Le sujet est pluriel, donc « zijn ». On nie le lieu avec « niet ».'),
+   makeCapQuestion('input','Traduis : « Le professeur n’écrit pas au tableau. »','De leraar schrijft niet op het bord.','La négation « niet » porte sur l’action ou le complément; le verbe singulier est « schrijft ».'),
+   makeCapQuestion('input','Conjugue « doen » : « Ik ___ mijn huiswerk. »','Ik doe mijn huiswerk.','Au présent, « doen » devient « doe » avec « ik ».'),
+   makeCapQuestion('input','Conjugue « hebben » : « De leerling ___ een nieuwe pen. »','De leerling heeft een nieuwe pen.','« De leerling » est singulier; on conjugue « hebben » en « heeft ».'),
+   makeCapQuestion('input','Conjugue « gaan » : « Jullie ___ naar de klas. »','Jullie gaan naar de klas.','Avec « jullie », on utilise la forme plurielle « gaan ».')
+  ]
+ }},
+ {id:5,title:'La maison, les animaux et l’alimentation',emoji:'🏠',levels:{
+  facile:[
+   makeCapQuestion('mcq','Que signifie « de keuken » ?','La cuisine','« Keuken » signifie cuisine et prend « de ».',['La cuisine','La chambre','Le jardin']),
+   makeCapQuestion('mcq','Que signifie « het konijn » ?','Le lapin','« Konijn » signifie lapin; son article est « het ».',['Le lapin','Le chien','Le cheval']),
+   makeCapQuestion('mcq','Que signifie « het brood » ?','Le pain','« Brood » signifie pain et prend l’article « het ».',['Le pain','Le fromage','Le lait']),
+   makeCapQuestion('mcq','Que signifie « de kat » ?','Le chat','« Kat » signifie chat et prend « de ».',['Le chat','La vache','Le poisson']),
+   makeCapQuestion('mcq','Que signifie « de appel » ?','La pomme','« Appel » signifie pomme et prend « de ».',['La pomme','L’œuf','La soupe']),
+   makeCapQuestion('mcq','Quel article convient : ___ huis (la maison) ?','het','« Huis » est un nom neutre : « het huis ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ hond (le chien) ?','de','« Hond » prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ ei (l’œuf) ?','het','« Ei » prend « het ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ raam (la fenêtre) ?','het','« Raam » est neutre : « het raam ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ tafel (la table) ?','de','« Tafel » prend l’article « de ».',['de','het'])
+  ],
+  moyen:[
+   makeCapQuestion('fill','Complète : De kat slaapt op de ___. (chaise)','stoel','« Stoel » signifie chaise; « op de stoel » veut dire sur la chaise.',['stoel','keuken','brood']),
+   makeCapQuestion('fill','Complète : Ik eet een ___. (pomme)','appel','« Appel » signifie pomme; « een appel » est une pomme.',['appel','raam','hond']),
+   makeCapQuestion('fill','Complète : De hond drinkt ___. (de l’eau)','water','« Water » signifie eau; ici le nom est sans article.',['water','brood','stoel']),
+   makeCapQuestion('fill','Complète : De melk staat in de ___. (réfrigérateur)','koelkast','« Koelkast » signifie réfrigérateur; « in de koelkast » signifie dans le frigo.',['koelkast','slaapkamer','tuin']),
+   makeCapQuestion('fill','Complète : Het paard eet een ___. (pomme)','appel','« Paard » prend « het »; « een appel » est le complément du verbe « eet ».',['appel','kat','keuken']),
+   makeCapQuestion('order','Remets les mots en ordre : « Le lapin mange une carotte. »','Het konijn eet een wortel.','Le sujet neutre est « het konijn »; « eten » devient « eet » au singulier.',null,['een','wortel.','Het','eet','konijn']),
+   makeCapQuestion('order','Remets les mots en ordre : « Nous mangeons du pain et du fromage. »','Wij eten brood en kaas.','Avec « wij », on utilise « eten ». Les noms non comptables « brood » et « kaas » sont sans article ici.',null,['kaas.','Wij','brood','en','eten']),
+   makeCapQuestion('order','Remets les mots en ordre : « Le chien est dans le jardin. »','De hond is in de tuin.','La phrase suit sujet, verbe, puis lieu : « in de tuin » signifie dans le jardin.',null,['in','tuin.','De','is','de','hond']),
+   makeCapQuestion('order','Remets les mots en ordre : « Ma chambre est dans la maison. »','Mijn slaapkamer is in het huis.','« Huis » prend « het »; après le possessif « mijn », le sujet est directement « mijn slaapkamer ».',null,['het','Mijn','huis.','in','is','slaapkamer']),
+   makeCapQuestion('order','Remets les mots en ordre : « Le chat boit du lait dans la cuisine. »','De kat drinkt melk in de keuken.','Avec le sujet singulier « de kat », le verbe « drinken » devient « drinkt ».',null,['melk','De','in','keuken.','drinkt','de','kat'])
+  ],
+  difficile:[
+   makeCapQuestion('input','Traduis en néerlandais : « Le cheval boit de l’eau dans le jardin. »','Het paard drinkt water in de tuin.','« Paard » est neutre et prend « het »; avec le sujet singulier, « drinken » devient « drinkt ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Mon frère prépare une soupe chaude. »','Mijn broer maakt warme soep.','« Maken » se conjugue « maakt » avec « mijn broer ». « Soep » est ici sans article et l’adjectif reste « warme ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Les chats dorment sous la table. »','De katten slapen onder de tafel.','Le pluriel de « kat » est « katten »; avec un sujet pluriel, on utilise « slapen ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Nous allons à la cuisine pour manger. »','Wij gaan naar de keuken om te eten.','« Wij gaan » signifie nous allons. « Om te eten » exprime le but : pour manger.'),
+   makeCapQuestion('input','Traduis : « Je n’ai pas de chien. »','Ik heb geen hond.','La négation d’un nom sans article défini est « geen » : « geen hond ».'),
+   makeCapQuestion('input','Traduis : « Le chat ne dort pas sur le lit. »','De kat slaapt niet op het bed.','On nie le lieu ou l’action avec « niet ». « Bed » est neutre : « het bed ».'),
+   makeCapQuestion('input','Traduis : « Il n’y a pas de lait dans le réfrigérateur. »','Er is geen melk in de koelkast.','« Er is » signifie il y a; devant le nom « melk », on emploie « geen ».'),
+   makeCapQuestion('input','Conjugue « eten » : « Jij ___ een appel. »','Jij eet een appel.','Avec « jij » dans une phrase déclarative, « eten » devient « eet ».'),
+   makeCapQuestion('input','Conjugue « drinken » : « Mijn vader ___ koffie. »','Mijn vader drinkt koffie.','« Mijn vader » est singulier; « drinken » prend la terminaison -t : « drinkt ».'),
+   makeCapQuestion('input','Conjugue « zijn » : « De dieren ___ in de tuin. »','De dieren zijn in de tuin.','« De dieren » est pluriel; la forme du présent de « zijn » est « zijn ».')
+  ]
+ }},
+ {id:6,title:'Verbes essentiels (zijn, hebben, gaan, doen) et construction de phrases',emoji:'🧩',levels:{
+  facile:[
+   makeCapQuestion('mcq','Que signifie « zijn » ?','Être','« Zijn » est l’infinitif du verbe être.',['Être','Avoir','Aller']),
+   makeCapQuestion('mcq','Que signifie « hebben » ?','Avoir','« Hebben » est l’infinitif du verbe avoir.',['Avoir','Faire','Être']),
+   makeCapQuestion('mcq','Que signifie « gaan » ?','Aller','« Gaan » est l’infinitif du verbe aller.',['Aller','Faire','Parler']),
+   makeCapQuestion('mcq','Que signifie « doen » ?','Faire','« Doen » est l’infinitif du verbe faire.',['Faire','Avoir','Aller']),
+   makeCapQuestion('mcq','Que signifie « samen » ?','Ensemble','« Samen » signifie ensemble.',['Ensemble','Demain','Jamais']),
+   makeCapQuestion('mcq','Quel article convient : ___ huiswerk (les devoirs) ?','het','« Huiswerk » prend l’article neutre « het ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ vraag (la question) ?','de','« Vraag » prend « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ antwoord (la réponse) ?','het','« Antwoord » est neutre : « het antwoord ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ vriend (l’ami) ?','de','« Vriend » prend l’article « de ».',['de','het']),
+   makeCapQuestion('mcq','Quel article convient : ___ meisje (la fille) ?','het','« Meisje » est un diminutif en -je; tous les diminutifs prennent « het ».',['de','het'])
+  ],
+  moyen:[
+   makeCapQuestion('fill','Complète : Ik ___ thuis. (Je suis à la maison.)','ben','La forme de « zijn » avec « ik » est « ben ».',['ben','bent','is']),
+   makeCapQuestion('fill','Complète : Wij ___ twee vragen. (Nous avons deux questions.)','hebben','Avec « wij », le verbe « hebben » garde sa forme plurielle « hebben ».',['hebben','heeft','heb']),
+   makeCapQuestion('fill','Complète : Morgen ___ jij naar school. (Demain, tu vas à l’école.)','ga','Quand « morgen » est en tête, le verbe conjugué est en deuxième position : « Morgen ga jij… ».',['ga','gaat','gaan']),
+   makeCapQuestion('fill','Complète : Zij ___ haar huiswerk. (Elle fait ses devoirs.)','doet','Avec « zij » au singulier, « doen » devient « doet ».',['doet','doen','doe']),
+   makeCapQuestion('fill','Complète : ___ jullie klaar? (Êtes-vous prêts ?)','Zijn','Avec « jullie », « zijn » se conjugue « zijn »; en question, le verbe vient en premier.',['Zijn','Is','Ben']),
+   makeCapQuestion('order','Remets les mots en ordre : « Je suis à la maison. »','Ik ben thuis.','Avec « ik », « zijn » devient « ben »; « thuis » signifie à la maison.',null,['thuis.','Ik','ben']),
+   makeCapQuestion('order','Remets les mots en ordre : « Nous avons du temps. »','Wij hebben tijd.','Avec le sujet « wij », le verbe « hebben » reste « hebben ».',null,['tijd.','hebben','Wij']),
+   makeCapQuestion('order','Remets les mots en ordre : « Demain, je vais à l’école. »','Morgen ga ik naar school.','Quand « morgen » est placé au début, le verbe conjugué « ga » vient en deuxième position, avant « ik ».',null,['ik','Morgen','naar','ga','school.']),
+   makeCapQuestion('order','Remets les mots en ordre : « Elle fait ses devoirs après l’école. »','Zij doet haar huiswerk na school.','Avec « zij » au singulier, « doen » devient « doet ». Le complément de temps se place en fin de phrase.',null,['haar','school.','Zij','na','huiswerk','doet']),
+   makeCapQuestion('order','Remets les mots en ordre : « Fais-tu tes devoirs aujourd’hui ? »','Doe jij vandaag je huiswerk?','Dans une question fermée, le verbe conjugué vient d’abord : « Doe jij…? ».',null,['vandaag','Doe','je','huiswerk?','jij'])
+  ],
+  difficile:[
+   makeCapQuestion('input','Traduis en néerlandais : « Je suis à l’école et j’ai un livre. »','Ik ben op school en ik heb een boek.','« Zijn » devient « ben » avec « ik »; « hebben » devient « heb ». Les deux propositions sont reliées par « en ».'),
+   makeCapQuestion('input','Traduis en néerlandais : « Demain, nous allons chez notre ami. »','Morgen gaan wij naar onze vriend.','Avec un complément placé en tête, le verbe vient en deuxième position : « Morgen gaan wij… ». « Naar » indique la destination.'),
+   makeCapQuestion('input','Traduis en néerlandais : « Elle fait ses devoirs à la maison. »','Zij doet haar huiswerk thuis.','Le verbe « doen » devient « doet » avec « zij » au singulier. « Thuis » signifie à la maison.'),
+   makeCapQuestion('input','Traduis en néerlandais : « Avez-vous une question ? »','Hebben jullie een vraag?','Dans une question fermée, le verbe est placé avant le sujet : « Hebben jullie…? ».'),
+   makeCapQuestion('input','Traduis : « Je ne suis pas à la maison. »','Ik ben niet thuis.','« Thuis » est un complément de lieu; on emploie « niet » pour le nier.'),
+   makeCapQuestion('input','Traduis : « Nous n’avons pas de temps. »','Wij hebben geen tijd.','« Tijd » est un nom sans article défini; on utilise « geen » pour dire qu’on n’en a pas.'),
+   makeCapQuestion('input','Traduis : « Il ne va pas à l’école aujourd’hui. »','Hij gaat vandaag niet naar school.','« Gaan » devient « gaat » avec « hij ». « Niet » nie le déplacement et se place avant le complément de destination.'),
+   makeCapQuestion('input','Conjugue « zijn » : « Jullie ___ klaar. »','Jullie zijn klaar.','Au présent, « zijn » garde la forme « zijn » avec « jullie ».'),
+   makeCapQuestion('input','Conjugue « hebben » : « Mijn broer ___ een fiets. »','Mijn broer heeft een fiets.','« Mijn broer » est singulier; « hebben » devient « heeft ».'),
+   makeCapQuestion('input','Conjugue « gaan » et respecte l’inversion : « Vandaag ___ ik naar huis. »','Vandaag ga ik naar huis.','Un complément en tête impose l’inversion sujet-verbe : « Vandaag ga ik… », et non « Vandaag ik ga… ».')
+  ]
+ }}
+];
+var CAP_LEVELS=['facile','moyen','difficile'];
+var CAP_LEVEL_LABELS={facile:'Facile',moyen:'Moyen',difficile:'Difficile'};
+CAP_PALIERS.forEach(function(palier){
+  CAP_LEVELS.forEach(function(level){
+    if(!Array.isArray(palier.levels[level])||palier.levels[level].length!==10){
+      throw new Error('Cap sur la 1ère : le palier '+palier.id+' doit avoir exactement 10 questions au niveau '+level+'.');
+    }
+    palier.levels[level].forEach(function(question,index){
+      question.id='p'+palier.id+'-'+level+'-'+(index+1);
+      if(!question.explication)throw new Error('Une question du palier '+palier.id+' n’a pas d’explication.');
+    });
+  });
+});
 function WD(id){return WORLDS[id-1];}
 var ALL=[],TI={};WORLDS.forEach(function(w){w.T.forEach(function(t){ALL.push({w:w,t:t});TI[t.id]={w:w,t:t};});});
 
@@ -4753,11 +5003,11 @@ function rec(q,good){upMondes(function(u){var e=(u.we=u.we||{}),t=(e[q.topic]=e[
 function ec(u,tid){return (u&&u.we&&u.we[tid]&&u.we[tid].it)||{};}
 function byErr(list,kf,u,tid){var e=ec(u,tid);return sh(list).sort(function(a,b){return (e[kf(b)]||0)-(e[kf(a)]||0);});}
 function opts(good,pool,n){var o=sh([good].concat(sh(pool.filter(function(x){return x!==good;})).slice(0,n||3)));return {o:o,a:o.indexOf(good)};}
-function gen(w,t,n,u){
+function gen(w,t,n,u,difficulty){
   var out=[],cat=t.cat||('Monde '+w.id+' · '+t.n);
-  function push(o){o.topic=t.id;o.cat=cat;out.push(o);}
+  function push(o){o.topic=t.id;o.cat=cat;o.difficulty=difficulty||'moyen';out.push(o);}
   if(t.k==='v'){
-    var d=byErr(t.d,function(x){return t.id+'|'+x[0];},u,t.id),ptr=0,m=w.modes;
+    var d=byErr(t.d,function(x){return t.id+'|'+x[0];},u,t.id),ptr=0,m=difficulty==='facile'?['mcq']:difficulty==='moyen'?['mcq','type']:difficulty==='difficile'?['type']:w.modes;
     while(out.length<n&&ptr<d.length){
       var it=d[ptr],mode=m[out.length%m.length],key=t.id+'|'+it[0];
       if(mode==='match'){
@@ -4776,7 +5026,8 @@ function gen(w,t,n,u){
     var arr=t.d.map(function(x,i){return {x:x,i:i};});
     arr=(t.k==='read')?arr:byErr(arr,function(z){return t.id+'#'+z.i;},u,t.id);
     arr.slice(0,n).forEach(function(z){var a=opts(z.x[1][z.x[2]],z.x[1],3);
-      push({t:'mcq',ctx:t.text,gap:t.k==='gap',q:z.x[0],o:a.o,a:a.a,key:t.id+'#'+z.i,label:z.x[0]});});
+      if(difficulty==='difficile')push({t:'type',ctx:t.text,q:z.x[0],ans:z.x[1][z.x[2]],key:t.id+'#'+z.i,label:z.x[0]});
+      else push({t:'mcq',ctx:t.text,gap:t.k==='gap',q:z.x[0],o:a.o,a:a.a,key:t.id+'#'+z.i,label:z.x[0]});});
   }else if(t.k==='order'){
     var ar=t.d.map(function(s,i){return {s:s,i:i};});
     byErr(ar,function(z){return t.id+'#'+z.i;},u,t.id).slice(0,n).forEach(function(z){
@@ -4789,19 +5040,116 @@ function gen(w,t,n,u){
 }
 window.ZestMondes={WORLDS:WORLDS,gen:gen,start:start};
 
-var V={w:1},S=null;
+var V={w:1},S=null,C=null;
 function bodyM(h){var b=g('mn-body');if(b)b.innerHTML=h;}
 function toastM(m){var t=g('mn-toast');if(!t)return;t.textContent=m;t.style.display='block';clearTimeout(toastM.h);toastM.h=setTimeout(function(){t.style.display='none';},3600);}
 function speakM(t,rate){if(typeof window.speak==='function')window.speak(t,typeof rate==='number'?rate:0.85,true);}
 
-function renderMap(){
-  S=null;var u=U();
-  if(!u){bodyM('<div class="card center"><span class="tag v">🗺️ Parcours P1 → P6</span><h2>Mondes de Zest</h2><p class="sub">Connecte-toi avec ton compte élève pour jouer et sauvegarder ta progression (les professeurs consultent le suivi dans leur espace profil).</p><button class="btn grad" onclick="switchTab(\'connexion\')">Aller à la connexion 🔑</button></div>');return;}
-  if(!u.classId){bodyM('<div class="card center"><span class="tag v">📚 Programme de ta classe</span><h2>Rejoins ta classe</h2><p class="sub">Entre le code fourni par ton professeur dans ton profil pour afficher uniquement les chapitres de ton année.</p><button class="btn grad" onclick="switchTab(\'portail\')">Saisir un code de classe</button></div>');return;}
-  var classroom=window.zestLocal.getStudentClass(window.stu);
-  if(!classroom){bodyM('<div class="card center"><h2>Chargement du programme…</h2><p class="sub">La classe n’est pas encore disponible hors ligne. Reconnecte-toi pour la charger.</p></div>');return;}
-  renderClassProgramMap(u,classroom);return;
+function capLevelProgress(user,palierId,level){
+  var root=user&&user.capSurLaPremiere,stage=root&&root['p'+palierId],saved=stage&&stage[level];
+  return saved||{bestScore:0,lastScore:0,runs:0,attempts:0,correctAnswers:0};
 }
+function renderMap(){
+  S=null;C=null;var u=U();
+  if(!u){bodyM('<div class="card center"><span class="tag v">🚀 Cap sur la 1ère</span><h2>Cap sur la 1ère</h2><p class="sub">Révision des bases indispensables du néerlandais</p><p class="sub">Connecte-toi avec ton compte élève pour jouer et sauvegarder ta progression.</p><button class="btn grad" onclick="switchTab(\'connexion\')">Aller à la connexion 🔑</button></div>');return;}
+  var html='<div class="card center"><span class="tag v">🚀 Parcours de remise à niveau</span><h2>Cap sur la 1ère</h2><p class="sub">Révision des bases indispensables du néerlandais</p><p class="sub">Accessible à tous les élèves, avec ou sans classe du secondaire. Choisis un palier puis un niveau.</p></div>';
+  html+='<div class="grid2">';
+  CAP_PALIERS.forEach(function(palier){
+    html+='<button class="card" type="button" data-m="cap-palier" data-p="'+palier.id+'" style="text-align:left;cursor:pointer"><div class="row"><b style="font-size:18px">'+palier.emoji+' Palier '+palier.id+'</b><span class="tag v">30 questions</span></div><p>'+E(palier.title)+'</p><p class="sub">'+CAP_LEVELS.map(function(level){var p=capLevelProgress(u,palier.id,level);return CAP_LEVEL_LABELS[level]+' '+(p.bestScore||0)+'/10';}).join(' · ')+'</p></button>';
+  });
+  html+='</div>';
+  bodyM(html);
+}
+function renderCapLevels(palierId){
+  var palier=CAP_PALIERS.filter(function(item){return item.id===Number(palierId);})[0],u=U();
+  if(!palier){renderMap();return;}
+  var html='<div class="card"><button class="btn sm" type="button" data-m="back">← Tous les paliers</button><h2>'+palier.emoji+' Palier '+palier.id+'</h2><p class="sub">'+E(palier.title)+'</p><p>Choisis un niveau de 10 questions. Chaque erreur reçoit une correction expliquée.</p></div><div class="grid3">';
+  CAP_LEVELS.forEach(function(level){
+    var p=capLevelProgress(u,palier.id,level);
+    html+='<button class="card center" type="button" data-m="cap-level" data-p="'+palier.id+'" data-level="'+level+'" style="cursor:pointer"><b style="font-size:20px">'+CAP_LEVEL_LABELS[level]+'</b><p>10 questions</p><span class="tag '+(p.bestScore>=10?'g':'v')+'">Meilleur score : '+(p.bestScore||0)+'/10</span><p class="sub">Séries terminées : '+(p.runs||0)+'</p></button>';
+  });
+  html+='</div>';bodyM(html);
+}
+function normalizeCapAnswer(value){
+  return String(value||'').toLocaleLowerCase().replace(/[.,!?;:]/g,'').replace(/[’']/g,' ').replace(/\s+/g,' ').trim();
+}
+function startCap(palierId,level,reviewQuestions){
+  var palier=CAP_PALIERS.filter(function(item){return item.id===Number(palierId);})[0];
+  if(!palier||CAP_LEVELS.indexOf(level)<0)return;
+  S=null;
+  var review=Array.isArray(reviewQuestions),questions=review?reviewQuestions.map(function(question){return Object.assign({},question);}):palier.levels[level].map(function(question){return Object.assign({},question);});
+  C={palierId:palier.id,level:level,title:palier.title,questions:questions,index:0,correct:0,errors:[],review:review,orderPick:[]};
+  renderCapQuestion();
+}
+function recordCapAnswer(question,correct){
+  if(!C)return;
+  if(correct)C.correct++;else C.errors.push(question);
+  upMondes(function(user){
+    user.capSurLaPremiere=user.capSurLaPremiere||{};
+    var stage=user.capSurLaPremiere['p'+C.palierId]||(user.capSurLaPremiere['p'+C.palierId]={});
+    var progress=stage[C.level]||(stage[C.level]={bestScore:0,lastScore:0,runs:0,attempts:0,correctAnswers:0,reviewAttempts:0,reviewCorrect:0});
+    if(C.review){
+      progress.reviewAttempts=(progress.reviewAttempts||0)+1;
+      if(correct)progress.reviewCorrect=(progress.reviewCorrect||0)+1;
+    }else{
+      progress.attempts=(progress.attempts||0)+1;
+      if(correct)progress.correctAnswers=(progress.correctAnswers||0)+1;
+      progress.bestScore=Math.max(Number(progress.bestScore)||0,C.correct);
+      progress.inProgress={answered:C.index+1,correct:C.correct};
+    }
+  });
+}
+function renderCapQuestion(){
+  if(!C)return;
+  if(C.index>=C.questions.length){finishCap();return;}
+  var question=C.questions[C.index],total=C.questions.length,pct=Math.round(C.index/total*100);
+  var title='Palier '+C.palierId+' · '+CAP_LEVEL_LABELS[C.level]+(C.review?' · Révision des erreurs':'');
+  var html='<div class="card"><div class="row"><b>'+E(title)+'</b><span class="sub">Question '+(C.index+1)+' / '+total+' · ✅ '+C.correct+'</span></div><div class="mn-bar"><i style="width:'+pct+'%;background:var(--accent)"></i></div><h3 style="margin-top:20px">'+E(question.prompt)+'</h3>';
+  if(question.type==='mcq'||question.type==='fill'){
+    html+='<div class="opts">'+question.choices.map(function(choice,index){return '<button class="opt" type="button" data-m="cap-option" data-i="'+index+'">'+E(choice)+'</button>';}).join('')+'</div>';
+  }else if(question.type==='order'){
+    html+='<p class="sub">Appuie sur les mots dans l’ordre pour construire la phrase.</p><div class="box center" style="min-height:54px">'+C.orderPick.map(function(wordIndex,index){return '<button class="mn-tok" type="button" data-m="cap-order-remove" data-pos="'+index+'">'+E(question.words[wordIndex])+'</button>';}).join('')+'</div><div class="center">'+question.words.map(function(word,index){return C.orderPick.indexOf(index)<0?'<button class="mn-tok" type="button" data-m="cap-order-add" data-i="'+index+'">'+E(word)+'</button>':'';}).join('')+'</div><div class="center" style="margin-top:10px"><button class="btn sm" type="button" data-m="cap-order-reset">Recommencer</button> <button class="btn green" type="button" data-m="cap-submit-order">Vérifier</button></div>';
+  }else{
+    html+='<input class="inp center" id="cap-answer" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Écris ta réponse en néerlandais…" style="max-width:520px;margin:12px auto;display:block"><div class="center"><button class="btn grad" type="button" data-m="cap-submit">Vérifier</button></div>';
+  }
+  html+='<div id="cap-feedback" class="msg" style="margin-top:12px"></div><div id="cap-next" class="hide center" style="margin-top:12px"><button class="btn grad" type="button" data-m="cap-next">Suivant ➡️</button></div></div>';
+  bodyM(html);
+  var input=g('cap-answer');if(input)input.focus();
+}
+function submitCapAnswer(value){
+  if(!C)return;
+  var question=C.questions[C.index];
+  if(!question||question.done)return;
+  var correct=normalizeCapAnswer(value)===normalizeCapAnswer(question.answer);
+  question.done=true;recordCapAnswer(question,correct);
+  var feedback=g('cap-feedback');
+  if(feedback){
+    feedback.className='msg'+(correct?' ok':'');
+    feedback.innerHTML=correct?'✅ Bonne réponse !':'❌ Bonne réponse : <b>'+E(question.answer)+'</b><br><b>Pourquoi ?</b> '+E(question.explication);
+  }
+  var buttons=document.querySelectorAll('#mn-body [data-m="cap-option"],#mn-body [data-m="cap-order-add"],#mn-body [data-m="cap-order-remove"],#mn-body [data-m="cap-order-reset"],#mn-body [data-m="cap-submit-order"],#mn-body [data-m="cap-submit"]');
+  for(var i=0;i<buttons.length;i++)buttons[i].disabled=true;
+  var next=g('cap-next');if(next)next.classList.remove('hide');
+}
+function finishCap(){
+  if(!C)return;
+  var state=C,score=state.correct,total=state.questions.length,missed=state.errors.length,palier=CAP_PALIERS.filter(function(item){return item.id===state.palierId;})[0];
+  upMondes(function(user){
+    user.capSurLaPremiere=user.capSurLaPremiere||{};
+    var stage=user.capSurLaPremiere['p'+state.palierId]||(user.capSurLaPremiere['p'+state.palierId]={});
+    var progress=stage[state.level]||(stage[state.level]={bestScore:0,lastScore:0,runs:0,attempts:0,correctAnswers:0});
+    if(state.review)progress.reviewRuns=(progress.reviewRuns||0)+1;
+    else{
+      progress.runs=(progress.runs||0)+1;progress.lastScore=score;progress.bestScore=Math.max(Number(progress.bestScore)||0,score);progress.inProgress=null;progress.completedAt=Date.now();
+    }
+  });
+  if(score===total&&typeof window.triggerSuccessAnimation==='function')window.triggerSuccessAnimation();
+  if(typeof window.refreshTrophyAwards==='function')window.refreshTrophyAwards();
+  var retry=missed?'<button class="btn grad" type="button" data-m="cap-review">'+(state.review?'Revoir les erreurs restantes':'Revoir mes erreurs')+' ('+missed+')</button> ':'';
+  bodyM('<div class="card center"><div style="font-size:48px">'+(score===total?'🏆':'💪')+'</div><h2>'+(state.review?(missed?'Révision terminée':'Toutes les erreurs sont corrigées !'):'Palier terminé !')+'</h2><p class="sub">'+E(palier.title)+' · '+CAP_LEVEL_LABELS[state.level]+'</p><p style="font-size:22px;font-weight:800;color:#f59e0b">'+score+' / '+total+'</p><p class="sub">'+(missed?missed+' question(s) à revoir. Les corrections détaillées sont affichées pendant la révision.':'Excellent travail !')+'</p>'+retry+'<button class="btn" type="button" data-m="cap-levels" data-p="'+state.palierId+'">Choisir un niveau</button> <button class="btn sm" type="button" data-m="back">Tous les paliers</button></div>');
+}
+function renderClassProgramMap(user,classroom){
+  S=null;C=null;
 function renderClassProgramMap(user,classroom){
   var active=Array.isArray(classroom.activeChapterIds)?classroom.activeChapterIds:[];
   var chapters=(classroom.chapters||[]).filter(function(chapter){return active.indexOf(chapter.id)>=0;});
@@ -4815,8 +5163,12 @@ function renderClassProgramMap(user,classroom){
    var topic=chapter.topicId&&window.ZestMondes.WORLDS.reduce(function(found,world){return found||world.T.filter(function(item){return item.id===chapter.topicId;})[0];},null);
    html+='<article class="box"><div class="row"><div><b>'+E(chapter.title)+'</b><p class="sub">'+E(chapter.description||'')+'</p></div><span class="tag '+(done?'g':'a')+'">'+(done?'✅ Terminé':progress?'Meilleur : '+(progress.best||0)+'%':'À faire')+'</span></div>';
    if(chapter.content)html+='<p style="white-space:pre-wrap">'+E(chapter.content)+'</p>';
-   if(topic)html+='<p class="sub">Exercice : '+E(topic.n)+'</p><button class="btn grad" type="button" data-m="play" data-v="'+E(topic.id)+'">Faire l’exercice ▶</button>';
-   else html+='<button class="btn '+(done?'':'grad')+'" type="button" data-m="complete" data-v="'+E(chapter.id)+'">'+(done?'Chapitre terminé':'Marquer comme terminé')+'</button>';
+   if(topic){
+    var levels=progress&&progress.levels||{};
+    html+='<p class="sub">Exercice : '+E(topic.n)+' · Choisis un niveau :</p><div class="row">'+CAP_LEVELS.map(function(level){var levelProgress=levels[level]||{};return '<button class="btn '+(level==='moyen'?'grad':'')+'" type="button" data-m="play" data-v="'+E(topic.id)+'" data-level="'+level+'">'+CAP_LEVEL_LABELS[level]+' · '+(levelProgress.best||0)+'%</button>';}).join('')+'</div>';
+   }else{
+    html+='<p class="sub">Modèle d’exercice : '+CAP_LEVELS.map(function(level){return CAP_LEVEL_LABELS[level];}).join(' · ')+'</p><button class="btn '+(done?'':'grad')+'" type="button" data-m="complete" data-v="'+E(chapter.id)+'">'+(done?'Chapitre terminé':'Marquer comme terminé')+'</button>';
+   }
    html+='</article>';
   });
   html+='</div>';
@@ -4838,7 +5190,7 @@ function updateClassProgramCompletion(user){
   });
   if(complete)user.worldP1P6Completed=true;
 }
-function start(tid){var u=U();if(!u)return;if(!u.classId||!getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===tid;})){toastM('Cet exercice n’est pas actif dans le programme de ta classe.');return;}var x=TI[tid];if(!x)return;S={w:x.w,tid:tid,title:x.w.g+' · '+x.t.n,qs:gen(x.w,x.t,6,u),i:0,ok:0,ko:0,rev:false};renderQ();}
+function start(tid,difficulty){var u=U();if(!u)return;if(!u.classId||!getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===tid;})){toastM('Cet exercice n’est pas actif dans le programme de ta classe.');return;}var x=TI[tid];if(!x)return;difficulty=CAP_LEVELS.indexOf(difficulty)>=0?difficulty:'moyen';S={w:x.w,tid:tid,title:x.w.g+' · '+x.t.n,diff:difficulty,qs:gen(x.w,x.t,6,u,difficulty),i:0,ok:0,ko:0,rev:false};renderQ();}
 function startRev(){var u=U();if(!u)return;var wk=weak(u).filter(function(x){return getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===x.t.id;});}).slice(0,2),qs=[];wk.forEach(function(x){qs=qs.concat(gen(x.w,x.t,4,u));});
   if(!qs.length){toastM('Aucune difficulté détectée dans les chapitres actifs.');return;}
   S={w:wk[0].w,tid:wk[0].t.id,title:'Révision ciblée',qs:qs,i:0,ok:0,ko:0,rev:true};renderQ();}
@@ -4884,7 +5236,7 @@ function finish(){
         if(u.mnLastStreakTheme!==S0.tid){u.mnStreak++;u.mnLastStreakTheme=S0.tid;}
         if(u.mnStreak>=3){streakBonus=true;pts=basePts*2;u.mnStreak=0;u.mnLastStreakTheme=null;}
       }else{u.mnStreak=0;u.mnLastStreakTheme=null;}
-      u.wp=u.wp||{};var p=u.wp[S0.tid]||{best:0,plays:0,stars:0};p.plays++;p.best=Math.max(p.best,pct);p.stars=Math.max(p.stars,stars);u.wp[S0.tid]=p;
+      u.wp=u.wp||{};var p=u.wp[S0.tid]||{best:0,plays:0,stars:0};p.plays++;p.best=Math.max(p.best,pct);p.stars=Math.max(p.stars,stars);p.levels=p.levels||{};var level=p.levels[S0.diff||'moyen']||{best:0,plays:0};level.plays++;level.best=Math.max(level.best,pct);p.levels[S0.diff||'moyen']=level;u.wp[S0.tid]=p;
       updateClassProgramCompletion(u);
     }
     streakCount=u.mnStreak;u.totalScore+=pts;
