@@ -2822,7 +2822,7 @@ function renderTeacherSchoolTree(){
   html+='<h4>Chapitres de '+schoolYearLabel(selected.annee)+'</h4><p class="sub">Active uniquement les chapitres à rendre visibles dans cette classe.</p>';
   html+=chapters.length?chapters.map(function(chapter){
    var topic=topics.filter(function(item){return item.id===chapter.topicId;})[0];
-   return '<div class="box"><div class="row"><div><b>'+esc(chapter.title)+'</b><p class="sub">'+esc(chapter.description||'')+(topic?' · Exercice : '+esc(topic.n):'')+'</p></div><div class="row"><button class="btn sm '+(active.indexOf(chapter.id)>=0?'green':'')+'" type="button" data-school-action="toggle-chapter" data-class-id="'+esc(selected.id)+'" data-chapter-id="'+esc(chapter.id)+'">'+(active.indexOf(chapter.id)>=0?'Visible':'Verrouillé')+'</button><button class="btn red sm" type="button" data-school-action="delete-chapter" data-class-id="'+esc(selected.id)+'" data-chapter-id="'+esc(chapter.id)+'">Supprimer</button></div></div>'+(chapter.content?'<details><summary>Contenu</summary><p style="white-space:pre-wrap">'+esc(chapter.content)+'</p></details>':'')+'</div>';
+   return '<div class="box"><div class="row"><div><b>'+esc(chapter.title)+'</b><p class="sub">'+esc(chapter.description||'')+(topic?' · Exercice : '+esc(topic.n):'')+'</p><p class="sub">Niveaux : Facile · Moyen · Difficile</p></div><div class="row"><button class="btn sm '+(active.indexOf(chapter.id)>=0?'green':'')+'" type="button" data-school-action="toggle-chapter" data-class-id="'+esc(selected.id)+'" data-chapter-id="'+esc(chapter.id)+'">'+(active.indexOf(chapter.id)>=0?'Visible':'Verrouillé')+'</button><button class="btn red sm" type="button" data-school-action="delete-chapter" data-class-id="'+esc(selected.id)+'" data-chapter-id="'+esc(chapter.id)+'">Supprimer</button></div></div>'+(chapter.content?'<details><summary>Contenu</summary><p style="white-space:pre-wrap">'+esc(chapter.content)+'</p></details>':'')+'</div>';
   }).join(''):'<p class="sub">Aucun chapitre pour cette classe.</p>';
   html+='<div class="box"><h4>＋ Créer un chapitre</h4><label class="auth-label" for="teacher-chapter-title">Titre</label><input class="inp" id="teacher-chapter-title" maxlength="80" placeholder="Ex. : Les verbes au présent"><label class="auth-label" for="teacher-chapter-description">Description</label><input class="inp" id="teacher-chapter-description" maxlength="180" placeholder="Objectifs du chapitre"><label class="auth-label" for="teacher-chapter-content">Contenu / consignes</label><textarea class="inp" id="teacher-chapter-content" rows="4" maxlength="4000" placeholder="Cours, consignes ou exercices à réaliser…"></textarea><label class="auth-label" for="teacher-chapter-topic">Exercice Zest associé (facultatif)</label><select class="inp" id="teacher-chapter-topic"><option value="">Aucun exercice lié</option>'+topics.map(function(topic,index){return '<option value="'+esc(topic.id)+'">'+(index+1)+'. '+esc(topic.n)+'</option>';}).join('')+'</select><button class="btn grad" type="button" data-school-action="create-chapter" data-class-id="'+esc(selected.id)+'">Créer le chapitre</button></div>';
  }
@@ -2835,7 +2835,7 @@ function renderStudentClassAssignment(profile){
   var name=classData&&classData.name||profile.className||'Classe rattachée';
   var year=Number(classData&&classData.annee||profile.annee)||0;
   var degree=Number(classData&&classData.degre||profile.degre)||0;
-  summary.textContent='Classe : '+name+(year?' · '+schoolYearLabel(year):'')+(degree?' · '+schoolDegreeLabel(degree):'')+'. Le programme affiché dans les Mondes est filtré selon les chapitres actifs.';
+  summary.textContent='Classe : '+name+(year?' · '+schoolYearLabel(year):'')+(degree?' · '+schoolDegreeLabel(degree):'')+'. Le programme du secondaire est filtré selon les chapitres actifs.';
   if(button)button.textContent='Changer de classe';
  }else{
   summary.textContent='Aucune classe rattachée. Entre le code fourni par ton professeur pour accéder au programme de ton année.';
@@ -2897,7 +2897,7 @@ function createClassChapter(classId){
  if(!record||!title)return;
  var name=String(title.value||'').trim();
  if(name.length<2||name.length>80){say('teacher-class-msg','Le titre du chapitre doit contenir entre 2 et 80 caractères.',false);return;}
- var chapters=(record.chapters||[]).slice(),chapter={id:makeSchoolId('chapter'),title:name,description:String(description&&description.value||'').trim(),content:String(content&&content.value||'').trim(),topicId:String(topic&&topic.value||'')};
+ var chapters=(record.chapters||[]).slice(),chapter={id:makeSchoolId('chapter'),title:name,description:String(description&&description.value||'').trim(),content:String(content&&content.value||'').trim(),topicId:String(topic&&topic.value||''),difficultyLevels:['facile','moyen','difficile']};
  chapters.push(chapter);
  var active=(record.activeChapterIds||[]).slice();active.push(chapter.id);
  syncTeacherClass(Object.assign({},record,{chapters:chapters,activeChapterIds:active}));
@@ -4296,7 +4296,7 @@ var BADGES=[
  makeTrophy('dict25','✍️','Plume d\'argent','Réussir 25 dictées',25,function(u){return trophyCount(u,'dicteeOK');}),
  makeTrophy('conj25','🔤','Roi de la Conjugaison','Réussir 25 exercices de conjugaison',25,function(u){return trophyCount(u,'conjExercises');}),
  makeTrophy('phrase10','👁️','Œil de lynx','Analyser 10 phrases avec le Correcteur IA',10,function(u){return trophyCount(u,'aiPhraseAnalyses');}),
- makeTrophy('worlds','🗺️','Explorateur des Mondes','Terminer tous les chapitres actifs de ta classe',1,function(u){return u&&u.worldP1P6Completed?1:0;}),
+ makeTrophy('worlds','🗺️','Explorateur du secondaire','Terminer tous les chapitres actifs de ta classe',1,function(u){return u&&!!(u.secondaryProgramCompleted||u.worldP1P6Completed)?1:0;}),
  makeTrophy('quest7','🏅','Maître des Défis','Réussir 7 défis du jour',7,function(u){return trophyCount(u,'questDone');})];
 function award(u){
  u.badges=Array.isArray(u.badges)?u.badges:[];
@@ -4695,7 +4695,7 @@ function N(s){return String(s||'').toLowerCase().replace(/[.,!?]/g,'').replace(/
 function strip(s){return N(s).replace(/^(de|het|een) /,'');}
 function sh(a){return a.slice().sort(function(){return Math.random()-0.5;});}
 function F(f){return typeof f==='function';}
-if(!F(window.ld)||!F(window.sv)||!F(window.me)||!F(window.saveMe)||typeof K==='undefined'){console.warn('Zest Mondes : script principal introuvable, module non chargé.');return;}
+ if(!F(window.ld)||!F(window.sv)||!F(window.me)||!F(window.saveMe)||typeof K==='undefined'){console.warn('Zest Cap sur la 1ère : script principal introuvable, module non chargé.');return;}
 
 function P(s){return s.split('|').map(function(x){var p=x.split('=');return [p[0],p[1]];});}
 var WORLDS=[
@@ -4988,13 +4988,10 @@ CAP_PALIERS.forEach(function(palier){
     });
   });
 });
-function WD(id){return WORLDS[id-1];}
 var ALL=[],TI={};WORLDS.forEach(function(w){w.T.forEach(function(t){ALL.push({w:w,t:t});TI[t.id]={w:w,t:t};});});
 
 function U(){return window.stu?window.me():null;}
 function upMondes(fn){if(!window.stu)return;try{window.saveMe(fn);}catch(e){console.warn(e);}}
-function pr(u,w){var n=0;w.T.forEach(function(t){var p=u&&u.wp&&u.wp[t.id];if(p&&p.best>=60)n++;});return n/w.T.length;}
-function isOpen(u,w){return w.id===1||pr(u,WORLDS[w.id-2])>=0.7;}
 function weak(u){var a=[];ALL.forEach(function(x){var e=u&&u.we&&u.we[x.t.id];if(!e||!e.r||e.r.length<5)return;var ko=e.r.filter(function(v){return !v;}).length,rate=ko/e.r.length;if(rate>=0.4)a.push({w:x.w,t:x.t,rate:rate});});return a.sort(function(a,b){return b.rate-a.rate;});}
 function rec(q,good){upMondes(function(u){var e=(u.we=u.we||{}),t=(e[q.topic]=e[q.topic]||{ok:0,ko:0,it:{},r:[]});
   t.r=(t.r||[]).concat(good?1:0).slice(-12);
@@ -5004,7 +5001,7 @@ function ec(u,tid){return (u&&u.we&&u.we[tid]&&u.we[tid].it)||{};}
 function byErr(list,kf,u,tid){var e=ec(u,tid);return sh(list).sort(function(a,b){return (e[kf(b)]||0)-(e[kf(a)]||0);});}
 function opts(good,pool,n){var o=sh([good].concat(sh(pool.filter(function(x){return x!==good;})).slice(0,n||3)));return {o:o,a:o.indexOf(good)};}
 function gen(w,t,n,u,difficulty){
-  var out=[],cat=t.cat||('Monde '+w.id+' · '+t.n);
+  var out=[],cat=t.cat||('Programme secondaire · '+t.n);
   function push(o){o.topic=t.id;o.cat=cat;o.difficulty=difficulty||'moyen';out.push(o);}
   if(t.k==='v'){
     var d=byErr(t.d,function(x){return t.id+'|'+x[0];},u,t.id),ptr=0,m=difficulty==='facile'?['mcq']:difficulty==='moyen'?['mcq','type']:difficulty==='difficile'?['type']:w.modes;
@@ -5038,10 +5035,11 @@ function gen(w,t,n,u,difficulty){
   }
   return out;
 }
-window.ZestMondes={WORLDS:WORLDS,gen:gen,start:start};
+window.ZestMondes={WORLDS:WORLDS,gen:gen,start:start,CAP_PALIERS:CAP_PALIERS};
 
-var V={w:1},S=null,C=null;
-function bodyM(h){var b=g('mn-body');if(b)b.innerHTML=h;}
+var S=null,C=null;
+function bodyM(h){var b=g(S&&S.context==='secondary'?'secondary-body':'mn-body');if(b)b.innerHTML=h;}
+function bodySecondary(h){var b=g('secondary-body');if(b)b.innerHTML=h;}
 function toastM(m){var t=g('mn-toast');if(!t)return;t.textContent=m;t.style.display='block';clearTimeout(toastM.h);toastM.h=setTimeout(function(){t.style.display='none';},3600);}
 function speakM(t,rate){if(typeof window.speak==='function')window.speak(t,typeof rate==='number'?rate:0.85,true);}
 
@@ -5059,6 +5057,14 @@ function renderMap(){
   });
   html+='</div>';
   bodyM(html);
+}
+function renderSecondaryProgram(){
+  S=null;C=null;var user=U();
+  if(!user){bodySecondary('<div class="card center"><h2>Mon programme secondaire</h2><p class="sub">Connecte-toi avec ton compte élève pour consulter ton programme.</p><button class="btn grad" type="button" onclick="switchTab(\'connexion\')">Aller à la connexion 🔑</button></div>');return;}
+  if(!user.classId){bodySecondary('<div class="card center"><span class="tag v">🏫 Programme du secondaire</span><h2>Rejoins ta classe</h2><p class="sub">Le programme du secondaire est indépendant de « Cap sur la 1ère ». Entre le code fourni par ton professeur dans ton profil pour rejoindre une classe.</p><button class="btn grad" type="button" onclick="switchTab(\'portail\')">Saisir un code de classe</button></div>');return;}
+  var classroom=window.zestLocal&&window.zestLocal.getStudentClass(window.stu);
+  if(!classroom){bodySecondary('<div class="card center"><h2>Chargement du programme…</h2><p class="sub">La classe n’est pas encore disponible hors ligne. Reconnecte-toi pour la charger.</p></div>');return;}
+  renderClassProgramMap(user,classroom);
 }
 function renderCapLevels(palierId){
   var palier=CAP_PALIERS.filter(function(item){return item.id===Number(palierId);})[0],u=U();
@@ -5078,6 +5084,7 @@ function startCap(palierId,level,reviewQuestions){
   if(!palier||CAP_LEVELS.indexOf(level)<0)return;
   S=null;
   var review=Array.isArray(reviewQuestions),questions=review?reviewQuestions.map(function(question){return Object.assign({},question);}):palier.levels[level].map(function(question){return Object.assign({},question);});
+  questions.forEach(function(question){delete question.done;});
   C={palierId:palier.id,level:level,title:palier.title,questions:questions,index:0,correct:0,errors:[],review:review,orderPick:[]};
   renderCapQuestion();
 }
@@ -5150,13 +5157,12 @@ function finishCap(){
 }
 function renderClassProgramMap(user,classroom){
   S=null;C=null;
-function renderClassProgramMap(user,classroom){
   var active=Array.isArray(classroom.activeChapterIds)?classroom.activeChapterIds:[];
   var chapters=(classroom.chapters||[]).filter(function(chapter){return active.indexOf(chapter.id)>=0;});
   var year=Number(classroom.annee||classroom.year)||Number(user.annee)||0;
   var degree=Number(classroom.degre||classroom.degree)||Number(user.degre)||0;
   var html='<div class="card"><span class="tag v">🏫 '+E(classroom.name||classroom.className||user.className||'Ma classe')+'</span><h2>Programme · '+E(schoolYearLabel(year))+'</h2><p class="sub">'+E(schoolDegreeLabel(degree))+' · '+chapters.length+' chapitre(s) actif(s)</p></div>';
-  if(!chapters.length){bodyM(html+'<div class="card center sub">Aucun chapitre n’est activé pour ta classe. Demande à ton professeur de publier le programme.</div>');return;}
+  if(!chapters.length){bodySecondary(html+'<div class="card center sub">Aucun chapitre n’est activé pour ta classe. Demande à ton professeur de publier le programme.</div>');return;}
   html+='<div class="card"><h3>Chapitres de ton année</h3>';
   chapters.forEach(function(chapter){
    var progress=chapter.topicId&&user.wp&&user.wp[chapter.topicId],custom=user.chapterProgress&&user.chapterProgress[chapter.id],done=chapter.topicId?!!(progress&&progress.best>=60):!!(custom&&custom.completed);
@@ -5172,7 +5178,7 @@ function renderClassProgramMap(user,classroom){
    html+='</article>';
   });
   html+='</div>';
-  bodyM(html);
+  bodySecondary(html);
 }
 function getStudentActiveClassChapters(user){
   if(!user||!user.classId)return [];
@@ -5188,12 +5194,12 @@ function updateClassProgramCompletion(user){
    if(chapter.topicId)return !!(user.wp&&user.wp[chapter.topicId]&&user.wp[chapter.topicId].best>=60);
    return !!(user.chapterProgress&&user.chapterProgress[chapter.id]&&user.chapterProgress[chapter.id].completed);
   });
-  if(complete)user.worldP1P6Completed=true;
+  if(complete)user.secondaryProgramCompleted=true;
 }
-function start(tid,difficulty){var u=U();if(!u)return;if(!u.classId||!getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===tid;})){toastM('Cet exercice n’est pas actif dans le programme de ta classe.');return;}var x=TI[tid];if(!x)return;difficulty=CAP_LEVELS.indexOf(difficulty)>=0?difficulty:'moyen';S={w:x.w,tid:tid,title:x.w.g+' · '+x.t.n,diff:difficulty,qs:gen(x.w,x.t,6,u,difficulty),i:0,ok:0,ko:0,rev:false};renderQ();}
+function start(tid,difficulty){var u=U();if(!u)return;if(!u.classId||!getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===tid;})){toastM('Cet exercice n’est pas actif dans le programme de ta classe.');return;}var x=TI[tid];if(!x)return;C=null;difficulty=CAP_LEVELS.indexOf(difficulty)>=0?difficulty:'moyen';S={w:x.w,tid:tid,title:schoolYearLabel(Number(u.annee)||x.w.id)+' · '+x.t.n,diff:difficulty,context:'secondary',qs:gen(x.w,x.t,6,u,difficulty),i:0,ok:0,ko:0,rev:false};renderQ();}
 function startRev(){var u=U();if(!u)return;var wk=weak(u).filter(function(x){return getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===x.t.id;});}).slice(0,2),qs=[];wk.forEach(function(x){qs=qs.concat(gen(x.w,x.t,4,u));});
   if(!qs.length){toastM('Aucune difficulté détectée dans les chapitres actifs.');return;}
-  S={w:wk[0].w,tid:wk[0].t.id,title:'Révision ciblée',qs:qs,i:0,ok:0,ko:0,rev:true};renderQ();}
+  S={w:wk[0].w,tid:wk[0].t.id,title:'Révision ciblée',context:'secondary',qs:qs,i:0,ok:0,ko:0,rev:true};renderQ();}
 
 function mhtml(q){
   if(!q.ln){q.ln=sh(q.pairs.map(function(_,i){return i;}));q.rn=sh(q.pairs.map(function(_,i){return i;}));q.ok={};q.bad={};q.d=0;q.er=0;q.sn=null;}
@@ -5227,7 +5233,7 @@ function checkWrite(t){
   return {c:c,ok:c.filter(function(x){return x[1];}).length};
 }
 function finish(){
-  var n=S.qs.length,pct=n?Math.round(S.ok/n*100):0,stars=pct>=90?3:pct>=75?2:pct>=60?1:0,basePts=S.ok*8+(pct>=60?20:0)+(S.rev&&pct>=60?15:0),pts=basePts,streakBonus=false,streakCount=0,uB=U(),S0=S;
+  var n=S.qs.length,pct=n?Math.round(S.ok/n*100):0,stars=pct>=90?3:pct>=75?2:pct>=60?1:0,basePts=S.ok*8+(pct>=60?20:0)+(S.rev&&pct>=60?15:0),pts=basePts,streakBonus=false,streakCount=0,S0=S;
   upMondes(function(u){
     u.totalScore=(u.totalScore||0);u.gamesPlayed=(u.gamesPlayed||0)+1;
     if(!S0.rev){
@@ -5242,16 +5248,24 @@ function finish(){
     streakCount=u.mnStreak;u.totalScore+=pts;
   });
   if(typeof window.refreshTrophyAwards==='function')window.refreshTrophyAwards();
-  var uA=U();
-  if(!S0.rev&&S0.w.id<6&&uB&&uA&&!isOpen(uB,WD(S0.w.id+1))&&isOpen(uA,WD(S0.w.id+1)))toastM('🎉 Monde '+(S0.w.id+1)+' débloqué !');
   var msg=pct>=60?'Thème validé !':'Encore un essai : il faut 60% pour valider.';
   if(pct>=60)triggerSuccessAnimation();
   bodyM('<div class="card center'+(streakBonus?' mn-celebrate':'')+'"><div style="font-size:48px">'+(streakBonus?'🎉':pct>=60?'🏆':'💪')+'</div><h2>'+(streakBonus?'Série de 3 thèmes réussis !':msg)+'</h2><p style="font-size:20px;font-weight:800;color:#f59e0b">'+S.ok+' / '+n+' · '+pct+'% · '+'⭐'.repeat(stars)+'</p>'+(streakBonus?'<p class="tag a">🔥 Bonus de série : points doublés !</p>':'')+'<p class="sub">+'+pts+' points ajoutés à ton score'+(!S0.rev&&!streakBonus&&pct>=60?' · Série : '+streakCount+' / 3':'')+'</p><button class="btn grad" data-m="again">Rejouer 🔄</button> <button class="btn" data-m="back">Retour à la carte 🗺️️</button></div>');
 }
 function actMondes(a,el){
   var v=el.getAttribute('data-v'),q=S&&S.qs[S.i];
-  if(a==='world'){V.w=+v;renderMap();}
-  else if(a==='play')start(v);
+  if(a==='cap-palier')renderCapLevels(el.getAttribute('data-p'));
+  else if(a==='cap-level')startCap(el.getAttribute('data-p'),el.getAttribute('data-level'));
+  else if(a==='cap-levels')renderCapLevels(el.getAttribute('data-p'));
+  else if(a==='cap-option'&&C){var capQuestion=C.questions[C.index],choice=capQuestion&&capQuestion.choices[Number(el.getAttribute('data-i'))];if(choice!=null)submitCapAnswer(choice);}
+  else if(a==='cap-order-add'&&C){var addIndex=Number(el.getAttribute('data-i'));if(C.orderPick.indexOf(addIndex)<0){C.orderPick.push(addIndex);renderCapQuestion();}}
+  else if(a==='cap-order-remove'&&C){C.orderPick.splice(Number(el.getAttribute('data-pos')),1);renderCapQuestion();}
+  else if(a==='cap-order-reset'&&C){C.orderPick=[];renderCapQuestion();}
+  else if(a==='cap-submit-order'&&C){var capOrder=C.questions[C.index];if(C.orderPick.length!==capOrder.words.length){toastM('Choisis tous les mots avant de vérifier.');return;}submitCapAnswer(C.orderPick.map(function(index){return capOrder.words[index];}).join(' '));}
+  else if(a==='cap-submit'&&C){var capInput=g('cap-answer');if(capInput&&capInput.value.trim())submitCapAnswer(capInput.value);}
+  else if(a==='cap-review'&&C){var previous=C;startCap(previous.palierId,previous.level,previous.errors);}
+  else if(a==='cap-next'&&C){C.index++;C.orderPick=[];renderCapQuestion();}
+  if(a==='play')start(v,el.getAttribute('data-level'));
   else if(a==='complete'){
     var user=U(),chapter=getStudentActiveClassChapters(user).filter(function(item){return item.id===v&&!item.topicId;})[0];
     if(!chapter)return;
@@ -5262,11 +5276,11 @@ function actMondes(a,el){
       profile.chapterProgress[chapter.id]=progress;updateClassProgramCompletion(profile);
     });
     if(typeof window.refreshTrophyAwards==='function')window.refreshTrophyAwards();
-    renderMap();
+    renderSecondaryProgram();
   }
   else if(a==='rev')startRev();
-  else if(a==='back')renderMap();
-  else if(a==='again'){if(S&&S.rev)startRev();else if(S)start(S.tid);}
+  else if(a==='back'){if(S&&S.context==='secondary')renderSecondaryProgram();else renderMap();}
+  else if(a==='again'){if(S&&S.rev)startRev();else if(S)start(S.tid,S.diff);}
   else if(a==='sp')speakM(v,0.85);
   else if(a==='next'){S.i++;renderQ();}
   else if(a==='opt'&&q&&!q.fin){var i=+v,bs=document.querySelectorAll('#mn-body .opt');for(var k=0;k<bs.length;k++){bs[k].style.pointerEvents='none';if(k===q.a)bs[k].classList.add('correct');else if(k===i)bs[k].classList.add('wrong');}
@@ -5290,16 +5304,16 @@ function report(users,title){
   var T={},st=[],names=Object.keys(users);
   names.forEach(function(p){var u=users[p],we=u.we||{};
     Object.keys(we).forEach(function(tid){var e=we[tid],t=T[tid]||(T[tid]={ok:0,ko:0,it:{}});t.ok+=e.ok||0;t.ko+=e.ko||0;Object.keys(e.it||{}).forEach(function(k){t.it[k]=(t.it[k]||0)+e.it[k];});});
-    var mx=1,dn=0;WORLDS.forEach(function(w){if(isOpen(u,w))mx=w.id;});ALL.forEach(function(x){var q=u.wp&&u.wp[x.t.id];if(q&&q.best>=60)dn++;});
-    st.push({p:p,mx:mx,dn:dn});});
+    var dn=0;ALL.forEach(function(x){var q=u.wp&&u.wp[x.t.id];if(q&&q.best>=60)dn++;});
+    st.push({p:p,dn:dn});});
   var rows=Object.keys(T).map(function(tid){var t=T[tid],tot=t.ok+t.ko,top=Object.keys(t.it).sort(function(a,b){return t.it[b]-t.it[a];}).slice(0,3).map(function(k){return lab(k)+' ×'+t.it[k];});return {tid:tid,tot:tot,rate:tot?Math.round(t.ko/tot*100):0,top:top};}).filter(function(r){return r.tot>0;}).sort(function(a,b){return b.rate-a.rate;});
   var block=rows.filter(function(r){return r.tot>=10&&r.rate>=40;});
-  var h='<h3>🗺️ Progression des Mondes — '+E(title)+'</h3>';
+  var h='<h3>📊 Suivi des exercices de classe — '+E(title)+'</h3>';
   if(!names.length)return {html:h+'<p class="sub"><i>Aucun élève.</i></p>',text:''};
   h+='<p class="sub">'+names.length+' élève(s) · 🔴 point de blocage = au moins 10 tentatives et 40% d\'erreurs.</p>';
-  h+=rows.length?'<div class="tw" style="max-height:260px"><table><thead><tr><th>Thème</th><th>Essais</th><th>% erreurs</th><th>Items les plus ratés</th></tr></thead><tbody>'+rows.map(function(r){var x=TI[r.tid];return '<tr><td>'+(r.tot>=10&&r.rate>=40?'🔴 ':'')+E(x.w.g+' · '+x.t.n)+'</td><td>'+r.tot+'</td><td><b style="color:'+(r.rate>=40?'#f43f5e':'#10b981')+'">'+r.rate+'%</b></td><td class="sub">'+E(r.top.join(' ; '))+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="sub"><i>Pas encore de données de jeu.</i></p>';
-  h+='<p style="margin-top:10px"><b>Élèves :</b> '+st.map(function(s){return E(s.p)+' (Monde '+s.mx+', '+s.dn+' thèmes)';}).join(' · ')+'</p><button class="btn sm amber" data-cp="1">📋 Copier le rapport d\'amélioration</button>';
-  var tx='ZEST — Rapport d\'équilibrage ('+title+', '+new Date().toLocaleDateString('fr-BE')+')\nÉlèves : '+names.length+'\n\nPOINTS DE BLOCAGE (≥10 essais, ≥40% d\'erreurs) :\n'+(block.length?block.map(function(r){var x=TI[r.tid];return '- '+x.w.g+' · '+x.t.n+' : '+r.rate+'% d\'erreurs sur '+r.tot+' essais. Items ratés : '+r.top.join(' ; ');}).join('\n'):'- Aucun pour le moment')+'\n\nTOUS LES THÈMES JOUÉS :\n'+rows.map(function(r){var x=TI[r.tid];return '- '+x.w.g+' · '+x.t.n+' : '+r.rate+'% erreurs ('+r.tot+' essais)';}).join('\n')+'\n\nPROGRESSION : '+st.map(function(s){return s.p+'=Monde '+s.mx+' ('+s.dn+' thèmes validés)';}).join(', ');
+  h+=rows.length?'<div class="tw" style="max-height:260px"><table><thead><tr><th>Thème</th><th>Essais</th><th>% erreurs</th><th>Items les plus ratés</th></tr></thead><tbody>'+rows.map(function(r){var x=TI[r.tid];return '<tr><td>'+(r.tot>=10&&r.rate>=40?'🔴 ':'')+E(schoolYearLabel(x.w.id)+' · '+x.t.n)+'</td><td>'+r.tot+'</td><td><b style="color:'+(r.rate>=40?'#f43f5e':'#10b981')+'">'+r.rate+'%</b></td><td class="sub">'+E(r.top.join(' ; '))+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="sub"><i>Pas encore de données de jeu.</i></p>';
+  h+='<p style="margin-top:10px"><b>Élèves :</b> '+st.map(function(s){return E(s.p)+' ('+s.dn+' thèmes validés)';}).join(' · ')+'</p><button class="btn sm amber" data-cp="1">📋 Copier le rapport d\'amélioration</button>';
+  var tx='ZEST — Rapport d\'équilibrage ('+title+', '+new Date().toLocaleDateString('fr-BE')+')\nÉlèves : '+names.length+'\n\nPOINTS DE BLOCAGE (≥10 essais, ≥40% d\'erreurs) :\n'+(block.length?block.map(function(r){var x=TI[r.tid];return '- '+schoolYearLabel(x.w.id)+' · '+x.t.n+' : '+r.rate+'% d\'erreurs sur '+r.tot+' essais. Items ratés : '+r.top.join(' ; ');}).join('\n'):'- Aucun pour le moment')+'\n\nTOUS LES THÈMES JOUÉS :\n'+rows.map(function(r){var x=TI[r.tid];return '- '+schoolYearLabel(x.w.id)+' · '+x.t.n+' : '+r.rate+'% erreurs ('+r.tot+' essais)';}).join('\n')+'\n\nPROGRESSION : '+st.map(function(s){return s.p+' ('+s.dn+' thèmes validés)';}).join(', ');
   return {html:h,text:tx};
 }
 function copy(t){
@@ -5312,7 +5326,7 @@ function mount(host,pid,users,title,first){
     box.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-cp]'):null;if(b&&box._t)copy(box._t);});}
   var r=report(users,title);box.innerHTML=r.html;box._t=r.text;
 }
-function hookM(name,after){var o=window[name];if(!F(o))return;window[name]=function(){var r=o.apply(this,arguments);try{after.apply(this,arguments);}catch(e){console.warn('Mondes hook '+name,e);}return r;};}
+function hookM(name,after){var o=window[name];if(!F(o))return;window[name]=function(){var r=o.apply(this,arguments);try{after.apply(this,arguments);}catch(e){console.warn('Cap sur la 1ère / secondaire hook '+name,e);}return r;};}
 hookM('renderTeacher',function(){var all=ld(K.users,{}),mine={};Object.keys(all).forEach(function(p){if(all[p].teacherCode===window.tch)mine[p]=all[p];});mount(g('t-tools'),'mn-teacher',mine,'classe '+window.tch,true);});
 hookM('renderDirection',function(){mount(g('portail-direction'),'mn-dir',ld(K.users,{}),'toute l\'école',false);});
 
@@ -5323,15 +5337,20 @@ hookM('renderDirection',function(){mount(g('portail-direction'),'mn-dir',ld(K.us
   document.head.appendChild(st);
   var sec=document.createElement('section');sec.id='tab-mondes';sec.className='tab hide';sec.style.cssText='max-width:900px;margin:0 auto';sec.innerHTML='<div id="mn-body"></div>';main.appendChild(sec);
   sec.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-m]'):null;if(b&&!b.disabled)actMondes(b.getAttribute('data-m'),b);});
-  sec.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='mn-in')actMondes('ty',e.target);});
+  sec.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='mn-in')actMondes('ty',e.target);else if(e.key==='Enter'&&e.target.id==='cap-answer'){e.preventDefault();actMondes('cap-submit',e.target);}});
+  var secondarySec=document.createElement('section');secondarySec.id='tab-secondaire';secondarySec.className='tab hide';secondarySec.style.cssText='max-width:900px;margin:0 auto';secondarySec.innerHTML='<div id="secondary-body"></div>';main.appendChild(secondarySec);
+  secondarySec.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-m]'):null;if(b&&!b.disabled)actMondes(b.getAttribute('data-m'),b);});
+  secondarySec.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='mn-in')actMondes('ty',e.target);});
   var toastEl=document.createElement('div');toastEl.id='mn-toast';toastEl.className='mn-toast';document.body.appendChild(toastEl);
-  var nb=document.createElement('button');nb.className='nav';nb.id='nav-mondes';nb.textContent='🗺️ Mondes';nb.onclick=function(){window.switchTab('mondes');};
+  var nb=document.createElement('button');nb.className='nav';nb.id='nav-mondes';nb.textContent='🚀 Cap sur la 1ère';nb.onclick=function(){window.switchTab('mondes');};
   var anchor=g('nav-quiz');if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(nb,anchor.nextSibling);else nav.appendChild(nb);
-  var home=g('tab-accueil');if(home){var c=document.createElement('div');c.className='card center';c.style.borderColor='var(--accent)';c.innerHTML='<h3>🗺️ Nouveau : le parcours des 6 Mondes (P1 → P6)</h3><p class="sub">Salutations, nombres, couleurs, famille… jusqu\'aux e-mails en néerlandais ! Débloque chaque monde en validant tes thèmes.</p><button class="btn grad" onclick="switchTab(\'mondes\')">Jouer aux Mondes 🚀</button>';home.appendChild(c);}
+  var secondaryNav=document.createElement('button');secondaryNav.className='nav';secondaryNav.id='nav-secondaire';secondaryNav.textContent='📚 Mon secondaire';secondaryNav.onclick=function(){window.switchTab('secondaire');};
+  if(nb.parentNode)nb.parentNode.insertBefore(secondaryNav,nb.nextSibling);else nav.appendChild(secondaryNav);
+  var home=g('tab-accueil');if(home){var c=document.createElement('div');c.className='card center';c.style.borderColor='var(--accent)';c.innerHTML='<h3>🚀 Cap sur la 1ère</h3><p class="sub">Révision des bases indispensables du néerlandais, avec six paliers et trois niveaux progressifs.</p><button class="btn grad" onclick="switchTab(\'mondes\')">Commencer le parcours 🚀</button>';home.appendChild(c);var secondaryCard=document.createElement('div');secondaryCard.className='card center';secondaryCard.innerHTML='<h3>📚 Mon programme secondaire</h3><p class="sub">Accède séparément aux chapitres activés par ton professeur pour ta classe.</p><button class="btn" onclick="switchTab(\'secondaire\')">Ouvrir mon programme</button>';home.appendChild(secondaryCard);}
 })();
 var _sw=window.switchTab;
 window.switchTab=function(t){
-  var tab=g('tab-mondes'),nb=g('nav-mondes');
+  var tab=g('tab-mondes'),nb=g('nav-mondes'),secondaryTab=g('tab-secondaire'),secondaryNav=g('nav-secondaire');
   if(t==='mondes'){
     document.body.classList.remove('yaya-home');
     setMobileNavOpen(false);
@@ -5341,7 +5360,17 @@ window.switchTab=function(t){
     if(nb)nb.classList.add('on');
     window.scrollTo(0,0);renderMap();return;
   }
-  if(tab)tab.classList.add('hide');if(nb)nb.classList.remove('on');
+  if(t==='secondaire'){
+    document.body.classList.remove('yaya-home');
+    setMobileNavOpen(false);
+    var secondaryTabs=document.querySelectorAll('.tab');for(var k=0;k<secondaryTabs.length;k++)secondaryTabs[k].classList.add('hide');
+    if(secondaryTab)secondaryTab.classList.remove('hide');
+    var secondaryNavs=document.querySelectorAll('.nav');for(var m=0;m<secondaryNavs.length;m++)secondaryNavs[m].classList.remove('on');
+    if(secondaryNav)secondaryNav.classList.add('on');
+    var current=g('breadcrumb-current');if(current)current.textContent='Mon secondaire';
+    window.scrollTo(0,0);renderSecondaryProgram();return;
+  }
+  if(tab)tab.classList.add('hide');if(nb)nb.classList.remove('on');if(secondaryTab)secondaryTab.classList.add('hide');if(secondaryNav)secondaryNav.classList.remove('on');
   return _sw.apply(this,arguments);
 };
 })();
@@ -5574,7 +5603,7 @@ if(location.protocol==='file:'){
   var world = Array.isArray(worlds) ? worlds.filter(function(item){ return item.id === Number(year); })[0] : null;
   if(!world) return [];
   return world.T.map(function(topic, index){
-   return {id: 'p' + year + '-' + topic.id, title: 'Chapitre ' + (index + 1) + ' — ' + topic.n, description: topic.n, content: '', topicId: topic.id};
+   return {id: 'p' + year + '-' + topic.id, title: 'Chapitre ' + (index + 1) + ' — ' + topic.n, description: topic.n, content: '', topicId: topic.id, difficultyLevels:['facile','moyen','difficile']};
   });
  }
  function localClassByCode(code){
