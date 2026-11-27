@@ -921,6 +921,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
     <button class="auth-mode-tab on" type="button" role="tab" aria-selected="true" aria-controls="auth-login-form" id="auth-tab-login" onclick="setAuthMode('login')">Se connecter</button>
     <button class="auth-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="auth-signup-form" id="auth-tab-signup" onclick="setAuthMode('signup')">Créer un compte</button>
    </div>
+    <p class="msg" id="email-send-limit-msg" role="status" aria-live="polite"></p>
 
    <!-- Message affiché après l'inscription -->
    <div id="auth-verify-notice" class="auth-notice hide" role="status" aria-live="polite">
@@ -943,7 +944,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
    </div>
 
    <!-- Se connecter -->
-   <form id="auth-login-form" class="auth-form" role="tabpanel" aria-labelledby="auth-tab-login" method="post" action="#" onsubmit="return false" novalidate>
+   <form id="auth-login-form" class="auth-form" role="tabpanel" aria-labelledby="auth-tab-login" method="post" action="#" novalidate>
     <label class="auth-label" for="login-email">Adresse e-mail</label>
     <input class="inp auth-field" id="login-email" type="email" placeholder="ton.email@exemple.be" autocomplete="username" autocapitalize="none" spellcheck="false" inputmode="email">
     <label class="auth-label" for="login-pass">Mot de passe</label>
@@ -955,7 +956,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
    </form>
 
    <!-- Créer un compte -->
-   <form id="auth-signup-form" class="auth-form hide" role="tabpanel" aria-labelledby="auth-tab-signup" method="post" action="#" onsubmit="return false" novalidate>
+   <form id="auth-signup-form" class="auth-form hide" role="tabpanel" aria-labelledby="auth-tab-signup" method="post" action="#" novalidate>
     <label class="auth-label" for="signup-name">Prénom ou pseudo</label>
     <input class="inp auth-field" id="signup-name" type="text" placeholder="2 à 20 caractères" autocomplete="nickname" maxlength="20" autocorrect="off" spellcheck="false">
 
@@ -5645,7 +5646,11 @@ if(location.protocol==='file:'){
   const MSG_NO_PROFILE = "Impossible de charger ton profil. Vérifie ta connexion Internet et réessaie.";
   const MSG_TECHNICAL = "Zest rencontre un problème technique. Réessaie dans quelques instants.";
   const DELETION_DELAY_MS = 7 * 24 * 60 * 60 * 1000;
-  const EMAIL_RESEND_COOLDOWN_MS = 60 * 1000;
+  const EMAIL_SEND_STORAGE_KEY = "zest-email-send-history-v1";
+  const EMAIL_SEND_WINDOW_MS = 60 * 60 * 1000;
+  const EMAIL_SEND_FIRST_COOLDOWN_MS = 60 * 1000;
+  const EMAIL_SEND_REPEAT_COOLDOWN_MS = 2 * 60 * 1000;
+  const EMAIL_SEND_LOCK_MS = 5 * 60 * 1000;
   const EMAIL_VERIFICATION_ACTION_SETTINGS = {
     url: "https://ibra-svg.github.io/Zest-app/",
     handleCodeInApp: false
@@ -5653,9 +5658,13 @@ if(location.protocol==='file:'){
 
   // Évite les opérations d’authentification concurrentes.
   let authBusy = false;
-  let resendBusy = false;
-  let resendCooldownUntil = 0;
-  let resendCooldownTimer = null;
+  let isSendingEmail = false;
+  let emailSendToken = null;
+  let emailSendTimer = null;
+  const emailSendButtons = [signupButton, resendButton, noticeResendButton, forgotButton].filter(Boolean);
+  const emailSendButtonLabels = new Map(emailSendButtons.map(function (button) {
+    return [button, button.textContent.trim()];
+  }));
   // Seule l’inscription et le renvoi peuvent garder brièvement une session non vérifiée pour envoyer le lien.
   let allowUnverifiedVerificationFlow = false;
   // Identifiants de la dernière inscription ou connexion refusée (e-mail non confirmé), gardés en mémoire
@@ -5670,35 +5679,160 @@ if(location.protocol==='file:'){
 
   function setResendVisible(visible) {
     if (resendButton) resendButton.classList.toggle("hide", !visible);
+    refreshEmailSendButtons();
   }
 
-  function refreshResendButtons() {
-    const secondsLeft = Math.max(0, Math.ceil((resendCooldownUntil - Date.now()) / 1000));
-    [resendButton, noticeResendButton].forEach(function (button) {
-      if (!button) return;
-      button.disabled = resendBusy || secondsLeft > 0;
-      button.textContent = secondsLeft > 0 ? "Renvoyer l’e-mail (" + secondsLeft + " s)" : "Renvoyer l’e-mail";
+  function readEmailSendState() {
+    const stored = JSON.parse(localStorage.getItem(EMAIL_SEND_STORAGE_KEY) || "{}");
+    const now = Date.now();
+    return {
+      sentAt: Array.isArray(stored.sentAt) ? stored.sentAt.filter(function (timestamp) {
+        return Number.isFinite(timestamp) && timestamp <= now && timestamp > now - EMAIL_SEND_WINDOW_MS;
+      }) : [],
+      cooldownUntil: Number(stored.cooldownUntil) || 0,
+      lockToken: typeof stored.lockToken === "string" ? stored.lockToken : "",
+      lockUntil: Number(stored.lockUntil) || 0
+    };
+  }
+
+  function writeEmailSendState(state) {
+    localStorage.setItem(EMAIL_SEND_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function refreshEmailSendButtons() {
+    let state;
+    try {
+      state = readEmailSendState();
+    } catch (error) {
+      console.error("[Zest · diagnostic] La protection anti-spam des e-mails est indisponible :", error);
+      emailSendButtons.forEach(function (button) { button.disabled = true; });
+      setMsg("login-msg", "La protection anti-spam ne peut pas être activée dans ce navigateur. Autorise le stockage local puis recharge la page.", false);
+      return;
+    }
+
+    const now = Date.now();
+    const cooldownSeconds = Math.max(0, Math.ceil((state.cooldownUntil - now) / 1000));
+    const rateLimitSeconds = state.sentAt.length >= 3
+      ? Math.max(0, Math.ceil((state.sentAt[0] + EMAIL_SEND_WINDOW_MS - now) / 1000))
+      : 0;
+    const externalLock = !isSendingEmail && state.lockUntil > now;
+    const locked = isSendingEmail || externalLock;
+    const rateLimited = state.sentAt.length >= 3;
+    if (rateLimited) {
+      const minutes = Math.max(1, Math.ceil(rateLimitSeconds / 60));
+      setMsg("email-send-limit-msg", "Limite atteinte : 3 e-mails maximum par heure depuis ce navigateur. Réessaie dans " + minutes + " min.", false);
+    } else {
+      setMsg("email-send-limit-msg", "", true);
+    }
+    const limitNotice = byId("email-send-limit-msg");
+    if (limitNotice) limitNotice.classList.toggle("hide", !rateLimited);
+
+    emailSendButtons.forEach(function (button) {
+      const disabled = authBusy || locked || cooldownSeconds > 0 || rateLimited;
+      button.disabled = disabled;
+      if (locked) button.textContent = "Envoi en cours...";
+      else if (cooldownSeconds > 0) button.textContent = "Réessayer dans " + cooldownSeconds + "s...";
+      else if (rateLimited) button.textContent = "Limite atteinte (3/3)";
+      else button.textContent = emailSendButtonLabels.get(button) || button.textContent;
     });
-    if (secondsLeft > 0 && resendCooldownTimer === null) {
-      resendCooldownTimer = window.setInterval(refreshResendButtons, 1000);
-    } else if (secondsLeft === 0 && resendCooldownTimer !== null) {
-      window.clearInterval(resendCooldownTimer);
-      resendCooldownTimer = null;
+
+    if ((cooldownSeconds > 0 || rateLimitSeconds > 0 || state.lockUntil > now) && emailSendTimer === null) {
+      emailSendTimer = window.setInterval(refreshEmailSendButtons, 1000);
+    } else if (cooldownSeconds === 0 && rateLimitSeconds === 0 && state.lockUntil <= now && emailSendTimer !== null) {
+      window.clearInterval(emailSendTimer);
+      emailSendTimer = null;
     }
   }
 
-  function startResendCooldown() {
-    resendCooldownUntil = Date.now() + EMAIL_RESEND_COOLDOWN_MS;
-    refreshResendButtons();
+  function reserveEmailSend(messageId) {
+    if (isSendingEmail) {
+      setMsg(messageId, "Un envoi d’e-mail est déjà en cours. Patiente quelques instants.", false);
+      return null;
+    }
+    let state;
+    try {
+      state = readEmailSendState();
+    } catch (error) {
+      console.error("[Zest · diagnostic] Lecture de la limite d’e-mails impossible :", error);
+      setMsg(messageId, "La protection anti-spam ne peut pas être vérifiée. Autorise le stockage local puis réessaie.", false);
+      return null;
+    }
+    const now = Date.now();
+    if (state.lockUntil > now) {
+      setMsg(messageId, "Un envoi d’e-mail est déjà en cours dans un autre onglet. Patiente quelques instants.", false);
+      refreshEmailSendButtons();
+      return null;
+    }
+    if (state.sentAt.length >= 3) {
+      const minutes = Math.max(1, Math.ceil((state.sentAt[0] + EMAIL_SEND_WINDOW_MS - now) / 60000));
+      setMsg(messageId, "Tu as atteint la limite de 3 e-mails par heure sur ce navigateur. Réessaie dans " + minutes + " min.", false);
+      refreshEmailSendButtons();
+      return null;
+    }
+    const secondsLeft = Math.max(0, Math.ceil((state.cooldownUntil - now) / 1000));
+    if (secondsLeft > 0) {
+      setMsg(messageId, "Tu pourras envoyer un autre e-mail dans " + secondsLeft + "s.", false);
+      refreshEmailSendButtons();
+      return null;
+    }
+
+    const token = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+    try {
+      state.lockToken = token;
+      state.lockUntil = now + EMAIL_SEND_LOCK_MS;
+      writeEmailSendState(state);
+      if (readEmailSendState().lockToken !== token) {
+        setMsg(messageId, "Un autre envoi d’e-mail vient de commencer dans un autre onglet. Réessaie dans quelques instants.", false);
+        refreshEmailSendButtons();
+        return null;
+      }
+    } catch (error) {
+      console.error("[Zest · diagnostic] Réservation de l’envoi d’e-mail impossible :", error);
+      setMsg(messageId, "La protection anti-spam ne peut pas enregistrer cet envoi. Autorise le stockage local puis réessaie.", false);
+      return null;
+    }
+    isSendingEmail = true;
+    emailSendToken = token;
+    refreshEmailSendButtons();
+    return token;
+  }
+
+  function finishEmailSend(token, sent) {
+    try {
+      const state = readEmailSendState();
+      const now = Date.now();
+      if (sent) {
+        state.sentAt.push(now);
+        state.cooldownUntil = now + (state.sentAt.length === 1
+          ? EMAIL_SEND_FIRST_COOLDOWN_MS
+          : EMAIL_SEND_REPEAT_COOLDOWN_MS);
+      }
+      if (state.lockToken === token) {
+        state.lockToken = "";
+        state.lockUntil = 0;
+      }
+      writeEmailSendState(state);
+    } catch (error) {
+      console.error("[Zest · diagnostic] Enregistrement de l’envoi d’e-mail impossible :", error);
+      setMsg("login-msg", sent
+        ? "L’e-mail a été envoyé, mais la limite anti-spam n’a pas pu être sauvegardée. Réessaie plus tard."
+        : "La limite anti-spam n’a pas pu être mise à jour. Réessaie plus tard.", false);
+    } finally {
+      if (emailSendToken === token) {
+        isSendingEmail = false;
+        emailSendToken = null;
+      }
+      refreshEmailSendButtons();
+    }
   }
 
   async function sendVerificationEmail(user) {
-    try {
-      await sendEmailVerification(user, EMAIL_VERIFICATION_ACTION_SETTINGS);
-    } finally {
-      startResendCooldown();
-    }
+    await sendEmailVerification(user, EMAIL_VERIFICATION_ACTION_SETTINGS);
   }
+
+  window.addEventListener("storage", function (event) {
+    if (event.key === EMAIL_SEND_STORAGE_KEY) refreshEmailSendButtons();
+  });
 
   // ===== Messages affichés à l’utilisateur : en français, simples, sans vocabulaire technique =====
   function userMessage(error, fallback) {
@@ -6359,10 +6493,13 @@ if(location.protocol==='file:'){
     const data = window.zestLocal.readSignup();
     if (data.error) { setMsg("signup-msg", data.error, false); return; }
 
+    const sendToken = reserveEmailSend("signup-msg");
+    if (!sendToken) return;
     authBusy = true;
-    signupButton.disabled = true;
+    refreshEmailSendButtons();
     setMsg("signup-msg", "Création du compte en cours…", true);
     let created = null;
+    let emailSent = false;
     let membership = data.classInfo || null;
     let inviteCode = data.inviteCode || "";
     let classCode = data.classCode || "";
@@ -6399,6 +6536,7 @@ if(location.protocol==='file:'){
         logFirebaseError("setDoc users/" + created.uid, firestoreError);
       }
       await sendVerificationEmail(created);
+      emailSent = true;
 
       pendingVerification = { email: data.email, password: data.password };
       const loginEmail = byId("login-email");
@@ -6426,7 +6564,7 @@ if(location.protocol==='file:'){
       }
       allowUnverifiedVerificationFlow = false;
       authBusy = false;
-      signupButton.disabled = false;
+      finishEmailSend(sendToken, emailSent);
     }
   }
 
@@ -6441,6 +6579,7 @@ if(location.protocol==='file:'){
 
     authBusy = true;
     loginButton.disabled = true;
+    refreshEmailSendButtons();
     setMsg("login-msg", "Connexion en cours…", true);
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
@@ -6473,6 +6612,7 @@ if(location.protocol==='file:'){
     } finally {
       authBusy = false;
       loginButton.disabled = false;
+      refreshEmailSendButtons();
     }
   }
 
@@ -6484,13 +6624,15 @@ if(location.protocol==='file:'){
       setMsg(messageId, "Saisis ton e-mail et ton mot de passe, puis clique sur « Se connecter » pour recevoir un nouvel e-mail.", false);
       return;
     }
+    const sendToken = reserveEmailSend(messageId);
+    if (!sendToken) return;
     const credentials = pendingVerification;
     authBusy = true;
-    resendBusy = true;
     allowUnverifiedVerificationFlow = true;
-    refreshResendButtons();
+    refreshEmailSendButtons();
     setMsg(messageId, "Envoi de l’e-mail…", true);
     let signedIn = false;
+    let emailSent = false;
     try {
       const credential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
       signedIn = true;
@@ -6509,6 +6651,7 @@ if(location.protocol==='file:'){
         return;
       }
       await sendVerificationEmail(credential.user);
+      emailSent = true;
       setMsg(messageId, "E-mail renvoyé à " + credentials.email + ". Pense à vérifier tes courriers indésirables.", true);
     } catch (error) {
       logFirebaseError("sendEmailVerification (renvoi)", error, { email: credentials.email });
@@ -6519,8 +6662,7 @@ if(location.protocol==='file:'){
       }
       allowUnverifiedVerificationFlow = false;
       authBusy = false;
-      resendBusy = false;
-      refreshResendButtons();
+      finishEmailSend(sendToken, emailSent);
     }
   }
 
@@ -6533,12 +6675,16 @@ if(location.protocol==='file:'){
     if (!email) { setMsg("login-msg", "Saisis ton adresse e-mail ci-dessus, puis clique sur « Mot de passe oublié ? ».", false); return; }
     if (!emailInput.checkValidity()) { setMsg("login-msg", "L’adresse e-mail n’est pas valide.", false); return; }
 
+    const sendToken = reserveEmailSend("login-msg");
+    if (!sendToken) return;
     authBusy = true;
-    forgotButton.disabled = true;
+    refreshEmailSendButtons();
     setMsg("login-msg", "Envoi de l’e-mail de réinitialisation…", true);
     const done = "Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé. Pense à vérifier tes courriers indésirables.";
+    let emailSent = false;
     try {
       await sendPasswordResetEmail(auth, email);
+      emailSent = true;
       setMsg("login-msg", done, true);
     } catch (error) {
       if (error && error.code === "auth/user-not-found") {
@@ -6549,7 +6695,7 @@ if(location.protocol==='file:'){
       }
     } finally {
       authBusy = false;
-      forgotButton.disabled = false;
+      finishEmailSend(sendToken, emailSent);
     }
   }
 
@@ -6710,6 +6856,7 @@ if(location.protocol==='file:'){
   if (resendButton) resendButton.addEventListener("click", function () { handleResend("login"); });
   if (noticeResendButton) noticeResendButton.addEventListener("click", function () { handleResend("notice"); });
   if (recoverButton) recoverButton.addEventListener("click", recoverAccount);
+  refreshEmailSendButtons();
   window.zestAuthReady = true;
 </script>
 </body>
