@@ -583,6 +583,38 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
  .stam-study-table td:first-child{z-index:2}
  .stam-scroll-hint{display:block;margin:6px 0;font-size:12px}
 }
+.dictionary-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px;align-items:stretch}
+.dictionary-word-card{min-width:0;padding:16px;border:1px solid var(--bd);border-radius:16px;background:var(--card);box-shadow:0 4px 16px rgba(0,0,0,.045)}
+.dictionary-word-head{display:flex;align-items:flex-start;gap:10px}
+.dictionary-word-heading{min-width:0;flex:1}
+.dictionary-word-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dictionary-word-title .vocab-term-nl{overflow-wrap:anywhere}
+.dictionary-word-card .vocab-term-fr{overflow-wrap:anywhere}
+.dictionary-article{display:inline-flex;align-items:center;justify-content:center;min-width:36px;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800}
+.dictionary-article.de{background:#dbeafe;color:#1d4ed8}
+.dictionary-article.het{background:#fce7f3;color:#be185d}
+.dictionary-article.none{background:var(--box);color:var(--sub)}
+.dictionary-word-meta{margin:10px 0 0;padding-top:9px;border-top:1px solid var(--bd);color:var(--sub);font-size:12px;overflow-wrap:anywhere}
+.dictionary-word-meta b{color:var(--txt)}
+.dictionary-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.dictionary-actions .btn{flex:1 1 112px;margin:0;min-height:44px;padding:8px 10px}
+.dictionary-actions .dictionary-review-button{border:1px solid var(--bd);background:var(--box);color:var(--txt)}
+.dictionary-actions .dictionary-review-button.is-saved{border-color:#10b981;background:#10b9811a;color:#047857}
+.dictionary-example{margin:10px 0 0;overflow-wrap:anywhere}
+.dictionary-example .vocab-example-nl{margin-top:0}
+.dictionary-example .vocab-example-fr{margin-top:4px}
+.dictionary-grammar-details{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--box);overflow-wrap:anywhere}
+.dictionary-ai-offer{grid-column:1/-1;padding:18px;border:1px dashed var(--bd);border-radius:16px;background:var(--card)}
+.dictionary-ai-offer .btn{margin:8px 0}
+.dictionary-ai-result{padding:12px;border:1px solid var(--bd);border-radius:12px;background:var(--box);overflow-wrap:anywhere}
+.dictionary-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dictionary-toolbar .inp{width:auto;min-width:130px;margin:0}
+@media(max-width:760px){
+ .dictionary-cards{grid-template-columns:minmax(0,1fr)}
+ .dictionary-toolbar{align-items:stretch}
+ .dictionary-toolbar .inp{width:100%}
+ #dictionary-word-count{white-space:normal}
+}
 </style>
 <script>
 (function(){
@@ -711,22 +743,26 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
 <!-- DICTIONNAIRE & GRAMMAIRE -->
 <section id="tab-vocabulaire" class="tab hide">
  <div class="card row">
-  <div><h2>📚 Dictionnaire & Grammaire</h2><span class="sub">Clique sur n'importe quelle ligne de grammaire pour l'ouvrir/la fermer</span></div>
+  <div><h2>Dictionnaire & Grammaire</h2><span class="sub">Recherche hors ligne, exemples et prononciation néerlandaise</span></div>
   <input class="inp" style="max-width:320px;margin:0" id="search" placeholder="Rechercher un mot ou une règle..." oninput="renderVocab()">
-  <button class="btn sm" id="favorites-filter" type="button" onclick="toggleFavoritesOnly()">☆ Mes favoris</button>
+  <button class="btn sm" id="favorites-filter" type="button" onclick="toggleFavoritesOnly()">Mes favoris</button>
+  <button class="btn sm" id="dictionary-review-filter" type="button" onclick="toggleDictionaryReviews()">À réviser</button>
+  <span class="tag" id="dictionary-word-count" aria-live="polite">Chargement du vocabulaire…</span>
  </div>
  <div class="category-select-row">
   <label for="vocab-topic-filter"><strong>Filtrer par thème :</strong></label>
   <select class="inp" id="vocab-topic-filter" aria-label="Filtrer le dictionnaire par thème" onchange="afficherDictionnaireParCategorie(this.value)"></select>
+  <label for="dictionary-article-filter"><strong>Article :</strong></label>
+  <select class="inp" id="dictionary-article-filter" aria-label="Filtrer par article" onchange="setDictionaryArticleFilter(this.value)">
+   <option value="all">Tous</option><option value="de">de</option><option value="het">het</option>
+  </select>
  </div>
  <div class="cats" id="cats"></div>
  <div class="dictionary-category-review" id="dictionary-category-review">
   <div><h3 id="dictionary-category-title">Tous les thèmes</h3><p class="sub" id="dictionary-category-count"></p></div>
-  <button class="btn grad" id="dictionary-test-button" type="button" onclick="lancerFlashcards(cat)">Se tester ⚡</button>
+  <button class="btn grad" id="dictionary-test-button" type="button" onclick="lancerFlashcards(cat)">Se tester</button>
  </div>
- <div class="card" style="padding:0;overflow:hidden"><div class="tw">
-  <table><thead><tr><th>Mot, traduction et exemple</th><th>Catégorie</th></tr></thead><tbody id="vocab"></tbody></table>
- </div></div>
+ <div id="vocab" class="dictionary-cards" aria-live="polite"></div>
 </section>
 
 <!-- FLASHCARDS -->
@@ -7880,6 +7916,697 @@ if(trainingTab){
   if (recoverButton) recoverButton.addEventListener("click", recoverAccount);
   refreshEmailSendButtons();
   window.zestAuthReady = true;
+</script>
+<script>
+function dictionaryRows(category, rows) {
+ return rows.map(function(row) {
+  var fields=row.split('|');
+  if(fields.length!==6)throw new Error('Entrée de dictionnaire incomplète dans '+category+': '+row);
+  return {nl:fields[0],fr:fields[1],article:fields[2],pluriel:fields[3],categorie:category,exempleNl:fields[4],exempleFr:fields[5]};
+ });
+}
+var DICTIONARY_EXTENDED=[].concat(
+ dictionaryRows('École et études',[
+  "boek|livre|het|boeken|Het boek ligt op de tafel.|Le livre est sur la table.",
+  "schrift|cahier|het|schriften|Ik schrijf in mijn schrift.|J'écris dans mon cahier.",
+  "pen|stylo|de|pennen|Mijn pen is blauw.|Mon stylo est bleu.",
+  "potlood|crayon|het|potloden|Ik teken met een potlood.|Je dessine avec un crayon.",
+  "gom|gomme|de|gommen|De gom ligt naast mijn boek.|La gomme est à côté de mon livre.",
+  "liniaal|règle|de|linialen|Met een liniaal trek ik een rechte lijn.|Avec une règle, je trace une ligne droite.",
+  "schaar|ciseaux|de|scharen|De schaar ligt in mijn pennenzak.|Les ciseaux sont dans ma trousse.",
+  "rugzak|cartable|de|rugzakken|Mijn rugzak is zwaar.|Mon cartable est lourd.",
+  "school|école|de|scholen|Onze school heeft een grote speelplaats.|Notre école a une grande cour.",
+  "klas|classe|de|klassen|De klas begint om acht uur.|La classe commence à huit heures.",
+  "leerling|élève|de|leerlingen|De leerling stelt een vraag.|L'élève pose une question.",
+  "leraar|enseignant|de|leraren|De leraar legt de oefening uit.|L'enseignant explique l'exercice.",
+  "lerares|enseignante|de|leraressen|De lerares schrijft op het bord.|L'enseignante écrit au tableau.",
+  "directeur|directeur|de|directeurs|De directeur begroet de leerlingen.|Le directeur salue les élèves.",
+  "vak|matière scolaire|het|vakken|Nederlands is een belangrijk vak.|Le néerlandais est une matière importante.",
+  "Nederlands|néerlandais|het|—|Ik leer Nederlands op school.|J'apprends le néerlandais à l'école.",
+  "Frans|français|het|—|Op dinsdag hebben we Frans.|Le mardi, nous avons français.",
+  "wiskunde|mathématiques|de|—|We rekenen tijdens de les wiskunde.|Nous calculons pendant le cours de mathématiques.",
+  "geschiedenis|histoire|de|—|We leren over de Belgische geschiedenis.|Nous apprenons l'histoire de Belgique.",
+  "aardrijkskunde|géographie|de|—|In aardrijkskunde bestuderen we kaarten.|En géographie, nous étudions des cartes.",
+  "biologie|biologie|de|—|Bij biologie leren we over dieren.|En biologie, nous apprenons des choses sur les animaux.",
+  "natuurkunde|physique|de|—|Bij natuurkunde doen we een proef.|En physique, nous faisons une expérience.",
+  "scheikunde|chimie|de|—|In het labo leren we scheikunde.|Au laboratoire, nous apprenons la chimie.",
+  "muziek|musique|de|—|Op vrijdag luisteren we naar muziek.|Le vendredi, nous écoutons de la musique.",
+  "lichamelijke opvoeding|éducation physique|de|—|We sporten tijdens de lichamelijke opvoeding.|Nous faisons du sport pendant le cours d'éducation physique.",
+  "huiswerk|devoirs|het|—|Ik maak mijn huiswerk na school.|Je fais mes devoirs après l'école.",
+  "toets|contrôle|de|toetsen|Morgen hebben we een toets Nederlands.|Demain, nous avons un contrôle de néerlandais.",
+  "examen|examen|het|examens|Zij studeert voor haar examen.|Elle étudie pour son examen.",
+  "rapport|bulletin scolaire|het|rapporten|Mijn rapport komt vrijdag.|Mon bulletin arrive vendredi.",
+  "cijfer|note|het|cijfers|Hij krijgt een goed cijfer.|Il obtient une bonne note.",
+  "vraag|question|de|vragen|De leerling leest de vraag.|L'élève lit la question.",
+  "antwoord|réponse|het|antwoorden|Schrijf je antwoord op.|Écris ta réponse.",
+  "oefening|exercice|de|oefeningen|Deze oefening is niet moeilijk.|Cet exercice n'est pas difficile.",
+  "opdracht|consigne|de|opdrachten|Lees eerst de opdracht.|Lis d'abord la consigne.",
+  "bladzijde|page|de|bladzijden|Open je boek op bladzijde tien.|Ouvre ton livre à la page dix.",
+  "pagina|page|de|pagina's|De tekst staat op de laatste pagina.|Le texte se trouve à la dernière page.",
+  "agenda|journal de classe|de|agenda's|Ik noteer de toets in mijn agenda.|Je note le contrôle dans mon journal de classe.",
+  "rooster|horaire scolaire|het|roosters|Mijn rooster begint met Nederlands.|Mon horaire commence par le néerlandais.",
+  "pauze|pause|de|pauzes|Tijdens de pauze speel ik buiten.|Pendant la pause, je joue dehors.",
+  "les|cours|de|lessen|De les begint over vijf minuten.|Le cours commence dans cinq minutes.",
+  "klaslokaal|salle de classe|het|klaslokalen|Het klaslokaal is licht en rustig.|La salle de classe est claire et calme.",
+  "bibliotheek|bibliothèque|de|bibliotheken|Ik leen een boek in de bibliotheek.|J'emprunte un livre à la bibliothèque.",
+  "leren|étudier, apprendre|-|leren|Wij leren elke dag nieuwe woorden.|Nous apprenons de nouveaux mots chaque jour.",
+  "schrijven|écrire|-|schreef, schreven, geschreven|Ik schrijf een zin in het Nederlands.|J'écris une phrase en néerlandais.",
+  "lezen|lire|-|las, lazen, gelezen|De leerlingen lezen een korte tekst.|Les élèves lisent un court texte."
+ ]),
+ dictionaryRows('Famille et personnes',[
+  "moeder|mère|de|moeders|Mijn moeder werkt vandaag thuis.|Ma mère travaille à la maison aujourd'hui.",
+  "vader|père|de|vaders|Mijn vader kookt vanavond.|Mon père cuisine ce soir.",
+  "broer|frère|de|broers|Mijn broer speelt graag voetbal.|Mon frère aime jouer au football.",
+  "zus|sœur|de|zussen|Mijn zus leest een boek.|Ma sœur lit un livre.",
+  "ouder|parent|de|ouders|Elke ouder krijgt een brief.|Chaque parent reçoit une lettre.",
+  "kind|enfant|het|kinderen|Het kind tekent een huis.|L'enfant dessine une maison.",
+  "familie|famille|de|families|Mijn familie woont in België.|Ma famille habite en Belgique.",
+  "grootvader|grand-père|de|grootvaders|Mijn grootvader vertelt een verhaal.|Mon grand-père raconte une histoire.",
+  "grootmoeder|grand-mère|de|grootmoeders|Mijn grootmoeder bakt een taart.|Ma grand-mère prépare un gâteau.",
+  "oom|oncle|de|ooms|Mijn oom komt morgen op bezoek.|Mon oncle vient nous rendre visite demain.",
+  "tante|tante|de|tantes|Mijn tante heeft een kleine tuin.|Ma tante a un petit jardin.",
+  "neef|cousin|de|neven|Mijn neef zit in mijn klas.|Mon cousin est dans ma classe.",
+  "nicht|cousine|de|nichten|Mijn nicht woont in Gent.|Ma cousine habite à Gand.",
+  "man|homme|de|mannen|De man wacht bij de deur.|L'homme attend près de la porte.",
+  "vrouw|femme|de|vrouwen|De vrouw leest de krant.|La femme lit le journal.",
+  "jongen|garçon|de|jongens|De jongen fietst naar school.|Le garçon va à l'école à vélo.",
+  "meisje|fille|het|meisjes|Het meisje zingt een lied.|La fille chante une chanson.",
+  "baby|bébé|de|baby's|De baby slaapt in de kamer.|Le bébé dort dans la chambre.",
+  "vriend|ami|de|vrienden|Mijn vriend helpt met mijn huiswerk.|Mon ami m'aide avec mes devoirs.",
+  "vriendin|amie|de|vriendinnen|Mijn vriendin woont in Brussel.|Mon amie habite à Bruxelles.",
+  "buurman|voisin|de|buurmannen|De buurman groet ons elke ochtend.|Le voisin nous salue chaque matin.",
+  "buurvrouw|voisine|de|buurvrouwen|De buurvrouw heeft een hond.|La voisine a un chien.",
+  "persoon|personne|de|personen|Elke persoon krijgt een stoel.|Chaque personne reçoit une chaise.",
+  "mens|être humain|de|mensen|Iedere mens heeft water nodig.|Chaque être humain a besoin d'eau.",
+  "collega|collègue|de|collega's|Mijn collega werkt in dezelfde school.|Mon collègue travaille dans la même école.",
+  "arts|médecin|de|artsen|De arts luistert naar de patiënt.|Le médecin écoute le patient.",
+  "dokter|docteur|de|dokters|De dokter geeft goed advies.|Le docteur donne un bon conseil.",
+  "bakker|boulanger|de|bakkers|De bakker opent de winkel vroeg.|Le boulanger ouvre le magasin tôt.",
+  "politieagent|policier|de|politieagenten|De politieagent helpt de fietser.|Le policier aide le cycliste.",
+  "brandweerman|pompier|de|brandweermannen|De brandweerman werkt samen met zijn team.|Le pompier travaille avec son équipe.",
+  "verpleegkundige|infirmier, infirmière|de|verpleegkundigen|De verpleegkundige zorgt voor de patiënt.|L'infirmier prend soin du patient.",
+  "kunstenaar|artiste|de|kunstenaars|De kunstenaar maakt een groot schilderij.|L'artiste réalise un grand tableau.",
+  "werknemer|travailleur|de|werknemers|De werknemer begint om negen uur.|Le travailleur commence à neuf heures.",
+  "student|étudiant|de|studenten|De student studeert voor een toets.|L'étudiant étudie pour un contrôle.",
+  "kok|cuisinier|de|koks|De kok maakt een lekkere soep.|Le cuisinier prépare une bonne soupe.",
+  "tandarts|dentiste|de|tandartsen|De tandarts controleert mijn tanden.|Le dentiste vérifie mes dents.",
+  "vriendelijk|gentil|-|—|De nieuwe leerling is vriendelijk.|Le nouvel élève est gentil.",
+  "aardig|sympathique|-|—|Onze buurvrouw is erg aardig.|Notre voisine est très sympathique.",
+  "grappig|drôle|-|—|Mijn oom vertelt een grappig verhaal.|Mon oncle raconte une histoire drôle.",
+  "helpen|aider|-|hielp, hielpen, geholpen|Ik help mijn broer met zijn taak.|J'aide mon frère avec son travail."
+ ]),
+ dictionaryRows('Maison et quotidien',[
+  "huis|maison|het|huizen|Ons huis heeft drie slaapkamers.|Notre maison a trois chambres.",
+  "appartement|appartement|het|appartementen|Zij woont in een appartement in de stad.|Elle habite dans un appartement en ville.",
+  "kamer|pièce, chambre|de|kamers|Mijn kamer is boven.|Ma chambre est à l'étage.",
+  "slaapkamer|chambre à coucher|de|slaapkamers|De slaapkamer heeft een groot raam.|La chambre à coucher a une grande fenêtre.",
+  "woonkamer|salon|de|woonkamers|We zitten samen in de woonkamer.|Nous sommes ensemble dans le salon.",
+  "keuken|cuisine|de|keukens|De keuken is naast de woonkamer.|La cuisine est à côté du salon.",
+  "badkamer|salle de bains|de|badkamers|De badkamer is schoon.|La salle de bains est propre.",
+  "toilet|toilettes|het|toiletten|Het toilet is beneden.|Les toilettes sont en bas.",
+  "tuin|jardin|de|tuinen|De kinderen spelen in de tuin.|Les enfants jouent dans le jardin.",
+  "balkon|balcon|het|balkons|Op het balkon staat een plant.|Il y a une plante sur le balcon.",
+  "deur|porte|de|deuren|Doe de deur rustig dicht.|Ferme doucement la porte.",
+  "raam|fenêtre|het|ramen|Ik open het raam.|J'ouvre la fenêtre.",
+  "trap|escalier|de|trappen|De kat zit op de trap.|Le chat est assis sur l'escalier.",
+  "muur|mur|de|muren|Er hangt een foto aan de muur.|Une photo est accrochée au mur.",
+  "vloer|sol|de|vloeren|De vloer is van hout.|Le sol est en bois.",
+  "plafond|plafond|het|plafonds|De lamp hangt aan het plafond.|La lampe est accrochée au plafond.",
+  "tafel|table|de|tafels|Het eten staat op tafel.|Le repas est sur la table.",
+  "stoel|chaise|de|stoelen|Er staat een stoel bij het raam.|Il y a une chaise près de la fenêtre.",
+  "bed|lit|het|bedden|Mijn bed staat naast de kast.|Mon lit est à côté de l'armoire.",
+  "kast|armoire|de|kasten|Mijn kleren liggen in de kast.|Mes vêtements sont dans l'armoire.",
+  "bank|canapé|de|banken|We zitten op de bank.|Nous sommes assis sur le canapé.",
+  "lamp|lampe|de|lampen|De lamp staat op het bureau.|La lampe est sur le bureau.",
+  "sleutel|clé|de|sleutels|Ik zoek mijn sleutel.|Je cherche ma clé.",
+  "koelkast|réfrigérateur|de|koelkasten|De melk staat in de koelkast.|Le lait est dans le réfrigérateur.",
+  "oven|four|de|ovens|De pizza staat in de oven.|La pizza est dans le four.",
+  "fornuis|cuisinière|het|fornuizen|De pan staat op het fornuis.|La casserole est sur la cuisinière.",
+  "wasmachine|machine à laver|de|wasmachines|De wasmachine staat in de badkamer.|La machine à laver est dans la salle de bains.",
+  "douche|douche|de|douches|Ik neem 's morgens een douche.|Je prends une douche le matin.",
+  "spiegel|miroir|de|spiegels|De spiegel hangt naast de deur.|Le miroir est à côté de la porte.",
+  "handdoek|serviette|de|handdoeken|De handdoek ligt op het bed.|La serviette est sur le lit.",
+  "kussen|oreiller|het|kussens|Ik leg mijn hoofd op het kussen.|Je pose ma tête sur l'oreiller.",
+  "deken|couverture|de|dekens|In de winter gebruik ik een warme deken.|En hiver, j'utilise une couverture chaude.",
+  "kleding|vêtements|de|—|Mijn kleding ligt in de kast.|Mes vêtements sont dans l'armoire.",
+  "shirt|tee-shirt|het|shirts|Hij draagt een wit shirt.|Il porte un tee-shirt blanc.",
+  "broek|pantalon|de|broeken|Deze broek is te groot.|Ce pantalon est trop grand.",
+  "jurk|robe|de|jurken|Zij draagt een rode jurk.|Elle porte une robe rouge.",
+  "jas|manteau|de|jassen|Neem je jas mee naar buiten.|Emporte ton manteau dehors.",
+  "schoen|chaussure|de|schoenen|Mijn schoen is nat.|Ma chaussure est mouillée.",
+  "sok|chaussette|de|sokken|Ik zoek mijn andere sok.|Je cherche mon autre chaussette.",
+  "pyjama|pyjama|de|pyjama's|Ik trek mijn pyjama aan.|Je mets mon pyjama.",
+  "ochtend|matin|de|ochtenden|Elke ochtend eet ik ontbijt.|Chaque matin, je prends mon petit-déjeuner.",
+  "avond|soir|de|avonden|We eten samen in de avond.|Nous mangeons ensemble le soir.",
+  "wakker worden|se réveiller|-|werd wakker, werden wakker, wakker geworden|Ik word om zeven uur wakker.|Je me réveille à sept heures.",
+  "opstaan|se lever|-|stond op, stonden op, opgestaan|Mijn zus staat vroeg op.|Ma sœur se lève tôt.",
+  "slapen|dormir|-|sliep, sliepen, geslapen|De kinderen slapen al.|Les enfants dorment déjà."
+ ]),
+ dictionaryRows('Nourriture et achats',[
+  "appel|pomme|de|appels|Ik eet elke dag een appel.|Je mange une pomme chaque jour.",
+  "banaan|banane|de|bananen|De banaan is geel.|La banane est jaune.",
+  "peer|poire|de|peren|Deze peer is zoet.|Cette poire est sucrée.",
+  "sinaasappel|orange|de|sinaasappels|Ik drink sap van een sinaasappel.|Je bois du jus d'orange.",
+  "brood|pain|het|broden|We kopen vers brood.|Nous achetons du pain frais.",
+  "kaas|fromage|de|kazen|Mijn boterham heeft kaas.|Mon sandwich contient du fromage.",
+  "melk|lait|de|—|De melk staat in de koelkast.|Le lait est dans le réfrigérateur.",
+  "water|eau|het|—|Ik drink een glas water.|Je bois un verre d'eau.",
+  "koffie|café|de|—|Mijn ouders drinken koffie.|Mes parents boivent du café.",
+  "thee|thé|de|theeën|Wil je thee met citroen?|Veux-tu du thé avec du citron ?",
+  "sap|jus|het|sappen|Het sap is vers.|Le jus est frais.",
+  "soep|soupe|de|soepen|Mijn oma maakt groentesoep.|Ma grand-mère prépare une soupe aux légumes.",
+  "vlees|viande|het|—|Hij eet geen vlees.|Il ne mange pas de viande.",
+  "kip|poulet|de|kippen|We eten kip met rijst.|Nous mangeons du poulet avec du riz.",
+  "ei|œuf|het|eieren|Ik eet een ei bij het ontbijt.|Je mange un œuf au petit-déjeuner.",
+  "groente|légume|de|groenten|Eet elke dag groente.|Mange des légumes chaque jour.",
+  "fruit|fruit|het|—|Fruit is goed voor je.|Les fruits sont bons pour toi.",
+  "aardappel|pomme de terre|de|aardappelen|De aardappel kookt in de pan.|La pomme de terre cuit dans la casserole.",
+  "rijst|riz|de|—|We eten rijst met groenten.|Nous mangeons du riz avec des légumes.",
+  "pasta|pâtes|de|pasta's|Vanavond eten we pasta.|Ce soir, nous mangeons des pâtes.",
+  "suiker|sucre|de|—|Doe geen suiker in mijn thee.|Ne mets pas de sucre dans mon thé.",
+  "zout|sel|het|—|De soep heeft weinig zout.|La soupe contient peu de sel.",
+  "boter|beurre|de|boters|Ik smeer boter op mijn brood.|Je mets du beurre sur mon pain.",
+  "olie|huile|de|oliën|De kok gebruikt olijfolie.|Le cuisinier utilise de l'huile d'olive.",
+  "ontbijt|petit-déjeuner|het|ontbijten|Ik eet brood bij het ontbijt.|Je mange du pain au petit-déjeuner.",
+  "lunch|déjeuner|de|lunches|We nemen onze lunch mee.|Nous emportons notre déjeuner.",
+  "avondeten|souper|het|—|Het avondeten staat klaar.|Le souper est prêt.",
+  "restaurant|restaurant|het|restaurants|We eten in een restaurant.|Nous mangeons dans un restaurant.",
+  "menu|menu|het|menu's|De ober brengt het menu.|Le serveur apporte le menu.",
+  "rekening|addition|de|rekeningen|Mag ik de rekening, alstublieft?|Puis-je avoir l'addition, s'il vous plaît ?",
+  "winkel|magasin|de|winkels|De winkel sluit om zes uur.|Le magasin ferme à six heures.",
+  "supermarkt|supermarché|de|supermarkten|Mijn vader gaat naar de supermarkt.|Mon père va au supermarché.",
+  "prijs|prix|de|prijzen|Wat is de prijs van deze appels?|Quel est le prix de ces pommes ?",
+  "geld|argent|het|—|Ik spaar mijn geld.|J'économise mon argent.",
+  "euro|euro|de|euro's|Dit boek kost tien euro.|Ce livre coûte dix euros.",
+  "kopen|acheter|-|kocht, kochten, gekocht|Wij kopen groenten op de markt.|Nous achetons des légumes au marché.",
+  "betalen|payer|-|betaalde, betaalden, betaald|Ik betaal met mijn bankkaart.|Je paie avec ma carte bancaire.",
+  "bestellen|commander|-|bestelde, bestelden, besteld|Zij bestelt een glas water.|Elle commande un verre d'eau.",
+  "eten|manger|-|at, aten, gegeten|We eten om zeven uur.|Nous mangeons à sept heures.",
+  "drinken|boire|-|dronk, dronken, gedronken|Hij drinkt graag melk.|Il aime boire du lait.",
+  "honger|faim|de|—|Na school heb ik honger.|Après l'école, j'ai faim.",
+  "dorst|soif|de|—|Na het sporten heb ik dorst.|Après le sport, j'ai soif.",
+  "lekker|délicieux|-|—|De soep is lekker en warm.|La soupe est délicieuse et chaude.",
+  "goedkoop|bon marché|-|—|Deze appels zijn goedkoop.|Ces pommes sont bon marché.",
+  "maaltijd|repas|de|maaltijden|We eten samen een warme maaltijd.|Nous partageons un repas chaud."
+ ]),
+ dictionaryRows('Ville, transports et Belgique',[
+  "stad|ville|de|steden|Brussel is een grote stad.|Bruxelles est une grande ville.",
+  "dorp|village|het|dorpen|Mijn grootouders wonen in een dorp.|Mes grands-parents habitent dans un village.",
+  "straat|rue|de|straten|De school ligt in deze straat.|L'école se trouve dans cette rue.",
+  "plein|place|het|pleinen|De markt staat op het plein.|Le marché se tient sur la place.",
+  "station|gare|het|stations|De trein vertrekt van het station.|Le train part de la gare.",
+  "bushalte|arrêt de bus|de|bushaltes|Ik wacht bij de bushalte.|J'attends à l'arrêt de bus.",
+  "luchthaven|aéroport|de|luchthavens|Het vliegtuig vertrekt van de luchthaven.|L'avion part de l'aéroport.",
+  "haven|port|de|havens|De boot ligt in de haven.|Le bateau est dans le port.",
+  "weg|route, chemin|de|wegen|Deze weg gaat naar het centrum.|Cette route mène au centre.",
+  "brug|pont|de|bruggen|We lopen over de brug.|Nous marchons sur le pont.",
+  "kerk|église|de|kerken|De oude kerk staat op het plein.|La vieille église se trouve sur la place.",
+  "museum|musée|het|musea|Het museum is vandaag open.|Le musée est ouvert aujourd'hui.",
+  "postkantoor|bureau de poste|het|postkantoren|Ik stuur een brief in het postkantoor.|J'envoie une lettre au bureau de poste.",
+  "ziekenhuis|hôpital|het|ziekenhuizen|De ambulance rijdt naar het ziekenhuis.|L'ambulance se dirige vers l'hôpital.",
+  "apotheek|pharmacie|de|apotheken|De apotheek is naast de bakker.|La pharmacie est à côté de la boulangerie.",
+  "markt|marché|de|markten|Op zaterdag bezoek ik de markt.|Le samedi, je vais au marché.",
+  "gemeentehuis|maison communale|het|gemeentehuizen|Het gemeentehuis staat in het centrum.|La maison communale se trouve au centre.",
+  "politie|police|de|—|De politie helpt de mensen.|La police aide les gens.",
+  "park|parc|het|parken|We wandelen in het park.|Nous nous promenons dans le parc.",
+  "parkeerplaats|place de parking|de|parkeerplaatsen|De auto staat op de parkeerplaats.|La voiture est sur la place de parking.",
+  "verkeerslicht|feu de circulation|het|verkeerslichten|Wacht tot het verkeerslicht groen is.|Attends que le feu de circulation soit vert.",
+  "voetganger|piéton|de|voetgangers|De voetganger steekt de straat over.|Le piéton traverse la rue.",
+  "trein|train|de|treinen|De trein naar Gent is op tijd.|Le train pour Gand est à l'heure.",
+  "bus|bus|de|bussen|De bus stopt voor de school.|Le bus s'arrête devant l'école.",
+  "tram|tram|de|trams|We nemen de tram naar het centrum.|Nous prenons le tram jusqu'au centre.",
+  "metro|métro|de|metro's|De metro rijdt onder de stad.|Le métro circule sous la ville.",
+  "auto|voiture|de|auto's|Mijn moeder rijdt met de auto.|Ma mère conduit la voiture.",
+  "fiets|vélo|de|fietsen|Ik ga met de fiets naar school.|Je vais à l'école à vélo.",
+  "kaart|carte|de|kaarten|Op de kaart zie je de stad.|Tu vois la ville sur la carte.",
+  "ticket|billet|het|tickets|Koop een ticket voor de trein.|Achète un billet de train.",
+  "reis|voyage|de|reizen|Onze reis naar België is kort.|Notre voyage en Belgique est court.",
+  "België|Belgique|-|—|België ligt in Europa.|La Belgique se trouve en Europe.",
+  "Brussel|Bruxelles|-|—|Brussel is de hoofdstad van België.|Bruxelles est la capitale de la Belgique.",
+  "Antwerpen|Anvers|-|—|Antwerpen heeft een grote haven.|Anvers possède un grand port.",
+  "Gent|Gand|-|—|Gent heeft een mooi historisch centrum.|Gand possède un beau centre historique.",
+  "Brugge|Bruges|-|—|Veel toeristen bezoeken Brugge.|De nombreux touristes visitent Bruges.",
+  "Luik|Liège|-|—|Luik ligt in Wallonië.|Liège se trouve en Wallonie.",
+  "Namen|Namur|-|—|Namen is een stad aan de Maas.|Namur est une ville au bord de la Meuse.",
+  "Vlaanderen|Flandre|-|—|In Vlaanderen spreekt men Nederlands.|En Flandre, on parle néerlandais.",
+  "Wallonië|Wallonie|-|—|Wallonië ligt in het zuiden van België.|La Wallonie se trouve dans le sud de la Belgique.",
+  "hoofdstad|capitale|de|hoofdsteden|Brussel is de hoofdstad van België.|Bruxelles est la capitale de la Belgique.",
+  "gemeente|commune|de|gemeenten|Onze gemeente organiseert een feest.|Notre commune organise une fête.",
+  "provincie|province|de|provincies|Antwerpen is ook de naam van een provincie.|Anvers est aussi le nom d'une province.",
+  "rechtdoor|tout droit|-|—|Loop rechtdoor tot aan de brug.|Continue tout droit jusqu'au pont.",
+  "oversteken|traverser|-|stak over, staken over, overgestoken|We steken de straat over bij het licht.|Nous traversons la rue au feu."
+ ]),
+ dictionaryRows('Loisirs, sport et météo',[
+  "sport|sport|de|sporten|Sport is goed voor je gezondheid.|Le sport est bon pour ta santé.",
+  "voetbal|football|het|—|We spelen voetbal na school.|Nous jouons au football après l'école.",
+  "basketbal|basket-ball|het|—|Mijn broer speelt basketbal in een team.|Mon frère joue au basket-ball dans une équipe.",
+  "tennis|tennis|het|—|Op woensdag speel ik tennis.|Le mercredi, je joue au tennis.",
+  "volleybal|volley-ball|het|—|Zij spelen volleybal op het strand.|Ils jouent au volley-ball sur la plage.",
+  "zwemmen|nager|-|zwom, zwommen, gezwommen|In de zomer zwem ik in zee.|En été, je nage dans la mer.",
+  "fietsen|faire du vélo|-|fietste, fietsten, gefietst|Wij fietsen naar het park.|Nous allons au parc à vélo.",
+  "dansen|danser|-|danste, dansten, gedanst|Mijn vriendin danst graag.|Mon amie aime danser.",
+  "tekenen|dessiner|-|tekende, tekenden, getekend|De kinderen tekenen een landschap.|Les enfants dessinent un paysage.",
+  "hobby|loisir|de|hobby's|Lezen is mijn favoriete hobby.|La lecture est mon loisir préféré.",
+  "bioscoop|cinéma|de|bioscopen|We gaan zaterdag naar de bioscoop.|Nous allons au cinéma samedi.",
+  "film|film|de|films|Deze film is erg grappig.|Ce film est très drôle.",
+  "gitaar|guitare|de|gitaren|Hij speelt gitaar in een groep.|Il joue de la guitare dans un groupe.",
+  "spel|jeu|het|spellen|We doen een spel met vrienden.|Nous faisons un jeu avec des amis.",
+  "computer|ordinateur|de|computers|De computer staat op mijn bureau.|L'ordinateur est sur mon bureau.",
+  "smartphone|smartphone|de|smartphones|Ik gebruik mijn smartphone niet in de les.|Je n'utilise pas mon smartphone en cours.",
+  "internet|Internet|het|—|We zoeken informatie op het internet.|Nous cherchons des informations sur Internet.",
+  "vakantie|vacances|de|vakanties|In de vakantie bezoek ik mijn familie.|Pendant les vacances, je rends visite à ma famille.",
+  "zee|mer|de|zeeën|De zee is vandaag rustig.|La mer est calme aujourd'hui.",
+  "strand|plage|het|stranden|De kinderen bouwen een zandkasteel op het strand.|Les enfants construisent un château de sable sur la plage.",
+  "berg|montagne|de|bergen|In de winter ligt er sneeuw op de berg.|En hiver, il y a de la neige sur la montagne.",
+  "lente|printemps|de|lentes|In de lente bloeien de bloemen.|Au printemps, les fleurs s'épanouissent.",
+  "zomer|été|de|zomers|De zomer is mijn favoriete seizoen.|L'été est ma saison préférée.",
+  "herfst|automne|de|herfsten|In de herfst vallen de bladeren.|En automne, les feuilles tombent.",
+  "winter|hiver|de|winters|De winter is koud in België.|L'hiver est froid en Belgique.",
+  "weer|temps, météo|het|—|Wat voor weer is het vandaag?|Quel temps fait-il aujourd'hui ?",
+  "zon|soleil|de|zonnen|De zon schijnt vandaag.|Le soleil brille aujourd'hui.",
+  "regen|pluie|de|—|De regen begint om vier uur.|La pluie commence à quatre heures.",
+  "wind|vent|de|winden|De wind waait hard aan zee.|Le vent souffle fort au bord de la mer.",
+  "wolk|nuage|de|wolken|Een donkere wolk hangt boven de stad.|Un nuage sombre est au-dessus de la ville.",
+  "sneeuw|neige|de|—|De sneeuw bedekt het dak.|La neige recouvre le toit.",
+  "warm|chaud|-|—|Het is warm in de zomer.|Il fait chaud en été.",
+  "koud|froid|-|—|Mijn handen zijn koud.|J'ai froid aux mains.",
+  "zonnig|ensoleillé|-|—|Morgen wordt het zonnig.|Demain, le temps sera ensoleillé.",
+  "bewolkt|nuageux|-|—|Het is vandaag bewolkt.|Aujourd'hui, le temps est nuageux.",
+  "winderig|venteux|-|—|Aan de kust is het winderig.|Il y a du vent sur la côte.",
+  "regenen|pleuvoir|-|regende, regenden, geregend|Het gaat vanavond regenen.|Il va pleuvoir ce soir.",
+  "trainen|s'entraîner|-|trainde, trainden, getraind|Het team traint elke dinsdag.|L'équipe s'entraîne chaque mardi.",
+  "spelen|jouer|-|speelde, speelden, gespeeld|De kinderen spelen buiten.|Les enfants jouent dehors.",
+  "winnen|gagner|-|won, wonnen, gewonnen|Ons team wil de wedstrijd winnen.|Notre équipe veut gagner le match.",
+  "wedstrijd|match|de|wedstrijden|De wedstrijd begint om zes uur.|Le match commence à six heures.",
+  "team|équipe|het|teams|Ons team speelt samen.|Notre équipe joue ensemble.",
+  "bal|ballon|de|ballen|De bal ligt in de tuin.|Le ballon est dans le jardin.",
+  "wandelen|se promener|-|wandelde, wandelden, gewandeld|We wandelen langs de rivier.|Nous nous promenons le long de la rivière.",
+  "schilderen|peindre|-|schilderde, schilderden, geschilderd|In mijn vrije tijd schilder ik landschappen.|Pendant mon temps libre, je peins des paysages."
+ ]),
+ dictionaryRows('Corps et santé',[
+  "lichaam|corps|het|lichamen|Bewegen is goed voor je lichaam.|Bouger est bon pour ton corps.",
+  "hoofd|tête|het|hoofden|Mijn hoofd doet pijn.|J'ai mal à la tête.",
+  "haar|cheveu, cheveux|het|haren|Zij heeft lang haar.|Elle a les cheveux longs.",
+  "gezicht|visage|het|gezichten|Was je gezicht met water.|Lave ton visage avec de l'eau.",
+  "oog|œil|het|ogen|Ik heb stof in mijn oog.|J'ai de la poussière dans l'œil.",
+  "oor|oreille|het|oren|Mijn oor doet een beetje pijn.|J'ai un peu mal à l'oreille.",
+  "neus|nez|de|neuzen|De neus zit in het midden van het gezicht.|Le nez se trouve au milieu du visage.",
+  "mond|bouche|de|monden|Open je mond, alstublieft.|Ouvre la bouche, s'il te plaît.",
+  "tand|dent|de|tanden|Ik poets mijn tanden elke avond.|Je me brosse les dents chaque soir.",
+  "tong|langue|de|tongen|De dokter kijkt naar mijn tong.|Le médecin regarde ma langue.",
+  "nek|cou|de|nekken|Na het sporten is mijn nek stijf.|Après le sport, mon cou est raide.",
+  "schouder|épaule|de|schouders|Draag je tas op je schouder.|Porte ton sac sur ton épaule.",
+  "arm|bras|de|armen|Hij breekt zijn arm niet.|Il ne se casse pas le bras.",
+  "elleboog|coude|de|ellebogen|Ik stootte mijn elleboog tegen de tafel.|Je me suis cogné le coude contre la table.",
+  "hand|main|de|handen|Was je handen voor het eten.|Lave-toi les mains avant le repas.",
+  "vinger|doigt|de|vingers|Zij heeft een ring aan haar vinger.|Elle porte une bague au doigt.",
+  "buik|ventre|de|buiken|De baby ligt op zijn buik.|Le bébé est couché sur le ventre.",
+  "rug|dos|de|ruggen|Mijn rug is moe na het fietsen.|Mon dos est fatigué après le vélo.",
+  "been|jambe|het|benen|Ik heb twee benen.|J'ai deux jambes.",
+  "knie|genou|de|knieën|Hij valt op zijn knie.|Il tombe sur son genou.",
+  "voet|pied|de|voeten|Mijn voet zit in een warme sok.|Mon pied est dans une chaussette chaude.",
+  "hart|cœur|het|harten|Het hart pompt bloed door het lichaam.|Le cœur fait circuler le sang dans le corps.",
+  "bloed|sang|het|—|Er stroomt bloed door je lichaam.|Le sang circule dans ton corps.",
+  "patiënt|patient|de|patiënten|De patiënt wacht op de dokter.|Le patient attend le médecin.",
+  "ziekte|maladie|de|ziekten|Rust helpt bij deze ziekte.|Le repos aide à soigner cette maladie.",
+  "pijn|douleur|de|—|Heb je pijn aan je arm?|As-tu mal au bras ?",
+  "hoofdpijn|mal de tête|de|—|Na de toets heb ik hoofdpijn.|Après le contrôle, j'ai mal à la tête.",
+  "buikpijn|mal de ventre|de|—|Het kind heeft buikpijn.|L'enfant a mal au ventre.",
+  "koorts|fièvre|de|—|Bij koorts moet je rusten.|En cas de fièvre, tu dois te reposer.",
+  "hoest|toux|de|hoesten|Zijn hoest klinkt erg droog.|Sa toux semble très sèche.",
+  "verkoudheid|rhume|de|verkoudheden|Ik blijf thuis met een verkoudheid.|Je reste à la maison avec un rhume.",
+  "griep|grippe|de|—|Zij heeft griep en blijft in bed.|Elle a la grippe et reste au lit.",
+  "wond|blessure, plaie|de|wonden|De verpleegkundige verzorgt de wond.|L'infirmier soigne la plaie.",
+  "medicijn|médicament|het|medicijnen|Neem dit medicijn na het eten.|Prends ce médicament après le repas.",
+  "gezond|en bonne santé|-|—|Groente en fruit zijn gezond.|Les légumes et les fruits sont bons pour la santé."
+ ]),
+ dictionaryRows('Adjectifs et mots de liaison',[
+  "groot|grand|-|—|Onze school heeft een grote speelplaats.|Notre école a une grande cour.",
+  "klein|petit|-|—|De kleine hond slaapt in de tuin.|Le petit chien dort dans le jardin.",
+  "lang|long|-|—|De straat is lang en recht.|La rue est longue et droite.",
+  "kort|court|-|—|We lezen een kort verhaal.|Nous lisons une histoire courte.",
+  "hoog|haut|-|—|De toren is erg hoog.|La tour est très haute.",
+  "laag|bas|-|—|De stoel is laag.|La chaise est basse.",
+  "nieuw|neuf, nouveau|-|—|Ik heb een nieuw schrift.|J'ai un nouveau cahier.",
+  "oud|vieux, ancien|-|—|Dit is een oud gebouw.|C'est un vieux bâtiment.",
+  "mooi|beau|-|—|Brugge is een mooie stad.|Bruges est une belle ville.",
+  "lelijk|laid|-|—|Deze kleur is niet lelijk.|Cette couleur n'est pas laide.",
+  "snel|rapide|-|—|De trein is snel.|Le train est rapide.",
+  "langzaam|lentement, lent|-|—|De bus rijdt langzaam.|Le bus roule lentement.",
+  "makkelijk|facile|-|—|Deze vraag is makkelijk.|Cette question est facile.",
+  "moeilijk|difficile|-|—|De toets was moeilijk.|Le contrôle était difficile.",
+  "belangrijk|important|-|—|Water drinken is belangrijk.|Boire de l'eau est important.",
+  "interessant|intéressant|-|—|Het boek is interessant.|Le livre est intéressant.",
+  "saai|ennuyeux|-|—|De film is een beetje saai.|Le film est un peu ennuyeux.",
+  "blij|content|-|—|Ik ben blij met mijn resultaat.|Je suis content de mon résultat.",
+  "verdrietig|triste|-|—|Zij is verdrietig omdat haar vriend verhuist.|Elle est triste parce que son ami déménage.",
+  "boos|fâché|-|—|Hij is boos op zijn broer.|Il est fâché contre son frère.",
+  "moe|fatigué|-|—|Na de training ben ik moe.|Après l'entraînement, je suis fatigué.",
+  "sterk|fort|-|—|De sterke speler helpt zijn team.|Le joueur fort aide son équipe.",
+  "zwak|faible|-|—|Ik voel me zwak na de griep.|Je me sens faible après la grippe.",
+  "open|ouvert|-|—|De bibliotheek is vandaag open.|La bibliothèque est ouverte aujourd'hui.",
+  "dicht|fermé|-|—|De winkel is op zondag dicht.|Le magasin est fermé le dimanche.",
+  "duur|cher|-|—|Dit restaurant is erg duur.|Ce restaurant est très cher.",
+  "gratis|gratuit|-|—|De toegang tot het museum is gratis.|L'entrée au musée est gratuite.",
+  "goed|bon, bien|-|—|Je hebt een goed antwoord gegeven.|Tu as donné une bonne réponse.",
+  "slecht|mauvais, mal|-|—|Het weer is slecht vandaag.|Le temps est mauvais aujourd'hui.",
+  "veilig|sûr|-|—|Deze fietsroute is veilig.|Cette piste cyclable est sûre.",
+  "gevaarlijk|dangereux|-|—|Oversteken zonder kijken is gevaarlijk.|Traverser sans regarder est dangereux.",
+  "rustig|calme|-|—|De bibliotheek is rustig.|La bibliothèque est calme.",
+  "druk|animé, occupé|-|—|Het is druk in het station.|Il y a beaucoup de monde à la gare.",
+  "vroeg|tôt|-|—|Ik sta vroeg op voor school.|Je me lève tôt pour aller à l'école.",
+  "laat|tard|-|—|De trein komt vandaag laat.|Le train arrive tard aujourd'hui.",
+  "altijd|toujours|-|—|Zij draagt altijd haar bril.|Elle porte toujours ses lunettes.",
+  "nooit|jamais|-|—|Ik ben nooit te laat op school.|Je ne suis jamais en retard à l'école.",
+  "soms|parfois|-|—|Soms lees ik voor het slapengaan.|Parfois, je lis avant de dormir.",
+  "vaak|souvent|-|—|Wij gaan vaak naar het park.|Nous allons souvent au parc.",
+  "en|et|-|—|Ik koop brood en kaas.|J'achète du pain et du fromage.",
+  "maar|mais|-|—|Ik wil fietsen, maar het regent.|Je veux faire du vélo, mais il pleut.",
+  "omdat|parce que|-|—|Ik blijf thuis omdat ik ziek ben.|Je reste à la maison parce que je suis malade.",
+  "want|car|-|—|Neem je jas mee, want het is koud.|Prends ton manteau, car il fait froid.",
+  "hoewel|bien que|-|—|Hoewel het regent, gaan we wandelen.|Bien qu'il pleuve, nous allons nous promener.",
+  "daarom|c'est pourquoi|-|—|Het regent, daarom neem ik mijn paraplu.|Il pleut, c'est pourquoi je prends mon parapluie.",
+  "dus|donc|-|—|Het is laat, dus we gaan naar huis.|Il est tard, donc nous rentrons à la maison.",
+  "eerst|d'abord|-|—|Eerst maak ik mijn huiswerk.|D'abord, je fais mes devoirs.",
+  "daarna|ensuite|-|—|Daarna speel ik met mijn zus.|Ensuite, je joue avec ma sœur.",
+  "of|ou|-|—|Wil je thee of water?|Veux-tu du thé ou de l'eau ?",
+  "als|si, quand|-|—|Als het zonnig is, fietsen we naar school.|S'il fait beau, nous allons à l'école à vélo."
+ ])
+);
+window.DICTIONARY_EXTENDED=DICTIONARY_EXTENDED;
+var dictionaryReviews=ld('zest_dictionary_review',{});
+if(!dictionaryReviews||typeof dictionaryReviews!=='object'||Array.isArray(dictionaryReviews))dictionaryReviews={};
+var dictionaryArticleFilter='all',dictionaryReviewsOnly=false;
+var dictionaryAIState={query:'',loading:false,error:'',success:false},dictionaryVisibleCount=80,dictionaryRenderSignature='';
+var dictionaryBaseRows=Array.isArray(W)?W.slice():[];
+var dictionaryBaseVocabularyTopics=vocabularyTopics;
+function normalizeDictionaryText(value){
+ return String(value==null?'':value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+}
+function dictionaryKey(value){
+ return normalizeDictionaryText(value).replace(/^(de|het|een)\s+/,'').replace(/[.,!?;:]+$/,'').trim();
+}
+function dictionaryArticleFromTerm(value){
+ var match=String(value||'').trim().match(/^(de|het)\s+(.+)$/i);
+ return match?{article:match[1].toLowerCase(),nl:match[2].trim()}:{article:'-',nl:String(value||'').trim()};
+}
+function dictionaryItemFromLegacy(word){
+ var source=dictionaryArticleFromTerm(word[0]),category=String(word[2]||'Vocabulaire');
+ var metadata=word[5]&&typeof word[5]==='object'?word[5]:{};
+ return {
+  nl:metadata.nl||source.nl,fr:String(word[1]||''),article:metadata.article||(source.article!=='-'?source.article:'-'),
+  pluriel:metadata.pluriel||'—',categorie:category,exempleNl:typeof word[3]==='string'?word[3]:'',
+  exempleFr:typeof word[4]==='string'?word[4]:'',categories:[category],grammarDetails:Array.isArray(word[4])?word[4]:null,
+  isGrammar:category==='Grammaire',legacyTitle:String(word[0]||''),source:'Dictionnaire existant'
+ };
+}
+function addDictionaryEntry(index,item){
+ if(!item||!item.nl||!item.fr)return;
+ var parsed=dictionaryArticleFromTerm(item.nl),nl=parsed.nl,article=item.article||parsed.article||'-';
+ var entry={
+  nl:String(nl).trim(),fr:String(item.fr).trim(),article:article,
+  pluriel:String(item.pluriel||'—'),categorie:String(item.categorie||'Vocabulaire'),
+  exempleNl:String(item.exempleNl||''),exempleFr:String(item.exempleFr||''),
+  categories:Array.isArray(item.categories)?item.categories.slice():[String(item.categorie||'Vocabulaire')],
+  grammarDetails:item.grammarDetails||null,isGrammar:!!item.isGrammar,
+  legacyTitle:item.legacyTitle||'',source:item.source||''
+ };
+ var key=dictionaryKey(entry.nl);
+ if(!key)return;
+ var existing=index[key];
+ if(!existing){entry.categories=entry.categories.filter(function(topic,i,list){return topic&&list.indexOf(topic)===i;});index[key]=entry;return;}
+ if(entry.categorie==='Vocabulaire — Les Animaux')existing.categorie=entry.categorie;
+ if((!existing.article||existing.article==='-')&&entry.article!=='-')existing.article=entry.article;
+ if((!existing.pluriel||existing.pluriel==='—')&&entry.pluriel&&entry.pluriel!=='—')existing.pluriel=entry.pluriel;
+ if(!existing.fr&&entry.fr)existing.fr=entry.fr;
+ if(!existing.exempleNl&&entry.exempleNl)existing.exempleNl=entry.exempleNl;
+ if(!existing.exempleFr&&entry.exempleFr)existing.exempleFr=entry.exempleFr;
+ if(!existing.grammarDetails&&entry.grammarDetails)existing.grammarDetails=entry.grammarDetails;
+ if(entry.isGrammar)existing.isGrammar=true;
+ entry.categories.forEach(function(topic){if(topic&&existing.categories.indexOf(topic)<0)existing.categories.push(topic);});
+}
+function extractDictionaryWorlds(index){
+ var source=window.ZestMondes&&window.ZestMondes.WORLDS;
+ if(!Array.isArray(source))return;
+ source.forEach(function(world){
+  (world.T||[]).forEach(function(topic){
+   if(topic.k!=='v'||!Array.isArray(topic.d))return;
+   var isAnimals=/anim(?:al|aux)/i.test(topic.n||''),category=isAnimals?'Vocabulaire — Les Animaux':'Cap sur la 1ère';
+   topic.d.forEach(function(pair){
+    if(!Array.isArray(pair)||!pair[0]||!pair[1])return;
+    var parsed=dictionaryArticleFromTerm(pair[0]);
+    addDictionaryEntry(index,{nl:parsed.nl,fr:pair[1],article:parsed.article,categorie:category,categories:[category,'Cap sur la 1ère'],exempleNl:'',exempleFr:'',source:topic.n});
+   });
+  });
+ });
+}
+function extractDictionaryCap(index){
+ var paliers=window.ZestMondes&&window.ZestMondes.CAP_PALIERS;
+ if(!Array.isArray(paliers))return;
+ var animalPattern=/^(hond|kat|koe|paard|varken|vis|vogel|konijn|kip|eend|muis|schaap|geit|beer|leeuw|dier)$/i;
+ paliers.forEach(function(palier){
+  Object.keys(palier.levels||{}).forEach(function(level){
+   (palier.levels[level]||[]).forEach(function(question){
+    if(!question||typeof question.prompt!=='string'||typeof question.answer!=='string')return;
+    var prompt=question.prompt,term='',fr='',article='-',match;
+    match=prompt.match(/Que signifie\s*[«"]([^»"]+)[»"]\s*\?/i);
+    if(match){term=match[1];fr=question.answer;var parsed=dictionaryArticleFromTerm(term);term=parsed.nl;article=parsed.article;}
+    else{
+     match=prompt.match(/Quel article convient\s*:\s*___\s+([^()?!]+?)\s*\(([^)]+)\)/i);
+     if(match&&(question.answer==='de'||question.answer==='het')){term=match[1].trim();fr=match[2].trim();article=question.answer;}
+     else{
+      match=prompt.match(/Traduis(?: en néerlandais)?\s*:\s*[«"]([^»"]+)[»"]/i);
+      if(match){term=question.answer;fr=match[1];}
+      else if(question.type==='fill'){
+       match=prompt.match(/\(([^()]*)\)\s*[?.!]*$/);
+       if(match&&match[1].trim().split(/\s+/).length<=3&&/^[a-zÀ-ÿ\s'-]+$/i.test(question.answer)){
+        term=question.answer;fr=match[1].trim();
+       }
+      }
+     }
+    }
+    if(!term||!fr)return;
+    var isAnimal=palier.id===5&&animalPattern.test(dictionaryKey(term));
+    var category=isAnimal?'Vocabulaire — Les Animaux':'Cap sur la 1ère';
+    addDictionaryEntry(index,{nl:term,fr:fr,article:article,categorie:category,categories:[category,'Cap sur la 1ère'],exempleNl:'',exempleFr:'',source:'Cap sur la 1ère'});
+   });
+  });
+ });
+}
+function readCustomDictionary(){
+ var custom=ld('zest_custom_dict',[]);
+ if(!Array.isArray(custom))return [];
+ return custom.filter(function(item){
+  return item&&typeof item.nl==='string'&&item.nl.trim()&&typeof item.fr==='string'&&item.fr.trim()&&
+   (item.article==='de'||item.article==='het'||item.article==='-')&&typeof item.pluriel==='string'&&
+   typeof item.exempleNl==='string'&&typeof item.exempleFr==='string';
+ }).map(function(item){
+  return {nl:item.nl,fr:item.fr,article:item.article,pluriel:item.pluriel,categorie:item.categorie||'Recherche IA',exempleNl:item.exempleNl,exempleFr:item.exempleFr,source:'Recherche IA'};
+ });
+}
+function rebuildDictionaryIndex(){
+ var index=Object.create(null);
+ dictionaryBaseRows.forEach(function(word){if(Array.isArray(word))addDictionaryEntry(index,dictionaryItemFromLegacy(word));});
+ DICTIONARY_EXTENDED.forEach(function(item){addDictionaryEntry(index,item);});
+ extractDictionaryWorlds(index);
+ extractDictionaryCap(index);
+ var verbs=window.STAMTIJDEN_VERBS;
+ if(Array.isArray(verbs))verbs.forEach(function(verb){
+  addDictionaryEntry(index,{nl:verb.inf,fr:verb.fr,article:'-',pluriel:'OVT sg : '+verb.ovtSg+' · OVT pl : '+verb.ovtPl+' · participe passé : '+verb.vd+' · auxiliaire : '+verb.aux,categorie:'Temps primitifs',categories:['Temps primitifs',verb.niveau],exempleNl:'Het werkwoord '+verb.inf+' is onregelmatig.',exempleFr:'Le verbe « '+verb.fr+' » est irrégulier.',source:'Temps primitifs'});
+ });
+ readCustomDictionary().forEach(function(item){addDictionaryEntry(index,item);});
+ var entries=Object.keys(index).map(function(key){return index[key];});
+ W=[];
+ entries.forEach(function(item){
+  var title=item.legacyTitle||((item.article==='de'||item.article==='het')?item.article+' '+item.nl:item.nl);
+  W.push([title,item.fr,item.categorie,item.exempleNl,item.grammarDetails||item.exempleFr,{
+   nl:item.nl,article:item.article,pluriel:item.pluriel,categories:item.categories,isGrammar:item.isGrammar,source:item.source
+  }]);
+ });
+ var extraCategories=entries.reduce(function(list,item){return list.concat(item.categories||[item.categorie]);},[]);
+ CATS=CATS.concat(extraCategories).filter(function(topic,index,list){return topic&&list.indexOf(topic)===index;});
+ vocabularyTopics=function(word){
+  var topics=dictionaryBaseVocabularyTopics(word),metadata=word[5]&&typeof word[5]==='object'?word[5]:{};
+  (metadata.categories||[]).concat(metadata.article&&metadata.article!=='-'?[metadata.article==='de'?'de':'het']:[]).forEach(function(topic){if(topic&&topics.indexOf(topic)<0)topics.push(topic);});
+  return topics;
+ };
+ allFlashcardsList=W.filter(function(word){return isFlashcardEligible(word)&&word[0]&&word[1];}).map(function(word){
+  return {nl:word[0],fr:word[1],example:typeof word[3]==='string'?word[3]:'',exampleFr:typeof word[4]==='string'?word[4]:'',topics:vocabularyTopics(word)};
+ });
+ flashcardsList=allFlashcardsList.filter(function(card){
+  return (!favoritesOnly||isVocabularyFavorite(card.nl))&&(flashcardCategory==='all'||card.topics.indexOf(flashcardCategory)>=0);
+ });
+ flashcardIndex=0;flashcardFlipped=false;
+ renderTopicSelectors();
+}
+function dictionaryItemMeta(word){
+ return word&&word[5]&&typeof word[5]==='object'?word[5]:dictionaryArticleFromTerm(word&&word[0]);
+}
+function dictionaryWordCount(){
+ return W.filter(function(word){return word&&word[2]!=='Grammaire';}).length;
+}
+function speakDictionaryEntry(encodedTerm){
+ var term=decodeURIComponent(encodedTerm),word=W.filter(function(item){return dictionaryKey(dictionaryItemMeta(item).nl||item[0])===dictionaryKey(term);})[0];
+ if(!('speechSynthesis'in window)){alert('La synthèse vocale n’est pas disponible sur cet appareil.');return;}
+ if(!word)return;
+ var metadata=dictionaryItemMeta(word),termText=(metadata.article==='de'||metadata.article==='het'?metadata.article+' ':'')+(metadata.nl||word[0]);
+ var text=termText+(word[3]?'. '+word[3]:'');
+ window.speechSynthesis.cancel();
+ var utterance=new SpeechSynthesisUtterance(text);utterance.lang='nl-NL';window.speechSynthesis.speak(utterance);
+}
+function dictionaryReviewKey(term){return dictionaryKey(term);}
+function toggleDictionaryReview(encodedTerm){
+ var key=dictionaryReviewKey(decodeURIComponent(encodedTerm));
+ if(dictionaryReviews[key])delete dictionaryReviews[key];else dictionaryReviews[key]=true;
+ sv('zest_dictionary_review',dictionaryReviews);
+ renderVocab();
+}
+function toggleDictionaryReviews(){
+ dictionaryReviewsOnly=!dictionaryReviewsOnly;
+ var button=$('dictionary-review-filter');
+ if(button){button.classList.toggle('on',dictionaryReviewsOnly);button.textContent=dictionaryReviewsOnly?'Masquer À réviser':'À réviser';}
+ renderVocab();
+}
+function setDictionaryArticleFilter(article){
+ dictionaryArticleFilter=article==='de'||article==='het'?article:'all';
+ renderVocab();
+}
+function showMoreDictionaryWords(){dictionaryVisibleCount+=80;renderVocab();}
+window.toggleFavoritesOnly=function(){
+ favoritesOnly=!favoritesOnly;sv('zest-favorites-only',favoritesOnly);
+ var button=$('favorites-filter');
+ if(button){button.classList.toggle('on',favoritesOnly);button.textContent=favoritesOnly?'Masquer les favoris':'Mes favoris';}
+ renderVocab();
+};
+window.renderVocab=function(){
+ var container=$('vocab'),chips=$('cats');
+ if(!container||!chips)return;
+ var searchInput=$('search'),query=searchInput?searchInput.value.trim():'',normalizedQuery=normalizeDictionaryText(query);
+ if(dictionaryAIState.query&&dictionaryAIState.query!==query)dictionaryAIState={query:'',loading:false,error:'',success:false};
+ var signature=[query,cat,dictionaryArticleFilter,favoritesOnly,dictionaryReviewsOnly].join('|');
+ if(signature!==dictionaryRenderSignature){dictionaryVisibleCount=80;dictionaryRenderSignature=signature;}
+ renderTopicSelectors();
+ chips.textContent='';
+ CATS.forEach(function(topic){
+  var group=document.createElement('span');group.className='category-filter';
+  var button=document.createElement('button');button.type='button';button.className='cat'+(topic===cat?' on':'');button.textContent=topic==='all'?'Tous':topic;
+  button.addEventListener('click',function(){afficherDictionnaireParCategorie(topic);});
+  group.appendChild(button);chips.appendChild(group);
+ });
+ var filtered=W.filter(function(word){
+  var metadata=dictionaryItemMeta(word),topics=vocabularyTopics(word),article=metadata.article||dictionaryArticleFromTerm(word[0]).article;
+  var corpus=[word[0],word[1],word[2],word[3],typeof word[4]==='string'?word[4]:'',(metadata.pluriel||''),(metadata.categories||[]).join(' ')].join(' ');
+  var reviewKey=dictionaryReviewKey(metadata.nl||word[0]);
+  return (cat==='all'||topics.indexOf(cat)>=0)&&
+   (dictionaryArticleFilter==='all'||article===dictionaryArticleFilter)&&
+   (!favoritesOnly||isVocabularyFavorite(word[0]))&&
+   (!dictionaryReviewsOnly||!!dictionaryReviews[reviewKey])&&
+   (!normalizedQuery||normalizeDictionaryText(corpus).indexOf(normalizedQuery)>=0);
+ });
+ var hasGlobalSearchMatch=!normalizedQuery||W.some(function(word){
+  var metadata=dictionaryItemMeta(word),corpus=[word[0],word[1],word[2],word[3],typeof word[4]==='string'?word[4]:'',(metadata.pluriel||''),(metadata.categories||[]).join(' ')].join(' ');
+  return normalizeDictionaryText(corpus).indexOf(normalizedQuery)>=0;
+ });
+ var total=dictionaryWordCount(),count=$('dictionary-word-count');
+ if(count)count.textContent=total+' mot'+(total===1?'':'s')+' disponibles';
+ var title=$('dictionary-category-title'),summary=$('dictionary-category-count'),testButton=$('dictionary-test-button');
+ var categoryName=cat==='all'?'Tous les thèmes':cat;
+ var flashCount=allFlashcardsList.filter(function(card){return (!favoritesOnly||isVocabularyFavorite(card.nl))&&(cat==='all'||card.topics.indexOf(cat)>=0);}).length;
+ if(title)title.textContent=dictionaryReviewsOnly?'À réviser — '+categoryName:categoryName;
+ if(summary)summary.textContent=(filtered.length>dictionaryVisibleCount?'Affichage de '+dictionaryVisibleCount+' sur ':'')+filtered.length+' résultat'+(filtered.length===1?'':'s')+(query?' pour cette recherche':' dans ce thème')+' · '+flashCount+' carte'+(flashCount===1?'':'s')+' de révision';
+ if(testButton){testButton.disabled=flashCount===0;testButton.textContent=flashCount?'Se tester':'Aucune flashcard disponible';testButton.setAttribute('aria-label',flashCount?'Se tester avec les flashcards du thème '+categoryName:'Aucune flashcard disponible pour '+categoryName);}
+ var reviewButton=$('dictionary-review-filter'),reviewCount=Object.keys(dictionaryReviews).length;
+ if(reviewButton){reviewButton.classList.toggle('on',dictionaryReviewsOnly);reviewButton.textContent=dictionaryReviewsOnly?'Masquer À réviser':'À réviser ('+reviewCount+')';}
+ var html='';
+ if(dictionaryAIState.success&&dictionaryAIState.query===query&&dictionaryAIState.item){
+  var aiItem=dictionaryAIState.item;
+  html+='<div class="dictionary-ai-result" role="status"><b>Résultat ajouté à ton dictionnaire hors ligne</b><div><span class="dictionary-article '+(aiItem.article==='de'?'de':aiItem.article==='het'?'het':'none')+'">'+esc(aiItem.article)+'</span> <b>'+esc(aiItem.nl)+'</b> — '+esc(aiItem.fr)+'</div><div><b>Pluriel :</b> '+esc(aiItem.pluriel)+'</div><div class="dictionary-example"><span class="vocab-example-nl">« '+esc(aiItem.exempleNl)+' »</span><span class="vocab-example-fr">'+esc(aiItem.exempleFr)+'</span></div></div>';
+ }
+ if(!filtered.length){
+  if(normalizedQuery.length>=2&&!hasGlobalSearchMatch){
+   html+='<div class="dictionary-ai-offer"><b>Aucun résultat hors ligne pour « '+esc(query)+' ».</b><p class="sub">Tu peux demander une traduction au dictionnaire IA. Le nouveau mot sera conservé sur cet appareil.</p>'+
+    '<button class="btn grad" type="button" '+(dictionaryAIState.loading?'disabled':'')+' onclick="lookupDictionaryWithAI()">Chercher ce mot avec l’assistant IA</button>'+
+    '<div id="dictionary-ai-feedback" class="msg" role="status">'+esc(dictionaryAIState.loading?'Recherche en cours…':dictionaryAIState.error)+'</div></div>';
+  }else html+='<div class="dictionary-ai-offer sub">'+(dictionaryReviewsOnly?'Aucun mot dans cette liste pour les filtres choisis.':'Aucun résultat avec les filtres choisis.')+'</div>';
+  container.innerHTML=html;return;
+ }
+ filtered.slice(0,dictionaryVisibleCount).forEach(function(word){
+  var metadata=dictionaryItemMeta(word),term=metadata.nl||dictionaryArticleFromTerm(word[0]).nl;
+  var article=metadata.article||dictionaryArticleFromTerm(word[0]).article;
+  var reviewKey=dictionaryReviewKey(term),saved=!!dictionaryReviews[reviewKey],favorite=isVocabularyFavorite(word[0]);
+  var isGrammar=word[2]==='Grammaire'&&Array.isArray(metadata.grammarDetails||word[4]);
+  var originalIndex=W.indexOf(word),details=metadata.grammarDetails||word[4];
+  var classes=article==='de'?'de':article==='het'?'het':'none';
+  html+='<article class="dictionary-word-card'+(isGrammar?' dictionary-grammar-card':'')+'">'+
+   '<div class="dictionary-word-head"><div class="dictionary-word-heading"><div class="dictionary-word-title">'+
+   '<span class="dictionary-article '+classes+'">'+esc(article)+'</span><span class="vocab-term-nl">'+esc(term)+'</span></div>'+
+   '<span class="vocab-term-fr">'+esc(word[1])+'</span></div>'+
+   '<button class="flashcard-favorite'+(favorite?' is-favorite':'')+'" type="button" data-dictionary-favorite="'+esc(encodeURIComponent(word[0]))+'" aria-label="'+(favorite?'Retirer des favoris':'Ajouter aux favoris')+'">'+(favorite?'Favori':'Ajouter')+'</button></div>'+
+   (metadata.pluriel&&metadata.pluriel!=='—'?'<p class="dictionary-word-meta"><b>'+((metadata.categories||[]).indexOf('Temps primitifs')>=0?'Formes verbales':'Pluriel / formes')+':</b> '+esc(metadata.pluriel)+'</p>':'')+
+   (word[3]||typeof word[4]==='string'&&word[4].trim()?'<div class="dictionary-example">'+(word[3]?'<span class="vocab-example-nl">« '+esc(word[3])+' »</span>':'')+(typeof word[4]==='string'&&word[4].trim()?'<span class="vocab-example-fr">'+esc(word[4])+'</span>':'')+'</div>':'')+
+   (isGrammar?'<button class="link" type="button" data-dictionary-grammar="'+originalIndex+'">'+(expandedGrammar[originalIndex]?'Masquer les détails':'Afficher les détails de grammaire')+'</button>'+(expandedGrammar[originalIndex]?'<div class="dictionary-grammar-details"><ul>'+details.map(function(line){return '<li>'+esc(line)+'</li>';}).join('')+'</ul></div>':''):'')+
+   '<span class="tag">'+esc(word[2])+'</span>'+((metadata.categories||[]).filter(function(topic){return topic!==word[2]&&/Cap sur la 1ère|Temps primitifs|Vocabulaire — Les Animaux/.test(topic);}).map(function(topic){return '<span class="tag">'+esc(topic)+'</span>';}).join(''))+'<div class="dictionary-actions">'+
+   '<button class="btn sm green" type="button" data-dictionary-audio="'+esc(encodeURIComponent(term))+'">Écouter</button>'+
+   '<button class="btn sm dictionary-review-button'+(saved?' is-saved':'')+'" type="button" data-dictionary-review="'+esc(encodeURIComponent(term))+'">'+(saved?'Retirer de la liste':'À réviser')+'</button>'+
+   '</div></article>';
+ });
+ if(filtered.length>dictionaryVisibleCount)html+='<div class="dictionary-ai-offer center"><button class="btn sm" type="button" data-dictionary-more>Afficher les 80 mots suivants ('+(filtered.length-dictionaryVisibleCount)+' restants)</button></div>';
+ container.innerHTML=html;
+};
+document.addEventListener('click',function(event){
+ var target=event.target;
+ if(!target||!target.closest)return;
+ var audio=target.closest('[data-dictionary-audio]');
+ if(audio){speakDictionaryEntry(audio.getAttribute('data-dictionary-audio'));return;}
+ var review=target.closest('[data-dictionary-review]');
+ if(review){toggleDictionaryReview(review.getAttribute('data-dictionary-review'));return;}
+ var favorite=target.closest('[data-dictionary-favorite]');
+ if(favorite){toggleVocabularyFavorite(favorite.getAttribute('data-dictionary-favorite'));return;}
+ var grammar=target.closest('[data-dictionary-grammar]');
+ if(grammar){toggleGrammar(Number(grammar.getAttribute('data-dictionary-grammar')));return;}
+ var more=target.closest('[data-dictionary-more]');
+ if(more)showMoreDictionaryWords();
+});
+window.lookupDictionaryWithAI=async function(){
+ var searchInput=$('search'),query=searchInput?searchInput.value.trim():'';
+ if(normalizeDictionaryText(query).length<2)return;
+ if(typeof isGeminiProxyConfigured==='function'&&!isGeminiProxyConfigured()){
+  dictionaryAIState={query:query,loading:false,error:'Le service de traduction IA n’est pas configuré.',success:false};renderVocab();return;
+ }
+ dictionaryAIState={query:query,loading:true,error:'',success:false};renderVocab();
+ try{
+  var requestBody=JSON.stringify({
+   systemInstruction:{parts:[{text:'Tu es un dictionnaire pédagogique français-néerlandais. Retourne uniquement un objet JSON strict, sans Markdown ni texte autour, avec exactement les champs fr, nl, article, pluriel, exempleNl, exempleFr. article doit être de, het ou -. Donne une traduction précise, le pluriel néerlandais ou — si le mot est invariable, et une phrase d’exemple naturelle en néerlandais avec sa traduction française.'}]},
+   contents:[{role:'user',parts:[{text:'Traduis ou explique le terme suivant, qui peut être en français ou en néerlandais : '+query}]}],
+   generationConfig:{temperature:0.2,responseMimeType:'application/json'}
+  });
+  var response;
+  try{response=await fetch(GEMINI_PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:requestBody});}
+  catch(networkError){console.error('Le service de dictionnaire IA est injoignable :',networkError);throw new Error('Impossible de joindre le service IA. Vérifie ta connexion Internet et réessaie.');}
+  var result=null;try{result=await response.json();}catch(parseError){result=null;}
+  if(!response.ok)throw new Error(typeof describeGeminiProxyError==='function'?describeGeminiProxyError(response.status):'Le service IA a répondu avec une erreur ('+response.status+').');
+  var text=result&&result.candidates&&result.candidates[0]&&result.candidates[0].content&&result.candidates[0].content.parts&&result.candidates[0].content.parts.map(function(part){return part.text||'';}).join('').trim();
+  if(!text)throw new Error('Le service IA a renvoyé une réponse vide ou illisible.');
+  text=text.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+  var parsed;try{parsed=JSON.parse(text);}catch(jsonError){throw new Error('La réponse IA n’est pas un JSON valide. Réessaie avec un autre mot.');}
+  if(!parsed||typeof parsed!=='object'||Array.isArray(parsed)||typeof parsed.fr!=='string'||!parsed.fr.trim()||
+   typeof parsed.nl!=='string'||!parsed.nl.trim()||typeof parsed.pluriel!=='string'||
+   typeof parsed.exempleNl!=='string'||!parsed.exempleNl.trim()||typeof parsed.exempleFr!=='string'||!parsed.exempleFr.trim()||
+   ['de','het','-'].indexOf(parsed.article)<0)throw new Error('La réponse IA ne contient pas les champs de dictionnaire attendus.');
+  var item={fr:parsed.fr.trim(),nl:parsed.nl.trim(),article:parsed.article,pluriel:parsed.pluriel.trim()||'—',categorie:'Recherche IA',exempleNl:parsed.exempleNl.trim(),exempleFr:parsed.exempleFr.trim()};
+  var custom=ld('zest_custom_dict',[]);if(!Array.isArray(custom))custom=[];
+  var alreadyAvailable=W.some(function(word){return dictionaryKey(dictionaryItemMeta(word).nl||word[0])===dictionaryKey(item.nl);});
+  if(!alreadyAvailable&&!custom.some(function(existing){return existing&&dictionaryKey(existing.nl)===dictionaryKey(item.nl);})){custom.push(item);sv('zest_custom_dict',custom);}
+  dictionaryAIState={query:query,loading:false,error:'',success:true,item:item};
+  rebuildDictionaryIndex();renderVocab();
+ }catch(error){
+  console.error('Échec de la recherche dans le dictionnaire IA :',error);
+  dictionaryAIState={query:query,loading:false,error:'La recherche IA a échoué : '+error.message,success:false};renderVocab();
+ }
+};
+rebuildDictionaryIndex();
+if($('dictionary-article-filter'))syncCustomSelect($('dictionary-article-filter'));
+renderVocab();
 </script>
 </body>
 </html>
