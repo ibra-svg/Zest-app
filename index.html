@@ -80,6 +80,11 @@ h2{margin:6px 0}h3{margin:6px 0}
 .btn.sm{padding:8px 14px;font-size:13px}
 .tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 12px;border-radius:99px;background:#6366f133;color:var(--accent)}
 .tag.g{background:#10b98133;color:#10b981}.tag.v{background:#8b5cf633;color:#8b5cf6}.tag.r{background:#f43f5e33;color:#f43f5e}.tag.a{background:#f59e0b33;color:#f59e0b}.tag.legend{background:linear-gradient(135deg,#fbbf24,#ec4899);color:#020617;animation:pulseGlow 2s infinite}
+.stam-field-result{padding:10px 12px;margin:6px 0;border:1px solid;border-radius:10px}
+.stam-field-result.correct{border-color:#10b981;background:#10b98122;color:#047857}
+.stam-field-result.wrong{border-color:#f43f5e;background:#f43f5e22;color:#be123c}
+body.dark .stam-field-result.correct{color:#6ee7b7}
+body.dark .stam-field-result.wrong{color:#fda4af}
 @keyframes pulseGlow{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
 .msg{min-height:20px;font-size:14px;font-weight:600;margin:0 0 8px;color:#f43f5e}.msg.ok{color:#10b981}
 .cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
@@ -765,6 +770,26 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
 
 <!-- QUIZ / ENTRAÎNEMENT & DUEL -->
 <section id="tab-quiz" class="tab hide">
+ <div class="card center" style="max-width:900px;margin:0 auto 18px">
+  <span class="tag v">📚 Grammaire & conjugaison</span>
+  <h2>Temps primitifs (Stamtijden)</h2>
+  <p class="sub">Révise les verbes irréguliers néerlandais des trois degrés du secondaire belge : infinitif, OVT et participe passé.</p>
+  <button class="btn grad" type="button" data-stam-action="open">Ouvrir le module Stamtijden</button>
+ </div>
+ <div id="stam-module" class="hide" style="max-width:1100px;margin:0 auto 24px">
+  <div class="card">
+   <div class="row">
+    <div><span class="tag v">🕰️ Stamtijden</span><h2>Temps primitifs</h2><p class="sub">90 verbes essentiels, classés par degré.</p></div>
+    <button class="btn sm" type="button" data-stam-action="close">Fermer le module</button>
+   </div>
+   <div class="row" style="justify-content:flex-start;margin:14px 0">
+    <button class="btn" type="button" data-stam-action="study">Tableau de révision</button>
+    <button class="btn grad" type="button" data-stam-action="quiz-config">Quiz d’entraînement</button>
+   </div>
+   <div id="stam-degree-progress" class="grid3" aria-live="polite"></div>
+   <div id="stam-module-content" aria-live="polite"></div>
+  </div>
+ </div>
  <div class="card center" style="max-width:640px;margin:0 auto">
   <div id="live-lobby">
    <span class="tag">⚡ Quiz & Entraînement</span>
@@ -5407,6 +5432,328 @@ if(location.protocol==='file:'){
  offlineStatus.textContent=serviceWorkerUnavailable?'Mode hors ligne indisponible dans cette fenêtre intégrée. Ouvre Zest dans un onglet ou un navigateur normal.':'Ce navigateur ne prend pas en charge le mode hors ligne.';
  offlineStatus.classList.remove('hide');
 }
+</script>
+<script>
+(function(){
+ 'use strict';
+ function stamGroup(niveau,rows){
+  return rows.map(function(row){return {inf:row[0],fr:row[1],ovtSg:row[2],ovtPl:row[3],vd:row[4],aux:row[5],niveau:niveau,piege:row[6]};});
+ }
+var STAMTIJDEN_VERBS=[
+].concat(
+ stamGroup('1er degré',[
+  ["zijn","être","was","waren","geweest","zijn","Le radical change de zijn à was ; le participe est irrégulier."],
+  ["hebben","avoir","had","hadden","gehad","hebben","La voyelle e devient a à l’OVT ; participe en ge-."],
+  ["gaan","aller","ging","gingen","gegaan","zijn","Changement aa → i à l’OVT ; auxiliaire zijn pour le déplacement."],
+  ["doen","faire","deed","deden","gedaan","hebben","À l’OVT, la voyelle s’allonge ; le participe est gedaan."],
+  ["komen","venir","kwam","kwamen","gekomen","zijn","Changement o → a ; le participe conserve la racine komen."],
+  ["zien","voir","zag","zagen","gezien","hebben","La voyelle ie devient a à l’OVT ; participe gezien."],
+  ["eten","manger","at","aten","gegeten","hebben","Changement e → a à l’OVT ; participe avec ge-."],
+  ["drinken","boire","dronk","dronken","gedronken","hebben","Changement i → o ; la consonne k reste dans le participe."],
+  ["slapen","dormir","sliep","sliepen","geslapen","hebben","Changement a → ie à l’OVT, puis retour à a au participe."],
+  ["lezen","lire","las","lazen","gelezen","hebben","Changement e → a ; le z devient s au singulier puis z au pluriel."],
+  ["schrijven","écrire","schreef","schreven","geschreven","hebben","Changement ij → ee ; le v devient f au singulier, v au pluriel."],
+  ["spreken","parler","sprak","spraken","gesproken","hebben","Changement e → a à l’OVT et o au participe."],
+  ["nemen","prendre","nam","namen","genomen","hebben","Changement e → a à l’OVT ; participe avec o."],
+  ["geven","donner","gaf","gaven","gegeven","hebben","Changement e → a ; le v s’assourdit en f au singulier."],
+  ["vinden","trouver","vond","vonden","gevonden","hebben","Changement i → o ; le d final reste sonore."],
+  ["denken","penser","dacht","dachten","gedacht","hebben","Verbe fort à consonne : nk devient cht au singulier."],
+  ["kopen","acheter","kocht","kochten","gekocht","hebben","Formes irrégulières à mémoriser : kocht à l’OVT et gekocht au participe."],
+  ["brengen","apporter","bracht","brachten","gebracht","hebben","Le groupe ng devient cht à l’OVT et au participe."],
+  ["zoeken","chercher","zocht","zochten","gezocht","hebben","Changement oe → o à l’OVT ; le k de la racine devient cht."],
+  ["zeggen","dire","zei","zeiden","gezegd","hebben","OVT zei/zeiden ; le participe s’écrit gezegd avec un d final."],
+  ["weten","savoir","wist","wisten","geweten","hebben","Changement e → i à l’OVT ; le participe revient à e."],
+  ["kunnen","pouvoir","kon","konden","gekund","hebben","Verbe modal : participe court gekund, surtout avec un autre infinitif."],
+  ["moeten","devoir","moest","moesten","gemoeten","hebben","Verbe modal : le participe est gemoeten, souvent en double infinitif."],
+  ["mogen","avoir le droit de","mocht","mochten","gemogen","hebben","Verbe modal irrégulier : g devient cht à l’OVT."],
+  ["willen","vouloir","wilde / wou","wilden / wouden","gewild","hebben","Deux OVT usuels : wilde/wilden et wou/wouden."],
+  ["zullen","exprimer le futur ou une intention","zou","zouden","zullen","hebben","Participe employé comme infinitif dans la double infinitive."],
+  ["worden","devenir","werd","werden","geworden","zijn","Le participe garde ge- ; dans une phrase passive, on emploie souvent worden."],
+  ["krijgen","recevoir, obtenir","kreeg","kregen","gekregen","hebben","Changement ij → ee à l’OVT ; participe avec ge-."],
+  ["blijven","rester","bleef","bleven","gebleven","zijn","Changement ij → ee ; le participe se construit avec zijn."],
+  ["rijden","conduire, rouler","reed","reden","gereden","hebben / zijn","Changement ij → ee ; hebben pour conduire, zijn pour un déplacement." ]
+ ]),
+ stamGroup('2e degré',[
+  ["lopen","marcher, courir","liep","liepen","gelopen","hebben / zijn","Changement o → ie ; zijn pour un trajet, hebben pour l’activité."],
+  ["vliegen","voler","vloog","vlogen","gevlogen","hebben / zijn","Changement ie → oo ; l’auxiliaire dépend du sens de déplacement."],
+  ["zwemmen","nager","zwom","zwommen","gezwommen","hebben / zijn","Changement e → o ; zijn pour un trajet, hebben pour l’activité."],
+  ["vallen","tomber","viel","vielen","gevallen","zijn","Changement a → ie ; le participe de mouvement prend zijn."],
+  ["beginnen","commencer","begon","begonnen","begonnen","zijn","Préfixe be- : pas de ge- ajouté au participe."],
+  ["verliezen","perdre","verloor","verloren","verloren","hebben","Changement ie → oo ; le préfixe ver- exclut ge-."],
+  ["winnen","gagner","won","wonnen","gewonnen","hebben","Changement i → o ; attention au double n au pluriel et au participe."],
+  ["liggen","être couché, se trouver","lag","lagen","gelegen","hebben","Changement i → a à l’OVT ; participe avec ge-."],
+  ["zitten","être assis","zat","zaten","gezeten","hebben","Changement i → a à l’OVT ; participe avec e."],
+  ["staan","être debout","stond","stonden","gestaan","hebben","Changement aa → o à l’OVT ; participe gestaan."],
+  ["hangen","être suspendu","hing","hingen","gehangen","hebben","Changement a → i à l’OVT ; ne pas confondre avec hangen au sens transitif."],
+  ["dragen","porter","droeg","droegen","gedragen","hebben","Changement a → oe à l’OVT ; le participe revient à a."],
+  ["slaan","frapper","sloeg","sloegen","geslagen","hebben","Changement aa → oe à l’OVT ; participe avec a."],
+  ["trekken","tirer","trok","trokken","getrokken","hebben / zijn","Changement e → o ; zijn peut s’employer pour un déplacement."],
+  ["snijden","couper","sneed","sneden","gesneden","hebben","Changement ij → ee ; le d devient parfois t à l’oral, mais s’écrit d."],
+  ["bijten","mordre","beet","beten","gebeten","hebben","Changement ij → ee à l’OVT ; participe gebeten."],
+  ["kiezen","choisir","koos","kozen","gekozen","hebben","Changement ie → oo ; le z s’assourdit en s au singulier."],
+  ["bieden","offrir, proposer","bood","boden","geboden","hebben","Changement ie → oo ; le d devient t au singulier à l’oral, mais s’écrit d."],
+  ["sluiten","fermer","sloot","sloten","gesloten","hebben","Changement ui → oo ; le participe conserve la consonne t."],
+  ["schieten","tirer","schoot","schoten","geschoten","hebben / zijn","Changement ie → oo ; zijn est possible pour un mouvement rapide."],
+  ["ruiken","sentir, dégager une odeur","rook","roken","geroken","hebben","Changement ui → oo à l’OVT ; participe avec o."],
+  ["stelen","voler, dérober","stal","stalen","gestolen","hebben","Changement e → a à l’OVT et o au participe."],
+  ["breken","casser, se briser","brak","braken","gebroken","hebben / zijn","Changement e → a ; zijn si l’objet se casse, hebben si on le casse."],
+  ["steken","piquer, enfoncer","stak","staken","gestoken","hebben","Changement e → a à l’OVT et o au participe."],
+  ["helpen","aider","hielp","hielpen","geholpen","hebben","Changement e → ie à l’OVT ; participe geholpen."],
+  ["sterven","mourir","stierf","stierven","gestorven","zijn","Changement e → ie et f → v au pluriel ; auxiliaire zijn."],
+  ["zingen","chanter","zong","zongen","gezongen","hebben","Changement i → o ; le g reste présent dans le participe."],
+  ["springen","sauter","sprong","sprongen","gesprongen","hebben / zijn","Changement i → o ; zijn pour un déplacement, hebben pour l’activité."],
+  ["binden","lier, attacher","bond","bonden","gebonden","hebben","Changement i → o à l’OVT ; participe gebonden."],
+  ["klimmen","grimper","klom","klommen","geklommen","hebben / zijn","Changement i → o ; zijn peut accompagner un déplacement."],
+  ["vergeten","oublier","vergat","vergaten","vergeten","hebben","Préfixe ver- : pas de ge- au participe ; changement e → a."],
+  ["genezen","guérir","genas","genazen","genezen","hebben / zijn","Préfixe ge- intégré au verbe : pas de ge- supplémentaire."],
+  ["meten","mesurer","mat","maten","gemeten","hebben","Changement e → a à l’OVT ; participe avec e."],
+  ["treden","entrer, marcher","trad","traden","getreden","hebben / zijn","Changement e → a ; zijn pour entrer, hebben dans certains emplois."],
+  ["wassen","laver","waste / wies","wasten / wiesen","gewassen","hebben","Deux OVT admis ; la forme faible waste suit la règle du t de ’t kofschip."]
+ ]),
+ stamGroup('3e degré',[
+  ["bevelen","ordonner","beval","bevalen","bevolen","hebben","Préfixe be- : le participe bevolen ne prend pas de ge-."],
+  ["verbieden","interdire","verbood","verboden","verboden","hebben","Préfixe ver- : pas de ge- au participe ; ie devient oo à l’OVT."],
+  ["gieten","verser","goot","goten","gegoten","hebben","Changement ie → oo ; participe avec ge-."],
+  ["buigen","plier, se courber","boog","bogen","gebogen","hebben","Changement ui → oo ; le participe revient à la voyelle o."],
+  ["kruipen","ramper","kroop","kropen","gekropen","zijn","Changement ui → oo ; auxiliaire zijn pour le déplacement."],
+  ["werpen","jeter, lancer","wierp","wierpen","geworpen","hebben","Changement e → ie à l’OVT et o au participe."],
+  ["treffen","rencontrer, toucher","trof","troffen","getroffen","hebben","Changement e → o ; le double f demeure au pluriel et au participe."],
+  ["zenden","envoyer","zond","zonden","gezonden","hebben","Changement e → o ; le d reste inchangé."],
+  ["klinken","sonner, résonner","klonk","klonken","geklonken","hebben","Changement i → o ; le groupe nk reste au participe."],
+  ["glimmen","briller","glom","glommen","geglommen","hebben","Changement i → o ; le double m se conserve."],
+  ["schelden","insulter, gronder","schold","scholden","gescholden","hebben","Changement e → o ; le participe conserve le groupe ld."],
+  ["schrikken","sursauter, avoir peur","schrok","schrokken","geschrokken","zijn","Changement i → o ; zijn décrit le changement d’état."],
+  ["smelten","fondre","smolt","smolten","gesmolten","hebben / zijn","Changement e → o ; zijn pour fondre, hebben pour faire fondre."],
+  ["spinnen","filer","spon","sponnen","gesponnen","hebben","Changement i → o ; le double n se conserve."],
+  ["vloeken","jurer, blasphémer","vloekte","vloekten","gevloekt","hebben","Verbe faible malgré la liste : k final donne -te selon ’t kofschip."],
+  ["wegen","peser","woog","wogen","gewogen","hebben","Changement e → oo ; attention à ne pas confondre avec l’OVT faible weegde."],
+  ["wijzen","indiquer, montrer","wees","wezen","gewezen","hebben","Changement ij → ee ; le z s’assourdit en s au singulier."],
+  ["prijzen","louer, faire l’éloge","prees","prezen","geprezen","hebben","Changement ij → ee ; le z devient s au singulier et reste z au pluriel."],
+  ["schijnen","briller, sembler","scheen","schenen","geschenen","hebben","Changement ij → ee ; le participe se forme avec ge-."],
+  ["verdwijnen","disparaître","verdween","verdwenen","verdwenen","zijn","Préfixe ver- : pas de ge- au participe ; auxiliaire zijn."],
+  ["verlaten","quitter, abandonner","verliet","verlieten","verlaten","hebben","Préfixe ver- : pas de ge- au participe ; e devient ie à l’OVT."],
+  ["raden","deviner, conseiller","raadde / ried","raadden / rieden","geraden","hebben","Deux OVT existent : la forme faible raadde et la forme forte ried."],
+  ["blazen","souffler","blies","bliezen","geblazen","hebben","Changement a → ie à l’OVT ; le z devient s au singulier."],
+  ["roepen","appeler, crier","riep","riepen","geroepen","hebben","Changement oe → ie à l’OVT ; participe avec oe."],
+  ["houden","tenir, garder","hield","hielden","gehouden","hebben","Changement ou → ie à l’OVT ; participe avec ou."]
+ ])
+);
+window.STAMTIJDEN_VERBS=STAMTIJDEN_VERBS;
+var STAM_LEVELS=['1er degré','2e degré','3e degré'];
+if(STAMTIJDEN_VERBS.length!==90||STAM_LEVELS.some(function(level){return STAMTIJDEN_VERBS.filter(function(verb){return verb.niveau===level;}).length!==(level==='1er degré'?30:level==='2e degré'?35:25);})||STAMTIJDEN_VERBS.some(function(verb){return ['fr','inf','ovtSg','ovtPl','vd','aux','niveau','piege'].some(function(key){return !verb[key];});})){
+ throw new Error('Stamtijden : les 90 verbes et leurs champs requis doivent être complets.');
+}
+var PROGRESS_KEY='zest-stamtijden-progress',stamView='study',stamQuiz=null,stamHideMode=false,stamMasks={ovt:true,vd:true,aux:true},stamRevealed={};
+function stamEscape(value){return String(value==null?'':value).replace(/[&<>"']/g,function(char){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];});}
+function cloneStam(value){return JSON.parse(JSON.stringify(value||{}));}
+function stamProfile(){return window.stu&&typeof window.me==='function'?window.me():null;}
+function stamStorageKey(){return PROGRESS_KEY+'-'+(window.stu||'guest');}
+function readStamProgress(){
+ var local=window.ld?window.ld(stamStorageKey(),{}):{},profile=stamProfile(),remote=profile&&profile.stamtijdenProgress;
+ if(!local||typeof local!=='object')local={};
+ if(!remote||typeof remote!=='object')remote={};
+ var selected=Number(local.updatedAt||0)>Number(remote.updatedAt||0)?local:remote;
+ if(!selected.verbs||typeof selected.verbs!=='object')selected={verbs:{},updatedAt:0};
+ return cloneStam(selected);
+}
+function writeStamProgress(progress){
+ progress.updatedAt=Date.now();
+ if(window.sv)window.sv(stamStorageKey(),progress);
+ if(window.stu&&typeof window.saveMe==='function')window.saveMe(function(user){user.stamtijdenProgress=cloneStam(progress);});
+}
+function stamRecord(inf,progress){
+ return progress.verbs&&progress.verbs[inf]||{status:'new',streak:0,attempts:0,correct:0,wrong:0};
+}
+function recordStamAnswer(verb,isCorrect){
+ var progress=readStamProgress();
+ progress.verbs=progress.verbs||{};
+ var record=stamRecord(verb.inf,progress);
+ record.attempts=(record.attempts||0)+1;
+ if(isCorrect){
+  record.correct=(record.correct||0)+1;
+  record.streak=(record.streak||0)+1;
+  record.status=record.streak>=2?'mastered':((record.wrong||0)>0?'review':'new');
+ }else{
+  record.wrong=(record.wrong||0)+1;
+  record.streak=0;
+  record.status='review';
+ }
+ record.updatedAt=Date.now();
+ progress.verbs[verb.inf]=record;
+ writeStamProgress(progress);
+ renderStamProgressBars();
+}
+function renderStamProgressBars(){
+ var box=document.getElementById('stam-degree-progress');
+ if(!box)return;
+ var progress=readStamProgress();
+ box.innerHTML=STAM_LEVELS.map(function(level){
+  var verbs=STAMTIJDEN_VERBS.filter(function(verb){return verb.niveau===level;});
+  var mastered=verbs.filter(function(verb){return stamRecord(verb.inf,progress).status==='mastered';}).length;
+  var percent=Math.round(mastered/verbs.length*100);
+  return '<div class="box"><div class="row"><b>'+stamEscape(level)+'</b><span>'+mastered+' / '+verbs.length+' maîtrisés</span></div><div style="height:8px;background:var(--bd);border-radius:99px;overflow:hidden;margin-top:8px"><div style="height:100%;width:'+percent+'%;background:var(--accent-grad);transition:width .2s"></div></div></div>';
+ }).join('');
+}
+function normalizedStam(value){
+ return String(value==null?'':value).toLocaleLowerCase().replace(/[.,!?;:]/g,'').replace(/\s+/g,' ').trim();
+}
+function matchesStamAnswer(value,expected){
+ var answer=normalizedStam(value);
+ return String(expected).split('/').some(function(variant){return answer===normalizedStam(variant);});
+}
+function auxiliaryChoices(verb){
+ return verb.aux.split('/').map(function(auxiliary){return auxiliary.trim();});
+}
+function speakStam(verb){
+ if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined'){
+  var status=document.getElementById('stam-status');if(status)status.textContent='La synthèse vocale n’est pas disponible sur ce navigateur.';
+  return;
+ }
+ try{
+  var auxiliary=verb.aux.replace(/\s*\/\s*/g,' ou '),utterance=new SpeechSynthesisUtterance(verb.inf+'. OVT enkelvoud: '+verb.ovtSg+'. OVT meervoud: '+verb.ovtPl+'. '+auxiliary+' '+verb.vd+'.');
+  utterance.lang='nl-NL';utterance.rate=0.82;
+  window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);
+ }catch(error){
+  console.error('Erreur de synthèse vocale des stamtijden :',error);
+  var feedback=document.getElementById('stam-status');if(feedback)feedback.textContent='Impossible de lancer la prononciation dans ce navigateur.';
+ }
+}
+function statusLabel(status){
+ return status==='mastered'?'Maîtrisé':status==='review'?'À revoir':'Non vu';
+}
+function maskCell(verb,field,maskGroup){
+ if(!stamHideMode||!stamMasks[maskGroup]||stamRevealed[verb.inf+'|'+field])return stamEscape(verb[field]);
+ return '<button class="btn sm" type="button" data-stam-action="reveal" data-inf="'+stamEscape(verb.inf)+'" data-field="'+field+'">Révéler</button>';
+}
+function renderStamStudyTable(){
+ var body=document.getElementById('stam-table-body'),count=document.getElementById('stam-match-count');
+ if(!body)return;
+ var query=normalizedStam((document.getElementById('stam-search')||{}).value||''),filter=(document.getElementById('stam-filter')||{}).value||'all',progress=readStamProgress();
+ var verbs=STAMTIJDEN_VERBS.filter(function(verb){
+  var record=stamRecord(verb.inf,progress);
+  var matchesFilter=filter==='all'||filter===verb.niveau||(filter==='review'&&record.status==='review');
+  var searchable=[verb.inf,verb.fr,verb.ovtSg,verb.ovtPl,verb.vd,verb.aux,verb.piege,verb.niveau].join(' ');
+  return matchesFilter&&(!query||normalizedStam(searchable).indexOf(query)>=0);
+ });
+ if(count)count.textContent=verbs.length+' verbe(s)';
+ body.innerHTML=verbs.map(function(verb){
+  var record=stamRecord(verb.inf,progress);
+  return '<tr><td><b>'+stamEscape(verb.inf)+'</b><br><span class="sub">'+stamEscape(verb.fr)+'</span></td><td>'+maskCell(verb,'ovtSg','ovt')+'</td><td>'+maskCell(verb,'ovtPl','ovt')+'</td><td>'+maskCell(verb,'vd','vd')+'</td><td>'+maskCell(verb,'aux','aux')+'</td><td><span class="tag '+(record.status==='mastered'?'g':record.status==='review'?'a':'')+'">'+statusLabel(record.status)+'</span><br><small class="sub">'+(record.streak||0)+'/2 bonnes réponses</small></td><td><button class="btn sm" type="button" data-stam-action="audio" data-inf="'+stamEscape(verb.inf)+'" aria-label="Écouter '+stamEscape(verb.inf)+'">🔊</button></td></tr>';
+ }).join('')||'<tr><td colspan="7" class="center sub">Aucun verbe ne correspond à la recherche ou au filtre.</td></tr>';
+}
+function renderStamStudy(){
+ var content=document.getElementById('stam-module-content');
+ if(!content)return;
+ content.innerHTML='<div class="box"><div class="grid2"><label for="stam-search"><b>Recherche instantanée</b><input class="inp" id="stam-search" type="search" placeholder="Infinitif néerlandais ou traduction française"></label><label for="stam-filter"><b>Filtrer les verbes</b><select class="inp" id="stam-filter"><option value="all">Tous les verbes</option><option value="1er degré">1er degré</option><option value="2e degré">2e degré</option><option value="3e degré">3e degré</option><option value="review">À revoir</option></select></label></div><div class="row" style="justify-content:flex-start"><button class="btn sm '+(stamHideMode?'grad':'')+'" type="button" data-stam-action="mask-mode">'+(stamHideMode?'Désactiver le mode révision':'Mode Révision (Masquer)')+'</button><label><input type="checkbox" data-stam-mask="ovt" '+(stamHideMode&&stamMasks.ovt?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer l’OVT</label><label><input type="checkbox" data-stam-mask="vd" '+(stamHideMode&&stamMasks.vd?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer le participe passé</label><label><input type="checkbox" data-stam-mask="aux" '+(stamHideMode&&stamMasks.aux?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer l’auxiliaire</label></div><p class="sub" id="stam-match-count" aria-live="polite"></p></div><div class="tw" style="overflow:auto;max-height:70vh"><table style="width:100%;min-width:860px;border-collapse:collapse"><thead><tr><th>Infinitif · français</th><th>OVT singulier</th><th>OVT pluriel</th><th>Participe passé</th><th>Auxiliaire</th><th>Maîtrise</th><th>Audio</th></tr></thead><tbody id="stam-table-body"></tbody></table></div><p id="stam-status" class="msg" role="status" aria-live="polite"></p>';
+ renderStamStudyTable();
+}
+function renderStamQuizConfig(){
+ var content=document.getElementById('stam-module-content');
+ if(!content)return;
+ content.innerHTML='<div class="box"><h3>Configurer ta série</h3><div class="grid2"><label for="stam-quiz-level">Degré<select class="inp" id="stam-quiz-level"><option value="all">Tous les degrés</option>'+STAM_LEVELS.map(function(level){return '<option value="'+stamEscape(level)+'">'+stamEscape(level)+'</option>';}).join('')+'</select></label><label for="stam-quiz-count">Nombre de verbes<select class="inp" id="stam-quiz-count"><option value="10">10 verbes</option><option value="20">20 verbes</option></select></label><label for="stam-quiz-difficulty">Difficulté<select class="inp" id="stam-quiz-difficulty"><option value="standard">Standard</option><option value="difficile">Difficile</option></select></label></div><p class="sub">Standard : infinitif et traduction visibles. Difficile : seule la traduction française est donnée; tu saisis aussi l’infinitif.</p><button class="btn grad" type="button" data-stam-action="start-quiz">Lancer la série ▶</button></div>';
+}
+function shuffleStam(verbs){
+ var result=verbs.slice();
+ for(var i=result.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),temp=result[i];result[i]=result[j];result[j]=temp;}
+ return result;
+}
+function startStamQuiz(verbs,difficulty,reviewing){
+ stamQuiz={verbs:verbs,index:0,score:0,errors:[],difficulty:difficulty,reviewing:!!reviewing,answered:false,results:[]};
+ renderStamQuizQuestion();
+}
+function startConfiguredStamQuiz(){
+ var level=(document.getElementById('stam-quiz-level')||{}).value||'all',count=Number((document.getElementById('stam-quiz-count')||{}).value)||10,difficulty=(document.getElementById('stam-quiz-difficulty')||{}).value||'standard';
+ var pool=STAMTIJDEN_VERBS.filter(function(verb){return level==='all'||verb.niveau===level;});
+ if(pool.length<count){
+  var status=document.getElementById('stam-status');if(status)status.textContent='Il n’y a pas assez de verbes pour cette série. Choisis 10 verbes ou une autre sélection.';
+  return;
+ }
+ startStamQuiz(shuffleStam(pool).slice(0,count),difficulty,false);
+}
+function quizFields(){
+ var fields=[];
+ if(stamQuiz.difficulty==='difficile')fields.push({key:'inf',label:'Infinitif'});
+ fields.push({key:'ovtSg',label:'OVT singulier'},{key:'ovtPl',label:'OVT pluriel'},{key:'vd',label:'Participe passé'},{key:'aux',label:'Auxiliaire'});
+ return fields;
+}
+function renderStamQuizQuestion(){
+ if(!stamQuiz)return;
+ if(stamQuiz.index>=stamQuiz.verbs.length){renderStamQuizResult();return;}
+ var content=document.getElementById('stam-module-content'),verb=stamQuiz.verbs[stamQuiz.index],hard=stamQuiz.difficulty==='difficile';
+ if(!content)return;
+ var title='Verbe '+(stamQuiz.index+1)+' / '+stamQuiz.verbs.length;
+ var prompt=hard?'<h3>'+stamEscape(verb.fr)+'</h3>':('<h3>'+stamEscape(verb.inf)+' <span class="sub">— '+stamEscape(verb.fr)+'</span></h3>');
+ if(!stamQuiz.answered){
+  var fields=quizFields().map(function(field){
+   if(field.key==='aux')return '<label class="stam-quiz-field" for="stam-answer-aux"><b>'+field.label+'</b><select class="inp" id="stam-answer-aux"><option value="">Choisir…</option><option value="hebben">hebben</option><option value="zijn">zijn</option></select></label>';
+   return '<label class="stam-quiz-field" for="stam-answer-'+field.key+'"><b>'+field.label+'</b><input class="inp" id="stam-answer-'+field.key+'" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Ta réponse"></label>';
+  }).join('');
+  content.innerHTML='<div class="box"><div class="row"><b>'+title+(stamQuiz.reviewing?' · Révision des erreurs':'')+'</b><span>'+stamEscape(verb.niveau)+'</span></div>'+prompt+'<form id="stam-answer-form" novalidate><div class="grid2">'+fields+'</div><button class="btn grad" type="submit">Corriger mes réponses</button></form></div>';
+  return;
+ }
+ var feedback=stamQuiz.results.map(function(result){
+  var shown=result.value?stamEscape(result.value):'<i>aucune réponse</i>';
+  return '<div class="stam-field-result '+(result.correct?'correct':'wrong')+'"><b>'+stamEscape(result.label)+' :</b> '+(result.correct?'✅ Correcte — ':'❌ Ta réponse : ')+shown+(!result.correct?' · Réponse attendue : <b>'+stamEscape(result.expected)+'</b>':'')+'</div>';
+ }).join('');
+ content.innerHTML='<div class="box"><div class="row"><b>'+title+(stamQuiz.reviewing?' · Révision des erreurs':'')+'</b><button class="btn sm" type="button" data-stam-action="audio" data-inf="'+stamEscape(verb.inf)+'">🔊 Écouter la correction</button></div>'+prompt+'<div>'+feedback+'</div><p class="box"><b>Astuce :</b> '+stamEscape(verb.piege)+'</p><p class="msg '+(stamQuiz.results.every(function(result){return result.correct;})?'ok':'')+'">'+(stamQuiz.results.every(function(result){return result.correct;})?'✅ Toutes les formes sont correctes.':'Relis la règle puis compare chaque forme à la correction.')+'</p><button class="btn grad" type="button" data-stam-action="next-quiz">Verbe suivant ➡</button></div>';
+}
+function submitStamQuiz(){
+ if(!stamQuiz||stamQuiz.answered)return;
+ var verb=stamQuiz.verbs[stamQuiz.index],fields=quizFields(),results=fields.map(function(field){
+  var control=document.getElementById('stam-answer-'+field.key),value=control?control.value:'',expected=verb[field.key];
+  return {key:field.key,label:field.label,value:value,expected:expected,correct:matchesStamAnswer(value,expected)};
+ });
+ var fullyCorrect=results.every(function(result){return result.correct;});
+ stamQuiz.answered=true;stamQuiz.results=results;
+ if(fullyCorrect)stamQuiz.score++;
+ else if(!stamQuiz.errors.some(function(item){return item.inf===verb.inf;}))stamQuiz.errors.push(verb);
+ recordStamAnswer(verb,fullyCorrect);
+ renderStamQuizQuestion();
+}
+function renderStamQuizResult(){
+ var content=document.getElementById('stam-module-content');
+ if(!content||!stamQuiz)return;
+ var errors=stamQuiz.errors.length,quizResult=stamQuiz;
+ content.innerHTML='<div class="card center"><div style="font-size:42px">'+(quizResult.score===quizResult.verbs.length?'🏆':'📝')+'</div><h3>'+(quizResult.reviewing?'Révision terminée':'Série terminée')+'</h3><p style="font-size:22px;font-weight:800;color:var(--accent)">'+quizResult.score+' / '+quizResult.verbs.length+' verbes entièrement corrects</p><p class="sub">'+(errors?errors+' verbe(s) à revoir.':'Excellent, toutes les réponses sont correctes !')+'</p>'+(errors?'<button class="btn grad" type="button" data-stam-action="review-errors">Revoir mes erreurs ('+errors+')</button> ':'')+'<button class="btn" type="button" data-stam-action="quiz-config">Nouvelle série</button> <button class="btn sm" type="button" data-stam-action="study">Retour au tableau</button></div>';
+}
+function renderStamView(view){
+ stamView=view;renderStamProgressBars();
+ if(view==='study')renderStamStudy();
+ else if(view==='quiz-config'){stamQuiz=null;renderStamQuizConfig();}
+ else if(view==='quiz')renderStamQuizQuestion();
+ else if(view==='result')renderStamQuizResult();
+}
+function handleStamAction(action,button){
+ var module=document.getElementById('stam-module');
+ if(action==='open'){module.classList.remove('hide');renderStamView('study');module.scrollIntoView({behavior:'smooth',block:'start'});}
+ else if(action==='close'){module.classList.add('hide');}
+ else if(action==='study'){stamHideMode=false;stamMasks={ovt:true,vd:true,aux:true};stamRevealed={};renderStamView('study');}
+ else if(action==='quiz-config')renderStamView('quiz-config');
+ else if(action==='mask-mode'){stamHideMode=!stamHideMode;stamMasks={ovt:stamHideMode,vd:stamHideMode,aux:stamHideMode};stamRevealed={};renderStamStudy();}
+ else if(action==='reveal'){stamRevealed[button.getAttribute('data-inf')+'|'+button.getAttribute('data-field')]=true;renderStamStudyTable();}
+ else if(action==='audio'){var verb=STAMTIJDEN_VERBS.filter(function(item){return item.inf===button.getAttribute('data-inf');})[0];if(verb)speakStam(verb);}
+ else if(action==='start-quiz'){startConfiguredStamQuiz();stamView='quiz';}
+ else if(action==='submit-quiz')submitStamQuiz();
+ else if(action==='next-quiz'){stamQuiz.index++;stamQuiz.answered=false;stamQuiz.results=[];renderStamQuizQuestion();}
+ else if(action==='review-errors'&&stamQuiz){var failed=stamQuiz.errors.slice(),difficulty=stamQuiz.difficulty;startStamQuiz(failed,difficulty,true);}
+}
+var trainingTab=document.getElementById('tab-quiz');
+if(trainingTab){
+ trainingTab.addEventListener('click',function(event){
+  var button=event.target.closest?event.target.closest('[data-stam-action]'):null;
+  if(button)handleStamAction(button.getAttribute('data-stam-action'),button);
+ });
+ trainingTab.addEventListener('input',function(event){if(event.target.id==='stam-search')renderStamStudyTable();});
+ trainingTab.addEventListener('change',function(event){
+  if(event.target.id==='stam-filter')renderStamStudyTable();
+  else if(event.target.hasAttribute('data-stam-mask')){stamMasks[event.target.getAttribute('data-stam-mask')]=event.target.checked;stamRevealed={};renderStamStudyTable();}
+ });
+ trainingTab.addEventListener('submit',function(event){if(event.target.id==='stam-answer-form'){event.preventDefault();submitStamQuiz();}});
+ trainingTab.addEventListener('keydown',function(event){
+  if(event.key==='Enter'&&event.target.matches&&event.target.matches('#stam-answer-form input')){event.preventDefault();submitStamQuiz();}
+ });
+}
+})();
 </script>
 <!-- SUPPRESSION DE COMPTE : confirmation par double mot de passe -->
 <div id="delete-account-modal" class="modal hide" role="dialog" aria-modal="true" aria-labelledby="delete-account-title" aria-describedby="delete-account-copy">
