@@ -503,9 +503,9 @@ body.dark .auth-form .msg.ok{border-color:#166534;background:#052e16;color:#bbf7
 @media(max-width:420px){.auth-card{padding:20px 16px}.auth-role-switch{gap:6px}.auth-role-pill{padding:8px 5px;font-size:12px}}
 .auth-label{display:block;margin:0 0 6px;color:var(--txt);font-size:14px;font-weight:700}
 .auth-hint{margin:-6px 0 14px;color:var(--sub);font-size:12px;line-height:1.4}
-#tab-connexion .auth-field{display:block;width:100%;min-height:48px;margin:0 0 14px;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;background:var(--card);color:var(--txt);font-size:16px;line-height:1.3;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-#tab-connexion .auth-field:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2);outline:none}
-body.dark #tab-connexion .auth-field{border-color:#475569}
+#tab-connexion .auth-field,#delete-account-modal .auth-field{display:block;width:100%;min-height:48px;margin:0 0 14px;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;background:var(--card);color:var(--txt);font-size:16px;line-height:1.3;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+#tab-connexion .auth-field:focus,#delete-account-modal .auth-field:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.2);outline:none}
+body.dark #tab-connexion .auth-field,body.dark #delete-account-modal .auth-field{border-color:#475569}
 .auth-field-group>.sub{margin:0 0 14px;line-height:1.55}
 .auth-resend{display:block;margin:0 0 14px;padding:4px 0}
 .auth-notice{margin:0 0 18px;padding:22px 18px;border:2px solid #22c55e;border-radius:14px;background:#f0fdf4;color:#14532d;text-align:center}
@@ -521,6 +521,14 @@ body.dark .auth-notice{background:#052e16;color:#bbf7d0}
 .auth-notice .msg:not(.ok):not(:empty){border:1px solid #fecaca;background:#fef2f2;color:#b91c1c}
 body.dark .auth-notice .msg.ok{border-color:#166534;background:#052e16;color:#bbf7d0}
 body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background:#450a0a;color:#fecaca}
+.acct-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center}
+.btn-danger-outline{background:transparent;color:#ef4444;border:1px solid #ef4444}
+.btn-danger-outline:hover{background:#ef444418}
+.auth-notice.warn{border-color:#f59e0b;background:#fffbeb;color:#78350f}
+body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
+.account-lock{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,23,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.account-lock .mbox{max-width:480px;width:100%}
+#delete-account-modal .auth-form{margin:0}
 </style>
 </head>
 <body class="dark yaya-home">
@@ -812,7 +820,7 @@ body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background
  <div class="card">
   <span class="tag v">🪄 Quiz personnalisé</span>
   <h2>Transforme ton cours en quiz</h2>
-  <p class="sub">Colle ton texte de cours ou ajoute une photo de tes notes. Avec une clé Gemini configurée, Yaya analyse le document et prépare trois niveaux de quiz. Le contenu fourni sera transmis à l’API Google Gemini.</p>
+  <p class="sub">Colle ton texte de cours ou ajoute une photo de tes notes. Yaya analyse le document et prépare trois niveaux de quiz. Le contenu fourni sera transmis à l’API Google Gemini via le service sécurisé de Zest.</p>
   <label for="ai-cours-photo" class="sub" style="display:block;margin:12px 0 6px"><b>📷 Photo de ton cours</b></label>
   <input class="inp" id="ai-cours-photo" type="file" accept="image/*" capture="environment">
   <div class="box center hide" id="ai-cours-photo-preview-box">
@@ -903,11 +911,20 @@ body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background
 
    <!-- Message affiché après l'inscription -->
    <div id="auth-verify-notice" class="auth-notice hide" role="status" aria-live="polite">
-    <p class="auth-notice-title">✅ Ton compte a bien été créé !</p>
+    <p class="auth-notice-title">✅ Ton compte Zest a bien été créé !</p>
     <p class="auth-notice-text">Un e-mail de confirmation vient d’être envoyé à <strong id="auth-notice-email"></strong>. Clique sur le lien dans le mail pour activer ton compte avant de te connecter.</p>
     <p class="msg" id="auth-notice-msg" role="status" aria-live="polite"></p>
     <div class="auth-notice-actions">
-     <button class="btn" id="auth-notice-resend-btn" type="button">Renvoyer l’e-mail de confirmation</button>
+     <button class="btn" id="auth-notice-resend-btn" type="button">Renvoyer l’e-mail</button>
+     <button class="btn grad" type="button" onclick="setAuthMode('login')">Aller à la connexion</button>
+    </div>
+   </div>
+
+   <!-- Message d'information (suppression de compte) -->
+   <div id="auth-info-notice" class="auth-notice warn hide" role="status" aria-live="polite">
+    <p class="auth-notice-title" id="auth-info-title"></p>
+    <p class="auth-notice-text" id="auth-info-text"></p>
+    <div class="auth-notice-actions">
      <button class="btn grad" type="button" onclick="setAuthMode('login')">Aller à la connexion</button>
     </div>
    </div>
@@ -920,7 +937,7 @@ body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background
     <input class="inp auth-field" id="login-pass" type="password" placeholder="Ton mot de passe" autocomplete="current-password">
     <button class="link auth-forgot" id="auth-forgot-btn" type="button">Mot de passe oublié ?</button>
     <p class="msg" id="login-msg" role="alert" aria-live="assertive"></p>
-    <button class="link auth-resend hide" id="auth-resend-btn" type="button">Renvoyer l’e-mail de confirmation</button>
+    <button class="link auth-resend hide" id="auth-resend-btn" type="button">Renvoyer l’e-mail</button>
     <button class="btn grad full auth-submit tw-w-full" id="login-btn" type="submit">Se connecter</button>
    </form>
 
@@ -953,10 +970,14 @@ body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background
   </div>
 
   <div id="firebase-auth-session" class="hide box center" role="status" aria-live="polite" style="background:#10b98111;border-color:#10b981;padding:20px">
-   <h3 style="color:#10b981">✅ Connecté à Zest</h3>
-   <p id="firebase-auth-user" style="font-weight:600;margin:10px 0"></p>
+   <h3 style="color:#10b981">Mon compte</h3>
+   <p style="font-weight:600;margin:6px 0 0">✅ Connecté</p>
+   <p id="firebase-auth-user" style="margin:6px 0 12px"></p>
    <p class="msg" id="firebase-session-message" role="status" aria-live="polite"></p>
-   <button class="btn red" id="firebase-signout-button" type="button">Se déconnecter 🚪</button>
+   <div class="auth-notice-actions">
+    <button class="btn red" id="firebase-signout-button" type="button">Se déconnecter 🚪</button>
+    <button class="btn btn-danger-outline" type="button" onclick="openDeleteAccount()">Supprimer mon compte</button>
+   </div>
   </div>
  </div>
 </section>
@@ -1034,13 +1055,13 @@ body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background
   </div>
 
   <h3>🎯 Difficultés par sujet (Erreurs analysées)</h3><div id="mistakes"></div>
-  <button class="btn red sm" onclick="zestLogout()">Se déconnecter</button>
+  <span class="acct-actions"><button class="btn red sm" onclick="zestLogout()">Se déconnecter</button><button class="btn sm btn-danger-outline" type="button" onclick="openDeleteAccount()">Supprimer mon compte</button></span>
  </div>
 
  <div id="portail-teacher" class="card hide">
   <div class="row" style="border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:16px">
    <div><span class="tag g">Professeur connecté</span><h2 id="t-name"></h2><small class="sub" id="t-dash-email"></small></div>
-   <button class="btn red sm" onclick="zestLogout()">Se déconnecter</button>
+   <span class="acct-actions"><button class="btn red sm" onclick="zestLogout()">Se déconnecter</button><button class="btn sm btn-danger-outline" type="button" onclick="openDeleteAccount()">Supprimer mon compte</button></span>
   </div>
   <div id="t-tools">
    <div class="box"><h3>📌 Annonce de classe</h3><textarea class="inp" id="teacher-announcement-input" rows="3" maxlength="240" placeholder="Ex. : Interro sur les verbes séparables mardi !"></textarea><button class="btn amber" type="button" onclick="publishAnnouncement('teacher-announcement-input')">Épingler l’annonce</button><button class="btn red sm" type="button" onclick="removeAnnouncement()">Retirer l’annonce</button><small class="sub">Stockée sur cet appareil ; visible aux visiteurs de cette installation.</small></div>
@@ -1063,7 +1084,7 @@ body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background
  <div id="portail-direction" class="card hide" style="border-color:#d97706">
   <div class="row" style="border-bottom:1px solid var(--bd);padding-bottom:14px;margin-bottom:16px">
    <div><span class="tag a">🏛️ Direction connectée</span><h2 id="dir-logged-name">Institut Saint-Joseph</h2></div>
-   <button class="btn red sm" onclick="zestLogout()">Se déconnecter</button>
+   <span class="acct-actions"><button class="btn red sm" onclick="zestLogout()">Se déconnecter</button><button class="btn sm btn-danger-outline" type="button" onclick="openDeleteAccount()">Supprimer mon compte</button></span>
   </div>
   <div class="grid3" style="margin-bottom:14px">
    <div class="box"><small class="sub">TOTAL ÉLÈVES</small><h2 id="dir-tot-stu" style="color:var(--accent);font-size:28px">0</h2></div>
@@ -1127,7 +1148,10 @@ body.dark .auth-notice .msg:not(.ok):not(:empty){border-color:#7f1d1d;background
 </div>
 
 <script>
-const API_KEY = "A_REMPLIR";
+// ===== Analyse de cours par IA : adresse du proxy Cloudflare Worker =====
+// La clé Gemini n'est JAMAIS dans ce fichier : elle est stockée comme secret dans le Worker (voir worker.js).
+// Remplace A_REMPLIR par le sous-domaine de ton Worker une fois celui-ci déployé.
+const GEMINI_PROXY_URL = "https://zest-gemini-proxy.A_REMPLIR.workers.dev";
 var $ = function(i){ return document.getElementById(i); };
 var customSelectCounter=0,customSelectMutationObserver=null;
 function syncCustomSelect(select){
@@ -1570,8 +1594,8 @@ function renderHeaderProfile(){
  if(avatar){avatar.classList.toggle('is-online',!!session);avatar.classList.toggle('is-offline',!session);avatar.setAttribute('aria-label','Yaya, la mascotte de Zest, '+(session?'en ligne':'hors ligne'));avatar.title=session?'Yaya est en ligne':'Yaya est hors ligne';}
  if(homePresence){homePresence.textContent=session?'🟢 En ligne':'🌙 Hors ligne';homePresence.className='tag '+(session?'g':'v');}
  var homeTitle=$('home-profile-title'),homeCopy=$('home-profile-copy');
- if(homeTitle)homeTitle.textContent=stu?'Mon profil & paramètres':tch?'Espace professeur':dir?'Espace direction':firebaseUser?'Compte Firebase':'Connexion et profil';
- if(homeCopy)homeCopy.textContent=stu?'Bienvenue, '+stu+' ! Consulte ton profil, tes points et tes paramètres.':tch?'Connecté à l’espace professeur (classe '+tch+').':dir?'Connecté à l’espace direction ('+dir+').':firebaseUser?'Connecté en tant que '+(firebaseUser.displayName||firebaseUser.email||'utilisateur Firebase')+'. Connecte-toi aussi avec ton profil Zest pour retrouver ta progression.':'Connecte-toi pour accéder à ton profil et à tes paramètres.';
+ if(homeTitle)homeTitle.textContent=stu?'Mon profil & paramètres':tch?'Espace professeur':dir?'Espace direction':firebaseUser?'Mon compte':'Connexion et profil';
+ if(homeCopy)homeCopy.textContent=stu?'Bienvenue, '+stu+' ! Consulte ton profil, tes points et tes paramètres.':tch?'Connecté à l’espace professeur (classe '+tch+').':dir?'Connecté à l’espace direction ('+dir+').':firebaseUser?'Connecté en tant que '+(firebaseUser.displayName||firebaseUser.email||'utilisateur')+'.':'Connecte-toi pour accéder à ton profil et à tes paramètres.';
  if(session&&session!==avatarBubbleSession)showAvatarBubble(getAvatarGreeting(),4000);
  avatarBubbleSession=session;
 }
@@ -2069,6 +2093,50 @@ function renderAICourseLoading(output){
  output.appendChild(card);
 }
 
+/* ===== Analyse de cours : appel du proxy (le Worker limite les requêtes à 2 Mo) ===== */
+var GEMINI_MAX_BODY_BYTES=1900000,GEMINI_MAX_IMAGE_SIDE=1600,GEMINI_IMAGE_QUALITY=0.82;
+
+function isGeminiProxyConfigured(){
+ return typeof GEMINI_PROXY_URL==='string'&&GEMINI_PROXY_URL.indexOf('A_REMPLIR')===-1&&/^https:\/\/[^\s]+$/.test(GEMINI_PROXY_URL);
+}
+
+function describeGeminiProxyError(status){
+ if(status===400)return 'La demande n’a pas pu être traitée. Essaie avec une autre photo ou un autre texte.';
+ if(status===403)return 'Le service d’analyse n’accepte pas les demandes depuis cette page.';
+ if(status===413)return 'Le document est trop volumineux. Utilise une photo plus légère ou un texte plus court.';
+ if(status===429)return 'Le service d’analyse est très sollicité en ce moment. Réessaie dans quelques minutes.';
+ if(status===404||status===500)return 'Le service d’analyse n’est pas disponible pour le moment. Réessaie plus tard.';
+ if(status>=500)return 'Le service d’analyse est momentanément indisponible. Réessaie dans quelques instants.';
+ return 'Le service d’analyse a rencontré un problème (code '+status+'). Réessaie dans quelques instants.';
+}
+
+function loadImageForCanvas(file){
+ return new Promise(function(resolve,reject){
+  var url=URL.createObjectURL(file),img=new Image();
+  img.onload=function(){URL.revokeObjectURL(url);resolve(img);};
+  img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('Image illisible.'));};
+  img.src=url;
+ });
+}
+
+/* Réduit la photo (dimensions et poids) avant l'envoi : une photo de téléphone dépasse souvent 2 Mo. */
+async function prepareImageForUpload(file){
+ try{
+  var img=await loadImageForCanvas(file),width=img.naturalWidth||img.width,height=img.naturalHeight||img.height;
+  if(!width||!height)throw new Error('Image vide.');
+  var scale=Math.min(1,GEMINI_MAX_IMAGE_SIDE/Math.max(width,height)),canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(width*scale));canvas.height=Math.max(1,Math.round(height*scale));
+  var context=canvas.getContext('2d');context.fillStyle='#fff';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(img,0,0,canvas.width,canvas.height);
+  var blob=await new Promise(function(resolve){canvas.toBlob(resolve,'image/jpeg',GEMINI_IMAGE_QUALITY);});
+  if(!blob)throw new Error('Encodage impossible.');
+  return {mimeType:'image/jpeg',data:await fileToBase64(blob)};
+ }catch(error){
+  /* Format que le navigateur ne sait pas décoder (ex. HEIC sous Chrome) : on envoie l'original s'il est assez léger. */
+  if(file.size<=1200000&&['image/jpeg','image/png','image/webp','image/heic','image/heif'].indexOf(file.type)!==-1)return {mimeType:file.type,data:await fileToBase64(file)};
+  throw new Error('Cette photo ne peut pas être préparée pour l’analyse. Essaie avec une photo plus légère au format JPEG ou PNG.');
+ }
+}
+
 async function analyserFeuilleCours(imageFile){
  var input=$('ai-cours-text'),text=input?input.value.trim():'',feedback=$('ai-cours-feedback'),output=$('ai-cours-quiz'),parts=[];
  if(!imageFile&&!text){
@@ -2076,8 +2144,9 @@ async function analyserFeuilleCours(imageFile){
   if(output)output.textContent='';
   return;
  }
- if(API_KEY==='A_REMPLIR'){
-  if(feedback){feedback.textContent='Configure API_KEY dans le fichier pour activer l’analyse Gemini. N’inscris pas une vraie clé dans une version publique de l’application.';feedback.className='msg';}
+ if(!isGeminiProxyConfigured()){
+  console.warn('GEMINI_PROXY_URL n’est pas configurée : remplace A_REMPLIR par l’adresse de ton Worker Cloudflare (voir worker.js).');
+  if(feedback){feedback.textContent='L’analyse de cours n’est pas encore disponible pour le moment. Réessaie plus tard.';feedback.className='msg';}
   return;
  }
  if(imageFile&&(!imageFile.type||imageFile.type.indexOf('image/')!==0)){
@@ -2089,18 +2158,27 @@ async function analyserFeuilleCours(imageFile){
  try{
   var systemPrompt='Tu es Yaya, le professeur virtuel de l’application Zest. Ton rôle est d’aider des élèves de l’enseignement secondaire belge (niveau 3e année technique/générale) à apprendre le néerlandais. RÈGLES STRICTES : 1. Analyse l’image ou le texte du cours fourni par l’élève. 2. Identifie les règles de grammaire (ex: rejet du verbe avec omdat, verbes irréguliers) et le vocabulaire clé du document. 3. Génère un quiz sur mesure structuré en 3 modes : RAPIDE (Échauffement) : exactement 3 questions QCM très simples sur le vocabulaire pur ; MOYEN (Entraînement) : exactement 3 phrases à trous pour tester la grammaire et le contexte ; DIFFICILE (Défi) : exactement 2 questions pièges ou de traduction (Français -> Néerlandais) nécessitant de la réflexion. 4. Réponds UNIQUEMENT en JSON valide, sans Markdown ni autre texte, selon exactement cette structure : {"rapide":[{"question":"...","options":["...","...","...","..."],"reponse":"..."}],"moyen":[{"question":"...","options":["...","...","...","..."],"reponse":"..."}],"difficile":[{"question":"...","options":[],"reponse":"..."}]}. Pour les QCM, la réponse doit être identique à l’une des options. Pour les questions difficiles à réponse libre, laisse options vide et fournis reponse comme réponse attendue.';
   if(text)parts.push({text:'Texte du cours fourni par l’élève :\n'+text});
-  if(imageFile)parts.push({inlineData:{mimeType:imageFile.type,data:await fileToBase64(imageFile)}});
-  var response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(API_KEY),{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({
-    systemInstruction:{parts:[{text:systemPrompt}]},
-    contents:[{role:'user',parts:parts}],
-    generationConfig:{responseMimeType:'application/json'}
-   })
+  if(imageFile)parts.push({inlineData:await prepareImageForUpload(imageFile)});
+  var requestBody=JSON.stringify({
+   systemInstruction:{parts:[{text:systemPrompt}]},
+   contents:[{role:'user',parts:parts}],
+   generationConfig:{responseMimeType:'application/json'}
   });
-  var result=await response.json();
-  if(!response.ok)throw new Error(result&&result.error&&result.error.message?result.error.message:'Réponse API invalide (HTTP '+response.status+').');
+  if(new Blob([requestBody]).size>GEMINI_MAX_BODY_BYTES)throw new Error('Le document est trop volumineux. Utilise une photo plus légère ou un texte plus court.');
+  var response;
+  try{
+   response=await fetch(GEMINI_PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:requestBody});
+  }catch(networkError){
+   console.error('Le proxy d’analyse est injoignable :',networkError);
+   throw new Error('Impossible de joindre le service d’analyse. Vérifie ta connexion Internet et réessaie.');
+  }
+  var result=null;
+  try{result=await response.json();}catch(parseError){result=null;}
+  if(!response.ok){
+   console.error('Réponse d’erreur du proxy d’analyse (HTTP '+response.status+') :',result);
+   throw new Error(describeGeminiProxyError(response.status));
+  }
+  if(!result)throw new Error('Le service d’analyse a renvoyé une réponse illisible. Réessaie dans quelques instants.');
   var generatedText=result&&result.candidates&&result.candidates[0]&&result.candidates[0].content&&result.candidates[0].content.parts&&result.candidates[0].content.parts.map(function(part){return part.text||'';}).join('');
   if(!generatedText)throw new Error('Gemini n’a retourné aucun contenu de quiz.');
   var modes=JSON.parse(generatedText);
@@ -4600,6 +4678,39 @@ if(location.protocol==='file:'){
  offlineStatus.classList.remove('hide');
 }
 </script>
+<!-- SUPPRESSION DE COMPTE : confirmation par double mot de passe -->
+<div id="delete-account-modal" class="modal hide" role="dialog" aria-modal="true" aria-labelledby="delete-account-title" aria-describedby="delete-account-copy">
+ <div class="mbox" style="max-width:460px;width:100%">
+  <h2 id="delete-account-title">Supprimer mon compte</h2>
+  <p class="sub" id="delete-account-copy" style="margin:8px 0 16px;line-height:1.55">Ton compte Zest sera supprimé définitivement dans 7 jours. Tu pourras l’annuler en te reconnectant avant cette date. Pour confirmer, saisis ton mot de passe actuel deux fois.</p>
+  <form id="delete-account-form" class="auth-form" method="post" action="#" onsubmit="return false" novalidate>
+    <label class="auth-label" for="delete-pass1">Mot de passe actuel</label>
+    <input class="inp auth-field" id="delete-pass1" type="password" placeholder="Ton mot de passe" autocomplete="current-password">
+    <label class="auth-label" for="delete-pass2">Confirme ton mot de passe actuel</label>
+    <input class="inp auth-field" id="delete-pass2" type="password" placeholder="Retape ton mot de passe" autocomplete="current-password">
+    <p class="msg" id="delete-account-msg" role="alert" aria-live="assertive"></p>
+    <div class="auth-notice-actions">
+     <button class="btn" type="button" id="delete-account-cancel">Annuler</button>
+     <button class="btn red" type="submit" id="delete-account-confirm">Supprimer mon compte</button>
+    </div>
+  </form>
+ </div>
+</div>
+
+<!-- COMPTE EN COURS DE SUPPRESSION : écran bloquant tant que le compte n'est pas récupéré -->
+<div id="account-lock" class="account-lock hide" role="alertdialog" aria-modal="true" aria-labelledby="account-lock-title" aria-describedby="account-lock-copy">
+ <div class="mbox center">
+  <span class="tag a">Suppression programmée</span>
+  <h2 id="account-lock-title" style="margin:10px 0">Ton compte Zest est en cours de suppression</h2>
+  <p class="sub" id="account-lock-copy" style="margin:0 0 14px;line-height:1.55"></p>
+  <p class="msg" id="account-lock-msg" role="alert" aria-live="assertive"></p>
+  <div class="auth-notice-actions">
+   <button class="btn grad" id="account-recover-btn" type="button">Récupérer mon compte</button>
+   <button class="btn" id="account-lock-signout-btn" type="button">Se déconnecter</button>
+  </div>
+ </div>
+</div>
+
 <!-- PROFILS ZEST : validation, profils locaux, progression et session (l’authentification et Firestore sont gérés dans le module Firebase plus bas) -->
 <script>
 (function(){
@@ -4721,6 +4832,7 @@ if(location.protocol==='file:'){
   show('auth-login-form', login);
   show('auth-signup-form', !login);
   show('auth-verify-notice', false);
+  show('auth-info-notice', false);
   show('auth-resend-btn', false);
   [['auth-tab-login', login], ['auth-tab-signup', !login]].forEach(function(pair){
    var b = $(pair[0]);
@@ -4733,7 +4845,17 @@ if(location.protocol==='file:'){
   say('auth-notice-msg', '');
   show('auth-login-form', false);
   show('auth-signup-form', false);
+  show('auth-info-notice', false);
   show('auth-verify-notice', true);
+ }
+ function showInfoNotice(title, text){
+  var ti = $('auth-info-title'), te = $('auth-info-text');
+  if(ti) ti.textContent = title || '';
+  if(te) te.textContent = text || '';
+  show('auth-login-form', false);
+  show('auth-signup-form', false);
+  show('auth-verify-notice', false);
+  show('auth-info-notice', true);
  }
 
  /* ===== Inscription : lecture et validation du formulaire ===== */
@@ -4940,6 +5062,43 @@ if(location.protocol==='file:'){
   say(msg, 'Pseudo modifié : ' + np + (cost ? ' (−200 points)' : ''), true);
  };
 
+ /* Efface de cet appareil les données du compte supprimé (profil, flashcards, scans, suivi de synchronisation, session).
+    Les autres profils présents sur l’appareil (autres élèves, données de classe) et les préférences ne sont pas touchés. */
+ function wipeAccount(uid){
+  Object.keys(ROLES).forEach(function(role){
+   var cfg = ROLES[role], store = ld(cfg.store, {}), changed = false;
+   Object.keys(store).forEach(function(k){
+    var a = store[k];
+    if(a && typeof a === 'object' && a.fbUid === uid){
+     delete store[k]; changed = true;
+     ['zest-srs-cards-', 'zest-scan-history-'].forEach(function(p){ try{ localStorage.removeItem(p + k); }catch(e){} });
+    }
+   });
+   if(changed) rawSv(cfg.store, store);
+  });
+  dropPending(uid);
+  var m = ld(SYNC_KEY, {}); if(has(m, uid)){ delete m[uid]; rawSv(SYNC_KEY, m); }
+  Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
+ }
+
+ /* ===== Fenêtre « Supprimer mon compte » (la vérification du mot de passe est faite par le module de connexion) ===== */
+ window.openDeleteAccount = function(){
+  var f = $('delete-account-form'); if(f) f.reset();
+  say('delete-account-msg', '');
+  show('delete-account-modal', true);
+  setTimeout(function(){ var i = $('delete-pass1'); if(i) i.focus(); }, 60);
+ };
+ window.closeDeleteAccount = function(){
+  var f = $('delete-account-form'); if(f) f.reset();
+  show('delete-account-modal', false);
+ };
+ var cancelDelete = $('delete-account-cancel');
+ if(cancelDelete) cancelDelete.addEventListener('click', window.closeDeleteAccount);
+ document.addEventListener('keydown', function(e){
+  var m = $('delete-account-modal');
+  if(e.key === 'Escape' && m && !m.classList.contains('hide')) window.closeDeleteAccount();
+ });
+
  window.zestLocal = {
   readSignup: readSignup, initialProgress: initialProgress,
   savePending: savePending, readPending: readPending, dropPending: dropPending, defaultProfileFor: defaultProfileFor,
@@ -4947,7 +5106,7 @@ if(location.protocol==='file:'){
   collectProgress: collectProgress, markSynced: markSynced, readMeta: readMeta,
   roleToCloud: function(r){ return has(ROLES, r) ? ROLES[r].cloud : null; },
   roleLabel: function(r){ return has(ROLES, r) ? ROLES[r].label : ''; },
-  clearSession: clearSession, showVerifyNotice: showVerifyNotice
+  clearSession: clearSession, showVerifyNotice: showVerifyNotice, showInfoNotice: showInfoNotice, wipeAccount: wipeAccount
  };
 
  /* ===== Plus d’écran « Accès restreint » : sans session, l’onglet Profil renvoie vers la connexion ===== */
@@ -4960,7 +5119,7 @@ if(location.protocol==='file:'){
 
  /* ===== Branchements ===== */
  /* Garde-fou : si le module Firebase n’a pas pu se charger, on évite l’envoi natif du formulaire (e-mail/mot de passe dans l’URL). */
- [['auth-login-form', 'login-msg'], ['auth-signup-form', 'signup-msg']].forEach(function(pair){
+ [['auth-login-form', 'login-msg'], ['auth-signup-form', 'signup-msg'], ['delete-account-form', 'delete-account-msg']].forEach(function(pair){
   var f = $(pair[0]);
   if(f) f.addEventListener('submit', function(e){
    e.preventDefault();
@@ -4979,6 +5138,9 @@ if(location.protocol==='file:'){
     signInWithEmailAndPassword,
     sendEmailVerification,
     sendPasswordResetEmail,
+    EmailAuthProvider,
+    reauthenticateWithCredential,
+    deleteUser,
     updateProfile,
     onAuthStateChanged,
     signOut
@@ -4988,6 +5150,7 @@ if(location.protocol==='file:'){
     doc,
     getDoc,
     setDoc,
+    deleteDoc,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
   import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
@@ -5011,28 +5174,35 @@ if(location.protocol==='file:'){
   isAnalyticsSupported().then(function (supported) {
     if (supported) getAnalytics(app);
   }).catch(function (error) {
-    console.warn("[Zest · Firebase] Analytics désactivé :", error);
+    console.warn("[Zest · diagnostic] Analytics désactivé :", error);
   });
 
   const byId = function (id) { return document.getElementById(id); };
   const loginForm = byId("auth-login-form");
   const signupForm = byId("auth-signup-form");
+  const deleteForm = byId("delete-account-form");
   const loginButton = byId("login-btn");
   const signupButton = byId("signup-btn");
   const forgotButton = byId("auth-forgot-btn");
   const resendButton = byId("auth-resend-btn");
   const noticeResendButton = byId("auth-notice-resend-btn");
+  const deleteConfirmButton = byId("delete-account-confirm");
+  const recoverButton = byId("account-recover-btn");
+  const lockSignOutButton = byId("account-lock-signout-btn");
   const signOutButton = byId("firebase-signout-button");
   const authPanel = byId("firebase-auth-panel");
   const authSession = byId("firebase-auth-session");
   const authUserLabel = byId("firebase-auth-user");
   const sessionMessage = byId("firebase-session-message");
   const headerUserLabel = byId("firebase-header-user");
+  const accountLock = byId("account-lock");
 
-  const MSG_UNVERIFIED = "Ton adresse e-mail n’est pas encore confirmée. Vérifie ta boîte mail (et tes spams) et clique sur le lien de validation avant de te connecter.";
+  const MSG_UNVERIFIED = "Ton adresse e-mail n’est pas encore confirmée. Vérifie ta boîte mail et clique sur le lien de validation avant de te connecter.";
   const MSG_NO_PROFILE = "Impossible de charger ton profil. Vérifie ta connexion Internet et réessaie.";
+  const MSG_TECHNICAL = "Zest rencontre un problème technique. Réessaie dans quelques instants.";
+  const DELETION_DELAY_MS = 7 * 24 * 60 * 60 * 1000;
 
-  // true pendant une inscription / connexion : l’observateur de session n’interfère pas.
+  // true pendant une opération en cours (inscription, connexion, suppression…) : l’observateur de session n’interfère pas.
   let authBusy = false;
   // Identifiants de la dernière inscription ou connexion refusée (e-mail non confirmé), gardés en mémoire
   // uniquement, pour pouvoir renvoyer l’e-mail de confirmation.
@@ -5048,59 +5218,93 @@ if(location.protocol==='file:'){
     if (resendButton) resendButton.classList.toggle("hide", !visible);
   }
 
-  // Message lisible (en français) pour un code d’erreur Firebase, avec le code entre parenthèses.
-  function describeFirebaseError(error, fallback) {
+  // ===== Messages affichés à l’utilisateur : en français, simples, sans vocabulaire technique =====
+  function userMessage(error, fallback) {
     const code = (error && error.code) || "";
-    const host = window.location.hostname || window.location.protocol;
-    const credentialsMessage = "Aucun compte trouvé ou mot de passe incorrect.";
+    const credentials = "Adresse e-mail ou mot de passe incorrect.";
+    const network = "Problème de connexion Internet. Vérifie ta connexion et réessaie.";
     const messages = {
-      "auth/user-not-found": credentialsMessage,
-      "auth/invalid-credential": credentialsMessage,
-      "auth/wrong-password": credentialsMessage,
-      "auth/email-already-in-use": "Cette adresse e-mail est déjà utilisée.",
+      "auth/user-not-found": credentials,
+      "auth/invalid-credential": credentials,
+      "auth/wrong-password": credentials,
+      "auth/email-already-in-use": "Un compte Zest existe déjà avec cette adresse e-mail.",
       "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères.",
       "auth/invalid-email": "L’adresse e-mail n’est pas valide.",
       "auth/missing-password": "Renseigne ton mot de passe.",
-      "auth/operation-not-allowed": "La connexion par e-mail et mot de passe n’est pas activée. Console Firebase › Authentication › Méthode de connexion : active « E-mail/Mot de passe ».",
       "auth/user-disabled": "Ce compte a été désactivé. Contacte ton établissement.",
       "auth/too-many-requests": "Trop de tentatives. Patiente quelques minutes avant de réessayer.",
-      "auth/quota-exceeded": "Le quota d’e-mails Firebase est dépassé pour aujourd’hui. Réessaie plus tard.",
-      "auth/network-request-failed": "Problème de réseau. Vérifie ta connexion Internet.",
-      "auth/invalid-api-key": "La clé API Firebase est refusée. Vérifie la clé et ses restrictions dans la console Google Cloud.",
-      "auth/api-key-not-valid": "La clé API Firebase est refusée. Vérifie la clé et ses restrictions dans la console Google Cloud.",
-      "auth/configuration-not-found": "Firebase Authentication n’est pas initialisé pour ce projet. Console Firebase › Authentication › clique sur « Commencer ».",
-      "permission-denied": "Accès refusé à la base de données. Les règles Firestore doivent autoriser chaque utilisateur à lire et écrire son propre document « users/{uid} ».",
-      "unavailable": "Base de données momentanément indisponible. Vérifie ta connexion Internet.",
-      "failed-precondition": "Cloud Firestore n’est pas encore créé pour ce projet. Console Firebase › Firestore Database › Créer une base de données."
+      "auth/quota-exceeded": "Trop d’e-mails ont été envoyés aujourd’hui. Réessaie plus tard.",
+      "auth/requires-recent-login": "Pour ta sécurité, reconnecte-toi puis réessaie.",
+      "auth/network-request-failed": network,
+      "unavailable": network,
+      "auth/operation-not-allowed": MSG_TECHNICAL,
+      "auth/invalid-api-key": MSG_TECHNICAL,
+      "auth/api-key-not-valid": MSG_TECHNICAL,
+      "auth/configuration-not-found": MSG_TECHNICAL,
+      "permission-denied": MSG_TECHNICAL,
+      "failed-precondition": MSG_TECHNICAL
     };
-    let base = messages[code];
-    if (!base && code.indexOf("requests-from-referer") !== -1) {
-      base = "Cette adresse (« " + host + " ») est bloquée par les restrictions de la clé API. Console Google Cloud › Identifiants : autorise ce référent.";
-    }
-    base = base || fallback;
-    // Pas de code technique affiché pour les erreurs de saisie courantes.
-    const quiet = ["auth/user-not-found", "auth/invalid-credential", "auth/wrong-password", "auth/email-already-in-use", "auth/weak-password", "auth/invalid-email", "auth/missing-password"];
-    if (quiet.indexOf(code) !== -1) return base;
-    return code ? base + " [" + code + "]" : base;
+    if (Object.prototype.hasOwnProperty.call(messages, code)) return messages[code];
+    if (code.indexOf("requests-from-referer") !== -1) return MSG_TECHNICAL;
+    return fallback;
   }
 
-  // Diagnostic détaillé dans la console du navigateur (F12 › Console).
+  // Aide au diagnostic pour le développeur : uniquement dans la console du navigateur (F12), jamais à l’écran.
+  function developerHint(error) {
+    const code = (error && error.code) || "";
+    const host = window.location.hostname || window.location.protocol;
+    const hints = {
+      "auth/operation-not-allowed": "Console Firebase › Authentication › Méthode de connexion : activer « E-mail/Mot de passe ».",
+      "auth/configuration-not-found": "Console Firebase › Authentication : cliquer sur « Commencer » pour initialiser le service.",
+      "auth/invalid-api-key": "Clé API refusée : vérifier la clé et ses restrictions dans la console Google Cloud.",
+      "auth/api-key-not-valid": "Clé API refusée : vérifier la clé et ses restrictions dans la console Google Cloud.",
+      "auth/quota-exceeded": "Quota d’e-mails dépassé pour aujourd’hui.",
+      "permission-denied": "Règles Firestore : chaque utilisateur doit pouvoir lire/écrire (et supprimer après le délai) son propre document users/{uid}.",
+      "failed-precondition": "Console Firebase › Firestore Database : la base de données n’est pas encore créée.",
+      "auth/requires-recent-login": "Une nouvelle authentification est nécessaire avant cette opération sensible."
+    };
+    if (hints[code]) return hints[code];
+    if (code.indexOf("requests-from-referer") !== -1) return "Le référent « " + host + " » est bloqué par les restrictions de la clé API (console Google Cloud › Identifiants).";
+    return "";
+  }
+
   function logFirebaseError(context, error, extra) {
-    console.error("[Zest · Firebase] " + context + " a échoué", {
+    console.error("[Zest · diagnostic] " + context + " a échoué", {
       code: error && error.code,
       message: error && error.message,
       customData: error && error.customData,
-      explication: describeFirebaseError(error, "Erreur inconnue."),
+      conseil: developerHint(error),
       page: {
         href: window.location.href,
         origin: window.location.origin,
         hostname: window.location.hostname,
         protocol: window.location.protocol
       },
-      firebase: { authDomain: firebaseConfig.authDomain, projectId: firebaseConfig.projectId },
+      projet: { authDomain: firebaseConfig.authDomain, projectId: firebaseConfig.projectId },
       extra: extra || null
     });
     console.error(error);
+  }
+
+  // ===== Dates et durées affichées à l’utilisateur =====
+  function formatDate(timestamp) {
+    try {
+      return new Date(timestamp).toLocaleString("fr-BE", { dateStyle: "long", timeStyle: "short" });
+    } catch (error) {
+      return new Date(timestamp).toLocaleString();
+    }
+  }
+  function plural(count, one, many) { return count + " " + (count > 1 ? many : one); }
+  function remainingText(milliseconds) {
+    const totalMinutes = Math.max(0, Math.floor(milliseconds / 60000));
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    const parts = [];
+    if (days) parts.push(plural(days, "jour", "jours"));
+    if (days || hours) parts.push(plural(hours, "heure", "heures"));
+    parts.push(plural(minutes, "minute", "minutes"));
+    return parts.length > 1 ? parts.slice(0, -1).join(", ") + " et " + parts[parts.length - 1] : parts[0];
   }
 
   // ===== Cloud Firestore : un document par utilisateur, users/{uid} =====
@@ -5116,6 +5320,8 @@ if(location.protocol==='file:'){
       classCode: classCode || "",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      scheduledDeletion: false,
+      deletionTimestamp: null,
       totalScore: 0,
       gamesPlayed: 0,
       progressJson: JSON.stringify(progress),
@@ -5189,7 +5395,7 @@ if(location.protocol==='file:'){
         // Un document Firestore est limité à 1 Mo : on écarte d’abord l’historique des cours scannés.
         dataJson = JSON.stringify({ srs: payload.data.srs, scanHistory: [] });
         if (byteLength(progressJson) + byteLength(dataJson) > 900000) {
-          console.error("[Zest · Firebase] Progression trop volumineuse pour un document Firestore : synchronisation ignorée.");
+          console.error("[Zest · diagnostic] Progression trop volumineuse pour un document Firestore : synchronisation ignorée.");
           return;
         }
       }
@@ -5209,7 +5415,7 @@ if(location.protocol==='file:'){
         if (sessionMessage) sessionMessage.textContent = "";
       } catch (error) {
         logFirebaseError("synchronisation de la progression (users/" + uid + ")", error);
-        if (sessionMessage) sessionMessage.textContent = "La sauvegarde dans le cloud n’a pas abouti : " + describeFirebaseError(error, "erreur inconnue.");
+        if (sessionMessage) sessionMessage.textContent = "Ta progression n’a pas pu être enregistrée pour le moment. Elle sera renvoyée automatiquement.";
       } finally {
         this.running = false;
         if (this.again) { this.again = false; this.schedule(); }
@@ -5218,15 +5424,111 @@ if(location.protocol==='file:'){
   };
   window.zestCloud = cloud;
 
-  // ===== Ouverture de la session : lecture de users/{uid}, puis ouverture directe de l’espace =====
+  // ===== Suppression de compte programmée : écran bloquant, récupération, suppression définitive =====
   let activeUid = null;
   let inflight = null;
   let inflightUid = null;
+  let lockedData = null;
+  let lockTimer = null;
 
+  function hideAccountLock() {
+    clearInterval(lockTimer);
+    lockTimer = null;
+    lockedData = null;
+    if (accountLock) accountLock.classList.add("hide");
+    setMsg("account-lock-msg", "", true);
+  }
+
+  function refreshAccountLock() {
+    const copy = byId("account-lock-copy");
+    if (!copy || !lockedData) return;
+    const deadline = Number(lockedData.deletionTimestamp);
+    if (!Number.isFinite(deadline)) {
+      copy.textContent = "La suppression de ton compte est programmée. Tu peux encore le récupérer en cliquant sur « Récupérer mon compte ».";
+      return;
+    }
+    const left = deadline - Date.now();
+    copy.textContent = left > 0
+      ? "La suppression de ton compte est programmée le " + formatDate(deadline) + ". Il te reste " + remainingText(left) + " pour changer d’avis : clique sur « Récupérer mon compte » pour tout retrouver comme avant."
+      : "Le délai de 7 jours est écoulé. Déconnecte-toi puis reconnecte-toi pour finaliser la suppression.";
+    if (left <= 0) { clearInterval(lockTimer); lockTimer = null; }
+  }
+
+  function showAccountLock(user, data) {
+    // Aucun accès à l’application tant que le compte n’est pas récupéré.
+    window.zestFirebaseUser = null;
+    activeUid = null;
+    cloud.stop();
+    if (window.zestLocal) window.zestLocal.clearSession();
+    lockedData = data;
+    setMsg("account-lock-msg", "", true);
+    if (accountLock) accountLock.classList.remove("hide");
+    refreshAccountLock();
+    clearInterval(lockTimer);
+    lockTimer = setInterval(refreshAccountLock, 30000);
+    if (recoverButton) recoverButton.focus();
+  }
+
+  // Délai dépassé : suppression définitive du document, du compte et des données locales du compte.
+  async function finalizeDeletion(user, data) {
+    const uid = user.uid;
+    let documentDeleted = false;
+    try {
+      await deleteDoc(profileRef(uid));
+      documentDeleted = true;
+      await deleteUser(user);
+      cloud.stop();
+      activeUid = null;
+      window.zestFirebaseUser = null;
+      window.zestLocal.wipeAccount(uid);
+      window.zestLocal.clearSession();
+      hideAccountLock();
+      window.switchTab("connexion");
+      window.zestLocal.showInfoNotice("Compte supprimé", "Le délai de 7 jours est dépassé. Ton compte Zest a été définitivement supprimé.");
+    } catch (error) {
+      logFirebaseError("suppression définitive du compte", error);
+      if (documentDeleted) {
+        // Le compte existe encore : on remet son enregistrement pour pouvoir réessayer la prochaine fois.
+        try { await setDoc(profileRef(uid), data); } catch (restoreError) { logFirebaseError("restauration de users/" + uid, restoreError); }
+      }
+      try { await signOut(auth); } catch (signOutError) { console.error("[Zest · diagnostic] signOut :", signOutError); }
+      window.zestLocal.clearSession();
+      window.switchTab("connexion");
+      window.zestLocal.showInfoNotice("Suppression en attente", "La suppression définitive de ton compte n’a pas pu être terminée pour le moment. Reconnecte-toi un peu plus tard pour réessayer.");
+    }
+  }
+
+  async function recoverAccount() {
+    const user = auth.currentUser;
+    if (!user || !lockedData || authBusy) return;
+    authBusy = true;
+    recoverButton.disabled = true;
+    setMsg("account-lock-msg", "Récupération de ton compte…", true);
+    try {
+      await setDoc(profileRef(user.uid), { scheduledDeletion: false, deletionTimestamp: null, updatedAt: serverTimestamp() }, { merge: true });
+      hideAccountLock();
+      window.zestFirebaseUser = user;
+      activeUid = null;
+      const opened = await openSession(user, true);
+      if (opened !== true) {
+        setMsg("login-msg", MSG_NO_PROFILE, false);
+        await signOut(auth);
+      }
+    } catch (error) {
+      logFirebaseError("récupération du compte (users/" + user.uid + ")", error);
+      setMsg("account-lock-msg", "Impossible de récupérer ton compte pour le moment. Réessaie dans quelques instants.", false);
+    } finally {
+      authBusy = false;
+      recoverButton.disabled = false;
+    }
+  }
+
+  // ===== Ouverture de la session : lecture de users/{uid}, puis ouverture directe de l’espace =====
   function goToSpace() {
     if (typeof window.switchTab === "function") window.switchTab("portail");
   }
 
+  // Retourne true (espace ouvert), false (échec), "locked" (suppression programmée) ou "deleted" (délai dépassé).
   async function doOpenSession(user) {
     let data = null;
     let readFailed = false;
@@ -5237,6 +5539,17 @@ if(location.protocol==='file:'){
       readFailed = true;
       logFirebaseError("getDoc users/" + user.uid, error);
     }
+
+    if (data && data.scheduledDeletion === true) {
+      const deadline = Number(data.deletionTimestamp);
+      if (!Number.isFinite(deadline) || Date.now() < deadline) {
+        showAccountLock(user, data);
+        return "locked";
+      }
+      await finalizeDeletion(user, data);
+      return "deleted";
+    }
+
     if (!data && !readFailed) data = await createMissingProfile(user);
 
     let result = null;
@@ -5260,9 +5573,9 @@ if(location.protocol==='file:'){
       inflightUid = user.uid;
       inflight = doOpenSession(user).finally(function () { inflight = null; inflightUid = null; });
     }
-    return inflight.then(function (ok) {
-      if (ok && navigate) goToSpace();
-      return ok;
+    return inflight.then(function (result) {
+      if (result === true && navigate) goToSpace();
+      return result;
     });
   }
 
@@ -5282,7 +5595,7 @@ if(location.protocol==='file:'){
     }
   }
 
-  // ===== Inscription : compte, profil Firestore, e-mail de confirmation, puis déconnexion immédiate =====
+  // ===== Inscription : compte, profil, e-mail de confirmation, puis déconnexion immédiate =====
   async function handleSignup(event) {
     event.preventDefault();
     if (authBusy) return;
@@ -5322,15 +5635,15 @@ if(location.protocol==='file:'){
       if (created) {
         logFirebaseError("sendEmailVerification", error, { email: data.email });
         pendingVerification = { email: data.email, password: data.password };
-        setMsg("signup-msg", "Ton compte a été créé, mais l’e-mail de confirmation n’a pas pu être envoyé. Va dans « Se connecter » pour en demander un nouveau. Détail : " + describeFirebaseError(error, "erreur inconnue."), false);
+        setMsg("signup-msg", "Ton compte Zest a été créé, mais l’e-mail de confirmation n’a pas pu être envoyé. Va dans « Se connecter » pour en demander un nouveau.", false);
       } else {
         logFirebaseError("createUserWithEmailAndPassword", error, { email: data.email });
-        setMsg("signup-msg", describeFirebaseError(error, "La création du compte a échoué. Réessaie."), false);
+        setMsg("signup-msg", userMessage(error, "La création du compte a échoué. Réessaie."), false);
       }
     } finally {
       if (created) {
         // L’utilisateur doit d’abord cliquer sur le lien reçu par e-mail : on le déconnecte tout de suite.
-        try { await signOut(auth); } catch (signOutError) { console.error("[Zest · Firebase] signOut après inscription :", signOutError); }
+        try { await signOut(auth); } catch (signOutError) { console.error("[Zest · diagnostic] signOut après inscription :", signOutError); }
       }
       authBusy = false;
       signupButton.disabled = false;
@@ -5361,7 +5674,13 @@ if(location.protocol==='file:'){
       }
       pendingVerification = null;
       const opened = await openSession(user, true);
-      if (!opened) {
+      if (opened === "locked" || opened === "deleted") {
+        // Écran de récupération ou message de suppression déjà affiché.
+        loginForm.reset();
+        setMsg("login-msg", "", true);
+        return;
+      }
+      if (opened !== true) {
         await signOut(auth);
         setMsg("login-msg", MSG_NO_PROFILE, false);
         return;
@@ -5370,7 +5689,7 @@ if(location.protocol==='file:'){
       setMsg("login-msg", "", true);
     } catch (error) {
       logFirebaseError("signInWithEmailAndPassword", error, { email: email });
-      setMsg("login-msg", describeFirebaseError(error, "La connexion a échoué. Réessaie."), false);
+      setMsg("login-msg", userMessage(error, "La connexion a échoué. Réessaie."), false);
     } finally {
       authBusy = false;
       loginButton.disabled = false;
@@ -5389,7 +5708,7 @@ if(location.protocol==='file:'){
     authBusy = true;
     if (resendButton) resendButton.disabled = true;
     if (noticeResendButton) noticeResendButton.disabled = true;
-    setMsg(messageId, "Envoi de l’e-mail de confirmation…", true);
+    setMsg(messageId, "Envoi de l’e-mail…", true);
     let signedIn = false;
     try {
       const credential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
@@ -5399,8 +5718,8 @@ if(location.protocol==='file:'){
         pendingVerification = null;
         setResendVisible(false);
         const opened = await openSession(credential.user, true);
-        if (opened) {
-          signedIn = false;
+        if (opened === true || opened === "locked") signedIn = false;   // "locked" : la session reste ouverte pour la récupération
+        if (opened === true || opened === "locked" || opened === "deleted") {
           loginForm.reset();
           setMsg(messageId, "", true);
         } else {
@@ -5409,13 +5728,13 @@ if(location.protocol==='file:'){
         return;
       }
       await sendEmailVerification(credential.user);
-      setMsg(messageId, "E-mail de confirmation renvoyé à " + credentials.email + ". Pense à vérifier tes spams.", true);
+      setMsg(messageId, "E-mail renvoyé à " + credentials.email + ". Pense à vérifier tes courriers indésirables.", true);
     } catch (error) {
       logFirebaseError("sendEmailVerification (renvoi)", error, { email: credentials.email });
-      setMsg(messageId, describeFirebaseError(error, "Impossible de renvoyer l’e-mail. Réessaie dans quelques minutes."), false);
+      setMsg(messageId, userMessage(error, "Impossible de renvoyer l’e-mail. Réessaie dans quelques minutes."), false);
     } finally {
       if (signedIn) {
-        try { await signOut(auth); } catch (signOutError) { console.error("[Zest · Firebase] signOut après renvoi :", signOutError); }
+        try { await signOut(auth); } catch (signOutError) { console.error("[Zest · diagnostic] signOut après renvoi :", signOutError); }
       }
       authBusy = false;
       if (resendButton) resendButton.disabled = false;
@@ -5435,7 +5754,7 @@ if(location.protocol==='file:'){
     authBusy = true;
     forgotButton.disabled = true;
     setMsg("login-msg", "Envoi de l’e-mail de réinitialisation…", true);
-    const done = "Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé. Pense à vérifier tes spams.";
+    const done = "Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé. Pense à vérifier tes courriers indésirables.";
     try {
       await sendPasswordResetEmail(auth, email);
       setMsg("login-msg", done, true);
@@ -5444,7 +5763,7 @@ if(location.protocol==='file:'){
         setMsg("login-msg", done, true);   // on ne révèle pas si l’adresse a un compte
       } else {
         logFirebaseError("sendPasswordResetEmail", error, { email: email });
-        setMsg("login-msg", describeFirebaseError(error, "Impossible d’envoyer l’e-mail de réinitialisation. Réessaie."), false);
+        setMsg("login-msg", userMessage(error, "Impossible d’envoyer l’e-mail de réinitialisation. Réessaie."), false);
       }
     } finally {
       authBusy = false;
@@ -5452,13 +5771,68 @@ if(location.protocol==='file:'){
     }
   }
 
-  // ===== Déconnexion et synchronisation du profil =====
+  // ===== « Supprimer mon compte » : double mot de passe, puis suppression programmée dans 7 jours =====
+  async function handleDeleteAccount(event) {
+    event.preventDefault();
+    if (authBusy) return;
+    const first = byId("delete-pass1").value || "";
+    const second = byId("delete-pass2").value || "";
+    const user = auth.currentUser;
+    if (!user || user.emailVerified !== true || !user.email) {
+      setMsg("delete-account-msg", "Connecte-toi pour supprimer ton compte.", false);
+      return;
+    }
+    if (!first || !second) { setMsg("delete-account-msg", "Saisis ton mot de passe actuel dans les deux champs.", false); return; }
+    if (first !== second) { setMsg("delete-account-msg", "Les deux mots de passe ne sont pas identiques.", false); return; }
+
+    authBusy = true;
+    deleteConfirmButton.disabled = true;
+    setMsg("delete-account-msg", "Vérification du mot de passe…", true);
+    try {
+      try {
+        await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, first));
+      } catch (error) {
+        logFirebaseError("reauthenticateWithCredential", error);
+        const wrong = error && (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password");
+        setMsg("delete-account-msg", wrong ? "Mot de passe incorrect." : userMessage(error, "Impossible de vérifier ton mot de passe. Réessaie."), false);
+        return;
+      }
+
+      await cloud.flush();                                           // la dernière progression est enregistrée avant de programmer la suppression
+      const deletionTimestamp = Date.now() + DELETION_DELAY_MS;
+      await setDoc(profileRef(user.uid), {
+        scheduledDeletion: true,
+        deletionTimestamp: deletionTimestamp,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      cloud.stop();
+      activeUid = null;
+      window.closeDeleteAccount();
+      await signOut(auth);
+      window.zestLocal.clearSession();
+      await new Promise(function (resolve) { setTimeout(resolve, 80); });   // laisse la fenêtre se fermer proprement
+      window.switchTab("connexion");
+      window.zestLocal.showInfoNotice(
+        "Suppression programmée",
+        "La suppression de ton compte Zest est programmée dans 7 jours (le " + formatDate(deletionTimestamp) + "). Tu as 1 semaine pour changer d’avis : il te suffit de te reconnecter avant cette date pour le récupérer."
+      );
+    } catch (error) {
+      logFirebaseError("programmation de la suppression (users/" + user.uid + ")", error);
+      setMsg("delete-account-msg", "Impossible de programmer la suppression pour le moment. Réessaie dans quelques instants.", false);
+    } finally {
+      authBusy = false;
+      deleteConfirmButton.disabled = false;
+    }
+  }
+
+  // ===== Déconnexion et synchronisation du nom =====
   window.zestFirebaseSignOut = async function () {
     try {
       await signOut(auth);
       if (sessionMessage) sessionMessage.textContent = "";
     } catch (error) {
-      console.error("La déconnexion Firebase a échoué :", error);
+      console.error("[Zest · diagnostic] La déconnexion a échoué :", error);
       if (sessionMessage) sessionMessage.textContent = "Impossible de te déconnecter. Réessaie.";
       throw error;
     }
@@ -5476,7 +5850,7 @@ if(location.protocol==='file:'){
     try {
       await updateProfile(user, { displayName: name });
     } catch (error) {
-      console.warn("[Zest · Firebase] Mise à jour du displayName impossible :", error);
+      console.warn("[Zest · diagnostic] Mise à jour du displayName impossible :", error);
     }
   };
 
@@ -5490,6 +5864,16 @@ if(location.protocol==='file:'){
       }
     });
   }
+  if (lockSignOutButton) {
+    lockSignOutButton.addEventListener("click", async function () {
+      lockSignOutButton.disabled = true;
+      try {
+        await window.zestLogout();
+      } finally {
+        lockSignOutButton.disabled = false;
+      }
+    });
+  }
 
   // ===== Session : seul un compte dont l’e-mail est confirmé ouvre l’application =====
   onAuthStateChanged(auth, async function (user) {
@@ -5499,13 +5883,14 @@ if(location.protocol==='file:'){
     if (user && !verified) {
       // E-mail non confirmé : jamais de session (sauf pendant l’inscription / la connexion en cours, qui s’en chargent).
       if (!authBusy) {
-        try { await signOut(auth); } catch (error) { console.error("[Zest · Firebase] signOut (e-mail non confirmé) :", error); }
+        try { await signOut(auth); } catch (error) { console.error("[Zest · diagnostic] signOut (e-mail non confirmé) :", error); }
       }
       return;
     }
     if (!user) {
       activeUid = null;
       cloud.stop();
+      hideAccountLock();
       if (window.zestLocal) window.zestLocal.clearSession();
       updateSessionBox(null);
       if (typeof window.renderAll === "function") window.renderAll();
@@ -5513,18 +5898,19 @@ if(location.protocol==='file:'){
     }
 
     const opened = await openSession(user, false);
-    if (!opened) {
-      console.error("[Zest · Firebase] Impossible d’ouvrir la session de", user.uid);
+    if (opened === "locked" || opened === "deleted") return;   // écran de récupération ou message déjà affiché
+    if (opened !== true) {
+      console.error("[Zest · diagnostic] Impossible d’ouvrir la session de", user.uid);
       if (!authBusy) {
-        try { await signOut(auth); } catch (error) { console.error("[Zest · Firebase] signOut (profil introuvable) :", error); }
+        try { await signOut(auth); } catch (error) { console.error("[Zest · diagnostic] signOut (profil introuvable) :", error); }
       }
       return;
     }
     updateSessionBox(user);
     if (typeof window.renderAll === "function") window.renderAll();
   }, function (error) {
-    console.error("La vérification de la session Firebase a échoué :", error);
-    setMsg("login-msg", "Impossible de vérifier la session. Recharge la page et réessaie.", false);
+    console.error("[Zest · diagnostic] La vérification de la session a échoué :", error);
+    setMsg("login-msg", "Impossible de vérifier ta session. Recharge la page et réessaie.", false);
   });
 
   // La progression part aussi quand l’onglet se masque ou se ferme, et dès que le réseau revient.
@@ -5536,9 +5922,11 @@ if(location.protocol==='file:'){
 
   if (loginForm) loginForm.addEventListener("submit", handleLogin);
   if (signupForm) signupForm.addEventListener("submit", handleSignup);
+  if (deleteForm) deleteForm.addEventListener("submit", handleDeleteAccount);
   if (forgotButton) forgotButton.addEventListener("click", handleForgot);
   if (resendButton) resendButton.addEventListener("click", function () { handleResend("login"); });
   if (noticeResendButton) noticeResendButton.addEventListener("click", function () { handleResend("notice"); });
+  if (recoverButton) recoverButton.addEventListener("click", recoverAccount);
   window.zestAuthReady = true;
 </script>
 </body>
