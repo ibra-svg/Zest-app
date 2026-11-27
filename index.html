@@ -14,6 +14,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#f1f5f9;--card:#fff;--box:#f1f5f9;--txt:#0f172a;--sub:#64748b;--bd:#e2e8f0;--inp:#f1f5f9;--accent:#4f46e5;--accent-grad:linear-gradient(90deg,#4f46e5,#ec4899);--app-font:"Trebuchet MS","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+:root[data-zest-theme="clair"]{--bg:#ffffff;--card:#f8fafc;--box:#f8fafc;--txt:#0f172a;--sub:#475569;--bd:#e2e8f0;--inp:#ffffff}
+:root[data-zest-theme="chaud"]{--bg:#fffaf0;--card:#fff;--box:#fff7e8;--txt:#172033;--sub:#4b5563;--bd:#ded7c9;--inp:#fff}
+:root[data-zest-theme="sombre"]{--bg:#020617;--card:#0f172a;--box:#020617;--txt:#f1f5f9;--sub:#94a3b8;--bd:#1e293b;--inp:#020617}
 body.dark{--bg:#020617;--card:#0f172a;--box:#020617;--txt:#f1f5f9;--sub:#94a3b8;--bd:#1e293b;--inp:#020617}
 body.theme-light{--bg:#fffaf0;--card:#fff;--box:#fff7e8;--txt:#172033;--sub:#4b5563;--bd:#ded7c9;--inp:#fff}
 body.weather-sunny{--glass-tint:rgba(251,191,36,.09)}
@@ -551,6 +554,15 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
 .account-lock .mbox{max-width:480px;width:100%}
 #delete-account-modal .auth-form{margin:0}
 </style>
+<script>
+(function(){
+ try{
+  var theme=localStorage.getItem('zest_theme'),legacy=localStorage.getItem('zest-theme');
+  if(theme!=='clair'&&theme!=='chaud'&&theme!=='sombre')theme=legacy==='light'?'chaud':'sombre';
+  document.documentElement.setAttribute('data-zest-theme',theme);
+ }catch(error){document.documentElement.setAttribute('data-zest-theme','sombre');}
+})();
+</script>
 </head>
 <body class="dark yaya-home">
 
@@ -583,7 +595,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
   <button class="nav" id="nav-labo" onclick="switchTab('labo')">🧪 Labo</button>
   <button class="nav" id="nav-connexion" onclick="switchTab('connexion')">🔑 Connexion</button>
   <button class="nav" id="nav-portail" onclick="switchTab('portail')">👤 Profil & Paramètres <span id="badge"></span></button>
-  <button class="nav" onclick="toggleTheme()" title="Thème">🌓</button>
+  <button class="nav" id="theme-toggle-button" type="button" onclick="toggleTheme()" title="Changer de thème"></button>
  </nav>
 </header>
  <div class="sidebar-edge-trigger" id="sidebar-edge-trigger" aria-hidden="true"></div>
@@ -1041,7 +1053,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
   </div>
   <div class="box"><b style="font-size:14px">🎨 Ton avatar</b><div id="skins" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px"></div></div>
   <div class="box"><b>⚙️ Préférences</b><div class="row" style="margin-top:8px">
-   <button class="btn sm" type="button" onclick="toggleTheme()" aria-label="Basculer le thème clair ou sombre">☀️ / 🌙 Thème clair / sombre</button>
+   <button class="btn sm" id="theme-toggle-settings" type="button" onclick="toggleTheme()" aria-label="Changer le thème"></button>
    <button class="btn sm" id="ui-sounds-toggle" type="button" onclick="toggleUISounds()">🔈 Sons doux : désactivés</button>
   </div></div>
   <div class="box" id="title-profile-box"><b>🏅 Ton titre</b><p class="sub" style="margin:4px 0 8px">Débloque de nouveaux titres en progressant.</p><select class="inp" id="student-title-select" onchange="selectStudentTitle(this.value)" style="margin:0"></select><p class="sub" id="student-title-progress" style="margin:8px 0 0"></p></div>
@@ -1102,9 +1114,12 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
   <div class="box" id="ai-coach-box" style="background:#4f46e511;border-color:var(--accent);margin-bottom:16px">
    <div class="row"><b>🤖 Assistant IA & Analyse des erreurs</b><span class="tag v">Actif</span></div>
    <p id="ai-coach-text" class="sub" style="margin-top:6px">Analyse en cours...</p>
+   <button class="btn sm grad" id="mistakes-ai-analyze" type="button" data-mistakes-ai>Générer une analyse IA détaillée</button>
+   <p id="mistakes-ai-feedback" class="msg" role="status" aria-live="polite"></p>
   </div>
 
   <h3>🎯 Difficultés par sujet (Erreurs analysées)</h3><div id="mistakes"></div>
+  <div id="mistake-practice" class="hide"></div>
   <span class="acct-actions"><button class="btn red sm" onclick="zestLogout()">Se déconnecter</button><button class="btn sm btn-danger-outline" type="button" onclick="openDeleteAccount()">Supprimer mon compte</button></span>
  </div>
 
