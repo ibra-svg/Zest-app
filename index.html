@@ -1151,7 +1151,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
 // ===== Analyse de cours par IA : adresse du proxy Cloudflare Worker =====
 // La clé Gemini n'est JAMAIS dans ce fichier : elle est stockée comme secret dans le Worker (voir worker.js).
 // Remplace A_REMPLIR par le sous-domaine de ton Worker une fois celui-ci déployé.
-const GEMINI_PROXY_URL = "https://zest-gemini-proxy.A_REMPLIR.workers.dev";
+const GEMINI_PROXY_URL = "https://zest-gemini-proxy.zest-app-official.workers.dev";
 var $ = function(i){ return document.getElementById(i); };
 var customSelectCounter=0,customSelectMutationObserver=null;
 function syncCustomSelect(select){
