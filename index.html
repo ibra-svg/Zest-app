@@ -1002,6 +1002,15 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
    <div><span class="tag">Espace élève</span>   <h2 id="e-title" style="font-size:26px">Mon profil & paramètres</h2><span class="tag v" id="student-title-display"></span></div>
    <span class="tag" id="e-code"></span>
   </div>
+  <div class="box" id="student-class-box">
+   <h3>🏫 Ma classe et mon programme</h3>
+   <p class="sub" id="student-class-summary">Entre le code fourni par ton professeur pour voir les chapitres de ton année.</p>
+   <div class="row" style="margin-top:8px">
+    <input class="inp" id="student-class-code" type="text" maxlength="24" autocomplete="off" autocapitalize="characters" placeholder="Ex. : ZEST-4C-482" style="margin:0;flex:1">
+    <button class="btn sm grad" id="student-class-join" type="button" onclick="joinStudentClass()">Rejoindre / changer</button>
+   </div>
+   <p class="msg" id="student-class-msg" role="status" aria-live="polite"></p>
+  </div>
   <div class="box"><b style="font-size:14px">🎨 Ton avatar</b><div id="skins" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px"></div></div>
   <div class="box"><b>⚙️ Préférences</b><div class="row" style="margin-top:8px">
    <button class="btn sm" type="button" onclick="toggleTheme()" aria-label="Basculer le thème clair ou sombre">☀️ / 🌙 Thème clair / sombre</button>
@@ -1078,7 +1087,8 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
   </div>
   <div id="t-tools">
    <div class="box"><h3>📌 Annonce de classe</h3><textarea class="inp" id="teacher-announcement-input" rows="3" maxlength="240" placeholder="Ex. : Interro sur les verbes séparables mardi !"></textarea><button class="btn amber" type="button" onclick="publishAnnouncement('teacher-announcement-input')">Épingler l’annonce</button><button class="btn red sm" type="button" onclick="removeAnnouncement()">Retirer l’annonce</button><small class="sub">Stockée sur cet appareil ; visible aux visiteurs de cette installation.</small></div>
-   <div class="box"><h3>👥 Suivi des élèves & Analyse des difficultés</h3><p class="sub">Scores, erreurs par sujet et suivi détaillé :</p><div id="t-students"></div></div>
+   <div class="box"><h3>🏫 Classes par degré et année</h3><p class="sub">Crée tes classes, organise leurs chapitres et consulte le suivi séparément.</p><div id="teacher-school-tree"></div><p class="msg" id="teacher-class-msg" role="status" aria-live="polite"></p></div>
+   <div class="box"><h3>👥 Suivi des élèves & Analyse des difficultés</h3><p class="sub" id="teacher-students-caption">Sélectionne une classe pour consulter son suivi.</p><div id="t-students"></div></div>
    <h3>Publier un quiz</h3>
    <input class="inp" id="q-q" placeholder="Question (ex: Comment dit-on « Crayon » ?)">
    <input class="inp" id="q-ok" placeholder="Bonne réponse">
@@ -2629,7 +2639,8 @@ function renderAll(){
       if($('st-games')) $('st-games').textContent = s.gamesPlayed || 0;
       if($('st-score')) $('st-score').textContent = (s.totalScore || 0) + ' pts';
       if($('e-title')) $('e-title').textContent = 'Bilan de ' + stu;
-      if($('e-code')) $('e-code').textContent = s.teacherCode ? ('Code prof : ' + s.teacherCode) : 'Mode indépendant';
+    if($('e-code')) $('e-code').textContent = s.classId ? ('Classe : ' + (s.className || '')) : 'Aucune classe';
+    renderStudentClassAssignment(s);
       renderYayaNotebook(s);
       renderYayaScanHistory();
       
@@ -2701,7 +2712,7 @@ function renderAll(){
       var admin = tch === 'ADMIN';
       var tObj = ld(K.teachers, {})[tch];
       var tEmail = (typeof tObj === 'object' && tObj !== null) ? (tObj.email || '—') : 'Admin';
-      if($('t-name')) $('t-name').textContent = admin ? '👑 Super admin' : 'Classe : ' + tch;
+      if($('t-name')) $('t-name').textContent = admin ? '👑 Super admin' : (tObj && tObj.displayName ? 'Espace professeur · ' + tObj.displayName : 'Espace professeur');
       if($('t-dash-email')) $('t-dash-email').textContent = '✉ ' + tEmail;
       show('t-tools', !admin); show('t-admin', admin);
       if (admin) renderAdmin(); else renderTeacher();
@@ -2713,44 +2724,324 @@ function renderAll(){
   }
 }
 
-function renderTeacher(){
- var users = ld(K.users, {}), box = $('t-students'); 
- if(!box) return;
- box.innerHTML = '';
- var names = Object.keys(users).filter(function(p){ return users[p].teacherCode === tch; });
- if (!names.length) box.innerHTML = '<p class="sub"><i>Aucun élève lié à ta classe.</i></p>';
- 
- names.forEach(function(p){
-    var d = users[p], errCount = 0;
-    var rawM = d.mistakes || {};
-    var catBreakdown = {};
-    
-    Object.keys(rawM).forEach(function(q){
-      var val = rawM[q];
-      var cnt = (typeof val === 'object' && val !== null) ? val.count : val;
-      var cat = (typeof val === 'object' && val !== null) ? val.cat : 'Général';
-      errCount += cnt;
-      catBreakdown[cat] = (catBreakdown[cat] || 0) + cnt;
-    });
-
-    var catText = Object.keys(catBreakdown).map(function(c){ return c + ': ' + catBreakdown[c] + ' err.'; }).join(' | ') || 'Aucune erreur';
-    var skinDisp = (d.skin === 'GAARA') ? GAARA_SVG : esc(d.skin || '🦊');
-    
-    var div = document.createElement('div'); div.className = 'box';
-    div.innerHTML = '<div class="row"><b>' + skinDisp + ' ' + esc(p) + '</b><span>🎮 ' + (d.gamesPlayed || 0) + ' &nbsp;⭐ ' + (d.totalScore || 0) + ' pts</span></div>' +
-      '<small class="sub">✉ ' + esc(d.email || '') + ' | 🎂 ' + esc(d.birthday || '') + '</small><br>' +
-      '<div style="margin-top:6px;font-size:13px;color:#f59e0b"><b>Difficultés par sujet :</b> ' + esc(catText) + '</div>';
-    
-    var remBtn = document.createElement('button'); remBtn.className = 'btn red sm'; remBtn.style.marginTop = '8px'; remBtn.textContent = 'Retirer l\'élève';
-    remBtn.onclick = function(){
-      if (!confirm('Retirer ' + p + ' ?')) return;
-      var u = ld(K.users, {}); delete u[p]; sv(K.users, u); renderAll();
-    };
-    div.appendChild(remBtn);
-    box.appendChild(div);
+var teacherSchoolNav = {degree:null, year:null, classId:null}, teacherSchoolOwner = null, teacherRosterCache = {};
+function schoolDegreeLabel(degree){ return degree === 1 ? '1er degré' : degree + 'e degré'; }
+function schoolYearLabel(year){ return year === 1 ? '1ère année' : year + 'ème année'; }
+function teacherClassList(){
+ var teachers=ld(K.teachers,{}),profile=teachers[tch];
+ return profile&&Array.isArray(profile.classes)?profile.classes:[];
+}
+function teacherClassById(classId){
+ return teacherClassList().filter(function(item){return item.id===classId;})[0]||null;
+}
+function makeSchoolId(prefix){
+ if(window.crypto&&typeof window.crypto.randomUUID==='function')return prefix+'-'+window.crypto.randomUUID();
+ return prefix+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);
+}
+function makeInviteCode(name){
+ var base=String(name||'CLASSE').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)||'CLASSE';
+ var alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',classes=Object.keys(ld(K.teachers,{})).reduce(function(all,key){
+  var profile=ld(K.teachers,{})[key];return all.concat(profile&&Array.isArray(profile.classes)?profile.classes:[]);
+ },[]);
+ for(var attempt=0;attempt<20;attempt++){
+  var suffix='';
+  for(var i=0;i<5;i++){
+   var byte=new Uint32Array(1);
+   if(window.crypto&&typeof window.crypto.getRandomValues==='function')window.crypto.getRandomValues(byte);
+   else byte[0]=Math.floor(Math.random()*4294967296);
+   suffix+=alphabet.charAt(byte[0]%alphabet.length);
+  }
+  var code='ZEST-'+base+'-'+suffix;
+  if(!classes.some(function(item){return String(item.code||'').toUpperCase()===code;}))return code;
+ }
+ throw new Error('Impossible de générer un code de classe unique.');
+}
+function saveLocalTeacherClass(classRecord){
+ var classes=teacherClassList(),index=classes.findIndex(function(item){return item.id===classRecord.id;});
+ if(index<0)classes.push(classRecord);else classes[index]=classRecord;
+ window.zestLocal.setTeacherClasses(tch,classes);
+}
+function syncTeacherClass(classRecord){
+ var pending=Object.assign({},classRecord,{_syncPending:true});
+ saveLocalTeacherClass(pending);
+ renderTeacherSchoolTree();
+ if(typeof window.zestFirebaseSaveClass!=='function'){
+  say('teacher-class-msg','Classe enregistrée sur cet appareil; la synchronisation Firebase sera disponible après la connexion.',false);
+  return;
+ }
+ function saveWithUniqueCode(record,retries){
+  return window.zestFirebaseSaveClass(record).catch(function(error){
+   if(record._isNew&&retries>0&&error&&String(error.message||'').indexOf('déjà utilisé')>=0){
+    var retry=Object.assign({},record,{code:makeInviteCode(record.name)});
+    saveLocalTeacherClass(Object.assign({},retry,{_syncPending:true}));
+    return saveWithUniqueCode(retry,retries-1);
+   }
+   throw error;
   });
-
- var qb = $('t-quizzes'); 
+ }
+ saveWithUniqueCode(classRecord,3).then(function(saved){
+  saveLocalTeacherClass(Object.assign({},saved,{_syncPending:false}));
+  say('teacher-class-msg','Classe synchronisée avec Firestore.',true);
+  renderTeacher();
+ }).catch(function(error){
+  console.error('[Zest] Synchronisation de la classe :',error);
+  say('teacher-class-msg','Classe conservée localement, mais sa synchronisation a échoué. Vérifie la connexion et les règles Firestore.',false);
+  renderTeacherSchoolTree();
+ });
+}
+function renderTeacherSchoolTree(){
+ var box=$('teacher-school-tree');
+ if(!box||!tch||tch==='ADMIN')return;
+ if(teacherSchoolOwner!==tch){teacherSchoolOwner=tch;teacherSchoolNav={degree:null,year:null,classId:null};}
+ var classes=teacherClassList(),nav=teacherSchoolNav,html='';
+ if(nav.degree===null){
+  html='<div class="grid3">'+[1,2,3].map(function(degree){return '<button class="btn" type="button" data-school-action="degree" data-degree="'+degree+'">'+schoolDegreeLabel(degree)+'</button>';}).join('')+'</div>';
+ }else if(nav.year===null){
+  var years=nav.degree===1?[1,2]:nav.degree===2?[3,4]:[5,6];
+  html='<button class="btn sm" type="button" data-school-action="back-degrees">← Degrés</button><h4>'+schoolDegreeLabel(nav.degree)+'</h4><div class="grid2">'+years.map(function(year){return '<button class="btn" type="button" data-school-action="year" data-year="'+year+'">'+schoolYearLabel(year)+'</button>';}).join('')+'</div>';
+ }else if(!nav.classId){
+  var yearClasses=classes.filter(function(item){return Number(item.annee)===Number(nav.year);});
+  html='<button class="btn sm" type="button" data-school-action="back-years">← Années</button><h4>'+schoolDegreeLabel(nav.degree)+' · '+schoolYearLabel(nav.year)+'</h4>';
+  html+='<button class="btn grad" type="button" data-school-action="create-class">＋ Créer une classe</button>';
+  html+=yearClasses.length?'<div class="grid2" style="margin-top:10px">'+yearClasses.map(function(item){
+   return '<button class="box" type="button" data-school-action="open-class" data-class-id="'+esc(item.id)+'" style="text-align:left;cursor:pointer"><b>🏫 '+esc(item.name)+'</b><br><small class="sub">'+esc(item.code)+' · '+(item.chapters||[]).length+' chapitre(s)</small></button>';
+  }).join('')+'</div>':'<p class="sub">Aucune classe dans cette année. Crée ta première classe.</p>';
+ }else{
+  var selected=teacherClassById(nav.classId);
+  if(!selected){nav.classId=null;renderTeacherSchoolTree();return;}
+  var chapters=Array.isArray(selected.chapters)?selected.chapters:[];
+  var active=Array.isArray(selected.activeChapterIds)?selected.activeChapterIds:[];
+  var worlds=window.ZestMondes&&window.ZestMondes.WORLDS||[];
+  var world=worlds.filter(function(item){return item.id===Number(selected.annee);})[0];
+  var topics=world?world.T:[];
+  html='<button class="btn sm" type="button" data-school-action="back-classes">← '+schoolYearLabel(selected.annee)+'</button>';
+  html+='<div class="row"><div><h4>Classe '+esc(selected.name)+'</h4><span class="tag g">'+schoolDegreeLabel(selected.degre)+' · '+schoolYearLabel(selected.annee)+'</span></div><div class="row"><button class="btn sm" type="button" data-school-action="copy-code" data-class-id="'+esc(selected.id)+'">Copier le code</button><button class="btn sm" type="button" data-school-action="rename-class" data-class-id="'+esc(selected.id)+'">Renommer</button><button class="btn red sm" type="button" data-school-action="delete-class" data-class-id="'+esc(selected.id)+'">Supprimer</button></div></div>';
+  html+='<p class="box"><b>Code de classe :</b> <code>'+esc(selected.code)+'</code></p>';
+  if(selected._syncPending)html+='<p class="msg">Synchronisation en attente <button class="btn sm" type="button" data-school-action="sync-class" data-class-id="'+esc(selected.id)+'">Réessayer</button></p>';
+  html+='<h4>Chapitres de '+schoolYearLabel(selected.annee)+'</h4><p class="sub">Active uniquement les chapitres à rendre visibles dans cette classe.</p>';
+  html+=chapters.length?chapters.map(function(chapter){
+   var topic=topics.filter(function(item){return item.id===chapter.topicId;})[0];
+   return '<div class="box"><div class="row"><div><b>'+esc(chapter.title)+'</b><p class="sub">'+esc(chapter.description||'')+(topic?' · Exercice : '+esc(topic.n):'')+'</p></div><div class="row"><button class="btn sm '+(active.indexOf(chapter.id)>=0?'green':'')+'" type="button" data-school-action="toggle-chapter" data-class-id="'+esc(selected.id)+'" data-chapter-id="'+esc(chapter.id)+'">'+(active.indexOf(chapter.id)>=0?'Visible':'Verrouillé')+'</button><button class="btn red sm" type="button" data-school-action="delete-chapter" data-class-id="'+esc(selected.id)+'" data-chapter-id="'+esc(chapter.id)+'">Supprimer</button></div></div>'+(chapter.content?'<details><summary>Contenu</summary><p style="white-space:pre-wrap">'+esc(chapter.content)+'</p></details>':'')+'</div>';
+  }).join(''):'<p class="sub">Aucun chapitre pour cette classe.</p>';
+  html+='<div class="box"><h4>＋ Créer un chapitre</h4><label class="auth-label" for="teacher-chapter-title">Titre</label><input class="inp" id="teacher-chapter-title" maxlength="80" placeholder="Ex. : Les verbes au présent"><label class="auth-label" for="teacher-chapter-description">Description</label><input class="inp" id="teacher-chapter-description" maxlength="180" placeholder="Objectifs du chapitre"><label class="auth-label" for="teacher-chapter-content">Contenu / consignes</label><textarea class="inp" id="teacher-chapter-content" rows="4" maxlength="4000" placeholder="Cours, consignes ou exercices à réaliser…"></textarea><label class="auth-label" for="teacher-chapter-topic">Exercice Zest associé (facultatif)</label><select class="inp" id="teacher-chapter-topic"><option value="">Aucun exercice lié</option>'+topics.map(function(topic,index){return '<option value="'+esc(topic.id)+'">'+(index+1)+'. '+esc(topic.n)+'</option>';}).join('')+'</select><button class="btn grad" type="button" data-school-action="create-chapter" data-class-id="'+esc(selected.id)+'">Créer le chapitre</button></div>';
+ }
+ box.innerHTML=html;
+}
+function renderStudentClassAssignment(profile){
+ var summary=$('student-class-summary'),button=$('student-class-join'),classData=window.zestLocal&&window.zestLocal.getStudentClass(stu);
+ if(!summary)return;
+ if(profile.classId){
+  var name=classData&&classData.name||profile.className||'Classe rattachée';
+  var year=Number(classData&&classData.annee||profile.annee)||0;
+  var degree=Number(classData&&classData.degre||profile.degre)||0;
+  summary.textContent='Classe : '+name+(year?' · '+schoolYearLabel(year):'')+(degree?' · '+schoolDegreeLabel(degree):'')+'. Le programme affiché dans les Mondes est filtré selon les chapitres actifs.';
+  if(button)button.textContent='Changer de classe';
+ }else{
+  summary.textContent='Aucune classe rattachée. Entre le code fourni par ton professeur pour accéder au programme de ton année.';
+  if(button)button.textContent='Rejoindre une classe';
+ }
+}
+function createTeacherClass(){
+ var year=Number(teacherSchoolNav.year),degree=Number(teacherSchoolNav.degree);
+ if(!year||!degree)return;
+ var name=String(prompt('Nom exact de la classe (ex. : 4C, 4TQ) :')||'').trim().replace(/\s+/g,' ');
+ if(name.length<2||name.length>20||! /^[\p{L}\p{N}_.\- ]+$/u.test(name)){
+  if(name)say('teacher-class-msg','Le nom doit contenir 2 à 20 caractères (lettres, chiffres, espaces, « . », « - » ou « _ »).',false);
+  return;
+ }
+ var chapters=window.zestLocal.defaultChaptersForYear(year),teacher=window.zestFirebaseUser;
+ var record={id:makeSchoolId('class'),name:name,code:makeInviteCode(name),annee:year,degre:degree,teacherId:teacher&&teacher.uid||'',teacherCode:tch,chapters:chapters,activeChapterIds:chapters.map(function(chapter){return chapter.id;}),createdAt:Date.now(),_isNew:true};
+ saveLocalTeacherClass(Object.assign({},record,{_syncPending:true}));
+ teacherSchoolNav.classId=record.id;
+ say('teacher-class-msg','Classe créée sur cet appareil; synchronisation avec Firestore en cours…',true);
+ renderTeacher();
+ syncTeacherClass(record);
+}
+function renameTeacherClass(classId){
+ var record=teacherClassById(classId);
+ if(!record)return;
+ var name=String(prompt('Nouveau nom exact de la classe :',record.name)||'').trim().replace(/\s+/g,' ');
+ if(name.length<2||name.length>20||! /^[\p{L}\p{N}_.\- ]+$/u.test(name)){
+  if(name)say('teacher-class-msg','Le nom doit contenir 2 à 20 caractères (lettres, chiffres, espaces, « . », « - » ou « _ »).',false);
+  return;
+ }
+ syncTeacherClass(Object.assign({},record,{name:name}));
+}
+async function deleteTeacherClass(classId){
+ var record=teacherClassById(classId);
+ if(!record||!confirm('Supprimer la classe '+record.name+' ? Les profils des élèves ne seront pas supprimés.'))return;
+ try{
+  if(!record._isNew){
+   if(typeof window.zestFirebaseDeleteClass!=='function')throw new Error('La suppression Firestore n’est pas disponible.');
+   await window.zestFirebaseDeleteClass(record);
+  }
+  window.zestLocal.setTeacherClasses(tch,teacherClassList().filter(function(item){return item.id!==classId;}));
+  if(teacherSchoolNav.classId===classId)teacherSchoolNav.classId=null;
+  delete teacherRosterCache[classId];
+  say('teacher-class-msg','Classe supprimée.',true);
+  renderTeacher();
+ }catch(error){
+  console.error('[Zest] Suppression de classe :',error);
+  say('teacher-class-msg','La classe n’a pas été supprimée. Vérifie la connexion et les règles Firestore.',false);
+ }
+}
+function updateTeacherClass(classId,change){
+ var record=teacherClassById(classId);
+ if(!record)return;
+ var updated=Object.assign({},record,change);
+ syncTeacherClass(updated);
+}
+function createClassChapter(classId){
+ var record=teacherClassById(classId),title=$('teacher-chapter-title'),description=$('teacher-chapter-description'),content=$('teacher-chapter-content'),topic=$('teacher-chapter-topic');
+ if(!record||!title)return;
+ var name=String(title.value||'').trim();
+ if(name.length<2||name.length>80){say('teacher-class-msg','Le titre du chapitre doit contenir entre 2 et 80 caractères.',false);return;}
+ var chapters=(record.chapters||[]).slice(),chapter={id:makeSchoolId('chapter'),title:name,description:String(description&&description.value||'').trim(),content:String(content&&content.value||'').trim(),topicId:String(topic&&topic.value||'')};
+ chapters.push(chapter);
+ var active=(record.activeChapterIds||[]).slice();active.push(chapter.id);
+ syncTeacherClass(Object.assign({},record,{chapters:chapters,activeChapterIds:active}));
+}
+function changeChapterVisibility(classId,chapterId){
+ var record=teacherClassById(classId);
+ if(!record)return;
+ var active=(record.activeChapterIds||[]).slice(),index=active.indexOf(chapterId);
+ if(index>=0)active.splice(index,1);else active.push(chapterId);
+ updateTeacherClass(classId,{activeChapterIds:active});
+}
+function removeClassChapter(classId,chapterId){
+ var record=teacherClassById(classId);
+ if(!record||!confirm('Supprimer ce chapitre de la classe ?'))return;
+ updateTeacherClass(classId,{chapters:(record.chapters||[]).filter(function(chapter){return chapter.id!==chapterId;}),activeChapterIds:(record.activeChapterIds||[]).filter(function(id){return id!==chapterId;})});
+}
+async function copyTeacherClassCode(classId){
+ var record=teacherClassById(classId);
+ if(!record)return;
+ try{
+  if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(record.code);
+  else{prompt('Copie ce code de classe :',record.code);return;}
+  say('teacher-class-msg','Code '+record.code+' copié.',true);
+ }catch(error){
+  console.warn('[Zest] Copie du code de classe :',error);
+  prompt('Copie ce code de classe :',record.code);
+ }
+}
+function handleTeacherSchoolAction(event){
+ var button=event.target.closest('#teacher-school-tree [data-school-action]');
+ if(!button)return;
+ var action=button.getAttribute('data-school-action'),classId=button.getAttribute('data-class-id'),chapterId=button.getAttribute('data-chapter-id');
+ if(action==='degree'){teacherSchoolNav={degree:Number(button.getAttribute('data-degree')),year:null,classId:null};renderTeacher();}
+ else if(action==='back-degrees'){teacherSchoolNav={degree:null,year:null,classId:null};renderTeacher();}
+ else if(action==='year'){teacherSchoolNav.year=Number(button.getAttribute('data-year'));teacherSchoolNav.classId=null;renderTeacher();}
+ else if(action==='back-years'){teacherSchoolNav.year=null;teacherSchoolNav.classId=null;renderTeacher();}
+ else if(action==='back-classes'){teacherSchoolNav.classId=null;renderTeacher();}
+ else if(action==='open-class'){teacherSchoolNav.classId=classId;renderTeacher();}
+ else if(action==='create-class')createTeacherClass();
+ else if(action==='rename-class')renameTeacherClass(classId);
+ else if(action==='delete-class')deleteTeacherClass(classId);
+ else if(action==='copy-code')copyTeacherClassCode(classId);
+ else if(action==='sync-class'){var item=teacherClassById(classId);if(item)syncTeacherClass(Object.assign({},item,{_syncPending:false}));}
+ else if(action==='create-chapter')createClassChapter(classId);
+ else if(action==='toggle-chapter')changeChapterVisibility(classId,chapterId);
+ else if(action==='delete-chapter')removeClassChapter(classId,chapterId);
+}
+document.addEventListener('click',handleTeacherSchoolAction);
+function renderTeacherStudents(classId){
+ var box=$('t-students'),caption=$('teacher-students-caption');
+ if(!box)return;
+ box.innerHTML='';
+ var record=teacherClassById(classId),localUsers=ld(K.users,{}),students=[];
+ if(!record){
+  if(caption)caption.textContent='Sélectionne une classe pour consulter son suivi.';
+  box.innerHTML='<p class="sub">Ouvre une classe dans l’arborescence pour afficher ses élèves, les chapitres et les difficultés.</p>';
+  return;
+ }
+ if(caption)caption.textContent='Suivi de '+record.name+' · '+schoolDegreeLabel(record.degre)+' · '+schoolYearLabel(record.annee);
+ Object.keys(localUsers).forEach(function(key){var user=localUsers[key];if(user.classId===classId)students.push(Object.assign({displayName:key},user));});
+ var remote=teacherRosterCache[classId]&&teacherRosterCache[classId].students||[];
+ remote.forEach(function(user){
+  var index=students.findIndex(function(item){return item.fbUid&&item.fbUid===user.fbUid||item.email&&item.email===user.email;});
+  if(index>=0)students[index]=Object.assign({},students[index],user);else students.push(user);
+ });
+ if(!students.length)box.innerHTML='<p class="sub">Aucun élève inscrit dans cette classe pour le moment.</p>';
+ var chapters=record.chapters||[],active=record.activeChapterIds||[];
+ if(students.length){
+  var completeTotal=0,requiredTotal=0,successSum=0,successCount=0,errors={};
+  chapters.filter(function(chapter){return active.indexOf(chapter.id)>=0;}).forEach(function(chapter){
+   var completed=0,chapterSuccess=0,successN=0;
+   students.forEach(function(student){
+    if(chapter.topicId){
+     var progress=student.wp&&student.wp[chapter.topicId];
+     if(progress){if(progress.best>=60)completed++;chapterSuccess+=Number(progress.best)||0;successN++;}
+    }else if(student.chapterProgress&&student.chapterProgress[chapter.id]&&student.chapterProgress[chapter.id].completed)completed++;
+   });
+   completeTotal+=completed;requiredTotal+=students.length;
+   if(successN){successSum+=chapterSuccess/successN;successCount++;}
+  });
+  var averageSuccess=successCount?Math.round(successSum/successCount):0;
+  var errorTotal=Object.keys(errors).length;
+  students.forEach(function(student){
+   Object.keys(student.mistakes||{}).forEach(function(question){
+    var entry=student.mistakes[question],count=Number(entry&&typeof entry==='object'?entry.count:entry)||0;
+    errors[question]=(errors[question]||0)+count;
+   });
+  });
+  var topErrors=Object.keys(errors).sort(function(a,b){return errors[b]-errors[a];}).slice(0,5);
+  var summary=document.createElement('div');summary.className='box';
+  summary.innerHTML='<b>📊 Progression des chapitres actifs</b><p class="sub">'+completeTotal+' / '+requiredTotal+' validations · taux moyen des exercices liés : '+averageSuccess+'%</p><b>Erreurs fréquentes</b><p class="sub">'+(topErrors.length?topErrors.map(function(q){return esc(q)+' ('+errors[q]+')';}).join(' · '):'Aucune erreur enregistrée.')+'</p>';
+  box.appendChild(summary);
+  students.forEach(function(student){
+   var errCount=Object.keys(student.mistakes||{}).reduce(function(total,key){var value=student.mistakes[key];return total+(Number(value&&typeof value==='object'?value.count:value)||0);},0);
+   var done=chapters.filter(function(chapter){
+    if(active.indexOf(chapter.id)<0)return false;
+    if(chapter.topicId)return !!(student.wp&&student.wp[chapter.topicId]&&student.wp[chapter.topicId].best>=60);
+    return !!(student.chapterProgress&&student.chapterProgress[chapter.id]&&student.chapterProgress[chapter.id].completed);
+   }).length;
+   var card=document.createElement('div');card.className='box';
+   card.innerHTML='<div class="row"><b>'+esc(student.displayName||student.name||'Élève')+'</b><span>🎮 '+(Number(student.gamesPlayed)||0)+' · ⭐ '+(Number(student.totalScore)||0)+' pts</span></div><small class="sub">✉ '+esc(student.email||'')+' · 📚 '+done+' / '+active.length+' chapitres actifs · ❌ '+errCount+' erreur(s)</small>';
+   box.appendChild(card);
+  });
+ }
+}
+function loadTeacherStudents(classId){
+ if(!classId||!window.zestFirebaseListClassStudents)return;
+ var cached=teacherRosterCache[classId];
+ if(cached&&Date.now()-cached.loadedAt<30000){renderTeacherStudents(classId);return;}
+ window.zestFirebaseListClassStudents(classId).then(function(students){
+  teacherRosterCache[classId]={students:students,loadedAt:Date.now()};
+  if(teacherSchoolNav.classId===classId)renderTeacherStudents(classId);
+ }).catch(function(error){
+  console.error('[Zest] Lecture du roster :',error);
+  say('teacher-class-msg','La liste des élèves n’a pas pu être chargée. Vérifie la connexion et les règles Firestore.',false);
+ });
+}
+window.joinStudentClass=async function(){
+ var code=$('student-class-code'),button=$('student-class-join'),message='student-class-msg';
+ if(!stu||!me())return say(message,'Connecte-toi avec un compte élève.',false);
+ var value=String(code&&code.value||'').trim().toUpperCase();
+ if(!value)return say(message,'Saisis le code fourni par ton professeur.',false);
+ if(button)button.disabled=true;
+ say(message,'Vérification du code de classe…',true);
+ try{
+  if(typeof window.zestFirebaseJoinClass!=='function')throw new Error('Le service de classe n’est pas disponible.');
+  var membership=await window.zestFirebaseJoinClass(value);
+  if(!window.zestLocal.applyStudentClass(membership))throw new Error('Le rattachement n’a pas pu être enregistré sur cet appareil.');
+  if(code)code.value='';
+  say(message,'Tu as rejoint la classe '+membership.name+'.',true);
+  renderAll();
+ }catch(error){
+  console.error('[Zest] Rattachement à une classe :',error);
+  say(message,error&&error.message?error.message:'Code invalide ou classe indisponible. Vérifie le code et réessaie.',false);
+ }finally{
+  if(button)button.disabled=false;
+ }
+};
+function renderTeacher(){
+ renderTeacherSchoolTree();
+ if(teacherSchoolNav.classId){
+  renderTeacherStudents(teacherSchoolNav.classId);
+  loadTeacherStudents(teacherSchoolNav.classId);
+ }else renderTeacherStudents(null);
+ var qb = $('t-quizzes');
  if(qb){
     qb.innerHTML = '';
     var qs = ld(K.quizzes, []).filter(function(q){ return q.teacher === tch; });
@@ -4004,7 +4295,7 @@ var BADGES=[
  makeTrophy('dict25','✍️','Plume d\'argent','Réussir 25 dictées',25,function(u){return trophyCount(u,'dicteeOK');}),
  makeTrophy('conj25','🔤','Roi de la Conjugaison','Réussir 25 exercices de conjugaison',25,function(u){return trophyCount(u,'conjExercises');}),
  makeTrophy('phrase10','👁️','Œil de lynx','Analyser 10 phrases avec le Correcteur IA',10,function(u){return trophyCount(u,'aiPhraseAnalyses');}),
- makeTrophy('worlds','🗺️','Explorateur des Mondes','Terminer un parcours P1 à P6',1,function(u){return u&&u.worldP1P6Completed?1:0;}),
+ makeTrophy('worlds','🗺️','Explorateur des Mondes','Terminer tous les chapitres actifs de ta classe',1,function(u){return u&&u.worldP1P6Completed?1:0;}),
  makeTrophy('quest7','🏅','Maître des Défis','Réussir 7 défis du jour',7,function(u){return trophyCount(u,'questDone');})];
 function award(u){
  u.badges=Array.isArray(u.badges)?u.badges:[];
@@ -4495,7 +4786,7 @@ function gen(w,t,n,u){
   }
   return out;
 }
-window.ZestMondes={WORLDS:WORLDS,gen:gen};
+window.ZestMondes={WORLDS:WORLDS,gen:gen,start:start};
 
 var V={w:1},S=null;
 function bodyM(h){var b=g('mn-body');if(b)b.innerHTML=h;}
@@ -4505,22 +4796,51 @@ function speakM(t,rate){if(typeof window.speak==='function')window.speak(t,typeo
 function renderMap(){
   S=null;var u=U();
   if(!u){bodyM('<div class="card center"><span class="tag v">🗺️ Parcours P1 → P6</span><h2>Mondes de Zest</h2><p class="sub">Connecte-toi avec ton compte élève pour jouer et sauvegarder ta progression (les professeurs consultent le suivi dans leur espace profil).</p><button class="btn grad" onclick="switchTab(\'connexion\')">Aller à la connexion 🔑</button></div>');return;}
-  var stars=0,done=0;ALL.forEach(function(x){var p=u.wp&&u.wp[x.t.id];if(p){stars+=p.stars||0;if(p.best>=60)done++;}});
-  var wk=weak(u);
-  var h='<div class="card"><div class="row"><div><span class="tag v">🗺️ Parcours P1 → P6</span><h2>Mondes de Zest</h2><small class="sub">🔥 Série de réussites : '+(u.mnStreak||0)+' / 3 thèmes</small></div><div class="center"><b style="font-size:22px;color:#f59e0b">⭐ '+stars+'</b><br><small class="sub">'+done+' / '+ALL.length+' thèmes validés</small></div></div><div class="grid3" style="margin-top:12px">'+
-    WORLDS.map(function(w){var op=isOpen(u,w),p=Math.round(pr(u,w)*100);return '<div class="mn-w'+(V.w===w.id?' sel':'')+(op?'':' lk')+'" data-m="world" data-v="'+w.id+'" style="border-top:5px solid '+w.c+'"><div class="mn-big">'+(op?w.e:'🔒')+'</div><b>Monde '+w.id+'</b><br><small class="sub">'+w.g+' · '+E(w.n)+'</small><div class="mn-bar"><i style="width:'+p+'%;background:'+w.c+'"></i></div><small>'+p+'%</small></div>';}).join('')+'</div></div>';
-  if(wk.length)h+='<div class="card" style="border-color:#f43f5e"><b>🎯 Quête secondaire : révision ciblée</b><p class="sub">Tu bloques un peu sur : '+wk.slice(0,3).map(function(x){return E(x.w.g+' · '+x.t.n)+' ('+Math.round(x.rate*100)+'% d\'erreurs)';}).join(', ')+'.</p><button class="btn red" data-m="rev">Lancer la révision (+15 pts) 🚀</button></div>';
-  var w=WD(V.w);
-  if(!isOpen(u,w))h+='<div class="card center sub">🔒 Valide au moins 70% des thèmes du Monde '+(w.id-1)+' (60% de réussite par thème) pour débloquer celui-ci.</div>';
-  else h+='<div class="card"><h3>'+w.e+' Monde '+w.id+' · '+w.g+' — '+E(w.n)+'</h3>'+w.T.map(function(t){var p=(u.wp&&u.wp[t.id])||{best:0,stars:0},isW=wk.some(function(x){return x.t.id===t.id;});
-    return '<div class="mn-t"><div><b>'+t.e+' '+E(t.n)+'</b> '+(isW?'<span class="tag r">à revoir</span>':'')+'<div class="mn-bar" style="width:170px"><i style="width:'+p.best+'%;background:'+(p.best>=60?'#10b981':'#f59e0b')+'"></i></div><small class="sub">Meilleur : '+p.best+'% '+'⭐'.repeat(p.stars||0)+'</small></div><button class="btn sm" data-m="play" data-v="'+t.id+'">Jouer ▶</button></div>';}).join('')+'</div>';
-  bodyM(h);
+  if(!u.classId){bodyM('<div class="card center"><span class="tag v">📚 Programme de ta classe</span><h2>Rejoins ta classe</h2><p class="sub">Entre le code fourni par ton professeur dans ton profil pour afficher uniquement les chapitres de ton année.</p><button class="btn grad" onclick="switchTab(\'portail\')">Saisir un code de classe</button></div>');return;}
+  var classroom=window.zestLocal.getStudentClass(window.stu);
+  if(!classroom){bodyM('<div class="card center"><h2>Chargement du programme…</h2><p class="sub">La classe n’est pas encore disponible hors ligne. Reconnecte-toi pour la charger.</p></div>');return;}
+  renderClassProgramMap(u,classroom);return;
 }
-
-function start(tid){var u=U();if(!u)return;var x=TI[tid];S={w:x.w,tid:tid,title:x.w.g+' · '+x.t.n,qs:gen(x.w,x.t,6,u),i:0,ok:0,ko:0,rev:false};renderQ();}
-function startRev(){var u=U();if(!u)return;var wk=weak(u).slice(0,2),qs=[];wk.forEach(function(x){qs=qs.concat(gen(x.w,x.t,4,u));});
-  if(!qs.length){toastM('Aucune difficulté détectée, bravo !');return;}
-  S={w:wk[0].w,tid:null,title:'Révision ciblée',qs:qs,i:0,ok:0,ko:0,rev:true};renderQ();}
+function renderClassProgramMap(user,classroom){
+  var active=Array.isArray(classroom.activeChapterIds)?classroom.activeChapterIds:[];
+  var chapters=(classroom.chapters||[]).filter(function(chapter){return active.indexOf(chapter.id)>=0;});
+  var year=Number(classroom.annee||classroom.year)||Number(user.annee)||0;
+  var degree=Number(classroom.degre||classroom.degree)||Number(user.degre)||0;
+  var html='<div class="card"><span class="tag v">🏫 '+E(classroom.name||classroom.className||user.className||'Ma classe')+'</span><h2>Programme · '+E(schoolYearLabel(year))+'</h2><p class="sub">'+E(schoolDegreeLabel(degree))+' · '+chapters.length+' chapitre(s) actif(s)</p></div>';
+  if(!chapters.length){bodyM(html+'<div class="card center sub">Aucun chapitre n’est activé pour ta classe. Demande à ton professeur de publier le programme.</div>');return;}
+  html+='<div class="card"><h3>Chapitres de ton année</h3>';
+  chapters.forEach(function(chapter){
+   var progress=chapter.topicId&&user.wp&&user.wp[chapter.topicId],custom=user.chapterProgress&&user.chapterProgress[chapter.id],done=chapter.topicId?!!(progress&&progress.best>=60):!!(custom&&custom.completed);
+   var topic=chapter.topicId&&window.ZestMondes.WORLDS.reduce(function(found,world){return found||world.T.filter(function(item){return item.id===chapter.topicId;})[0];},null);
+   html+='<article class="box"><div class="row"><div><b>'+E(chapter.title)+'</b><p class="sub">'+E(chapter.description||'')+'</p></div><span class="tag '+(done?'g':'a')+'">'+(done?'✅ Terminé':progress?'Meilleur : '+(progress.best||0)+'%':'À faire')+'</span></div>';
+   if(chapter.content)html+='<p style="white-space:pre-wrap">'+E(chapter.content)+'</p>';
+   if(topic)html+='<p class="sub">Exercice : '+E(topic.n)+'</p><button class="btn grad" type="button" data-m="play" data-v="'+E(topic.id)+'">Faire l’exercice ▶</button>';
+   else html+='<button class="btn '+(done?'':'grad')+'" type="button" data-m="complete" data-v="'+E(chapter.id)+'">'+(done?'Chapitre terminé':'Marquer comme terminé')+'</button>';
+   html+='</article>';
+  });
+  html+='</div>';
+  bodyM(html);
+}
+function getStudentActiveClassChapters(user){
+  if(!user||!user.classId)return [];
+  var classroom=window.zestLocal.getStudentClass(window.stu);
+  if(!classroom)return [];
+  var active=Array.isArray(classroom.activeChapterIds)?classroom.activeChapterIds:[];
+  return (classroom.chapters||[]).filter(function(chapter){return active.indexOf(chapter.id)>=0;});
+}
+function updateClassProgramCompletion(user){
+  var chapters=getStudentActiveClassChapters(user);
+  if(!chapters.length)return;
+  var complete=chapters.every(function(chapter){
+   if(chapter.topicId)return !!(user.wp&&user.wp[chapter.topicId]&&user.wp[chapter.topicId].best>=60);
+   return !!(user.chapterProgress&&user.chapterProgress[chapter.id]&&user.chapterProgress[chapter.id].completed);
+  });
+  if(complete)user.worldP1P6Completed=true;
+}
+function start(tid){var u=U();if(!u)return;if(!u.classId||!getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===tid;})){toastM('Cet exercice n’est pas actif dans le programme de ta classe.');return;}var x=TI[tid];if(!x)return;S={w:x.w,tid:tid,title:x.w.g+' · '+x.t.n,qs:gen(x.w,x.t,6,u),i:0,ok:0,ko:0,rev:false};renderQ();}
+function startRev(){var u=U();if(!u)return;var wk=weak(u).filter(function(x){return getStudentActiveClassChapters(u).some(function(chapter){return chapter.topicId===x.t.id;});}).slice(0,2),qs=[];wk.forEach(function(x){qs=qs.concat(gen(x.w,x.t,4,u));});
+  if(!qs.length){toastM('Aucune difficulté détectée dans les chapitres actifs.');return;}
+  S={w:wk[0].w,tid:wk[0].t.id,title:'Révision ciblée',qs:qs,i:0,ok:0,ko:0,rev:true};renderQ();}
 
 function mhtml(q){
   if(!q.ln){q.ln=sh(q.pairs.map(function(_,i){return i;}));q.rn=sh(q.pairs.map(function(_,i){return i;}));q.ok={};q.bad={};q.d=0;q.er=0;q.sn=null;}
@@ -4564,7 +4884,7 @@ function finish(){
         if(u.mnStreak>=3){streakBonus=true;pts=basePts*2;u.mnStreak=0;u.mnLastStreakTheme=null;}
       }else{u.mnStreak=0;u.mnLastStreakTheme=null;}
       u.wp=u.wp||{};var p=u.wp[S0.tid]||{best:0,plays:0,stars:0};p.plays++;p.best=Math.max(p.best,pct);p.stars=Math.max(p.stars,stars);u.wp[S0.tid]=p;
-      if(!u.worldP1P6Completed&&ALL.every(function(item){var topic=u.wp[item.t.id];return !!topic&&topic.best>=60;}))u.worldP1P6Completed=true;
+      updateClassProgramCompletion(u);
     }
     streakCount=u.mnStreak;u.totalScore+=pts;
   });
@@ -4579,6 +4899,18 @@ function actMondes(a,el){
   var v=el.getAttribute('data-v'),q=S&&S.qs[S.i];
   if(a==='world'){V.w=+v;renderMap();}
   else if(a==='play')start(v);
+  else if(a==='complete'){
+    var user=U(),chapter=getStudentActiveClassChapters(user).filter(function(item){return item.id===v&&!item.topicId;})[0];
+    if(!chapter)return;
+    upMondes(function(profile){
+      profile.chapterProgress=profile.chapterProgress||{};
+      var progress=profile.chapterProgress[chapter.id]||{completions:0};
+      progress.completed=true;progress.completions=(Number(progress.completions)||0)+1;progress.completedAt=Date.now();
+      profile.chapterProgress[chapter.id]=progress;updateClassProgramCompletion(profile);
+    });
+    if(typeof window.refreshTrophyAwards==='function')window.refreshTrophyAwards();
+    renderMap();
+  }
   else if(a==='rev')startRev();
   else if(a==='back')renderMap();
   else if(a==='again'){if(S&&S.rev)startRev();else if(S)start(S.tid);}
@@ -4883,6 +5215,67 @@ if(location.protocol==='file:'){
   }while(findKey(store, code) && tries < 20);
   return code;
  }
+ function classDegree(year){ return year <= 2 ? 1 : year <= 4 ? 2 : 3; }
+ function defaultChaptersForYear(year){
+  var worlds = window.ZestMondes && window.ZestMondes.WORLDS;
+  var world = Array.isArray(worlds) ? worlds.filter(function(item){ return item.id === Number(year); })[0] : null;
+  if(!world) return [];
+  return world.T.map(function(topic, index){
+   return {id: 'p' + year + '-' + topic.id, title: 'Chapitre ' + (index + 1) + ' — ' + topic.n, description: topic.n, content: '', topicId: topic.id};
+  });
+ }
+ function localClassByCode(code){
+  var teachers = ld(K.teachers, {}), wanted = String(code || '').toUpperCase();
+  var teacherKey = Object.keys(teachers).filter(function(key){
+   var profile = teachers[key];
+   return profile && Array.isArray(profile.classes) && profile.classes.some(function(item){ return String(item.code || '').toUpperCase() === wanted; });
+  })[0];
+  if(!teacherKey) return null;
+  var profile = teachers[teacherKey], item = profile.classes.filter(function(entry){ return String(entry.code || '').toUpperCase() === wanted; })[0];
+  return Object.assign({}, item, {teacherCode: teacherKey, teacherId: profile.fbUid || item.teacherId || ''});
+ }
+ function localClassById(classId){
+  var teachers = ld(K.teachers, {}), found = null;
+  Object.keys(teachers).some(function(key){
+   var profile = teachers[key];
+   var item = profile && Array.isArray(profile.classes) ? profile.classes.filter(function(entry){ return entry.id === classId; })[0] : null;
+   if(item){ found = Object.assign({}, item, {teacherCode: key, teacherId: profile.fbUid || item.teacherId || ''}); return true; }
+   return false;
+  });
+  return found;
+ }
+ function saveTeacherClasses(teacherKey, classes){
+  var teachers = ld(K.teachers, {}), profile = teachers[teacherKey];
+  if(!profile || typeof profile !== 'object') throw new Error('Profil professeur introuvable.');
+  profile.classes = Array.isArray(classes) ? classes : [];
+  sv(K.teachers, teachers);
+ }
+ function applyStudentClass(membership){
+  if(!stu || !membership || !membership.id) return false;
+  var users = ld(K.users, {}), profile = users[stu];
+  if(!profile) return false;
+  profile.classId = membership.id;
+  profile.className = membership.name || membership.className || '';
+  profile.annee = Number(membership.annee || membership.year) || 0;
+  profile.degre = Number(membership.degre || membership.degree) || 0;
+  profile.teacherId = membership.teacherId || '';
+  profile.teacherCode = membership.teacherCode || membership.teacherKey || '';
+  profile.inviteCode = String(membership.code || membership.inviteCode || '').toUpperCase();
+  profile.chapterProgress = profile.chapterProgress && typeof profile.chapterProgress === 'object' ? profile.chapterProgress : {};
+  sv(K.users, users);
+  var cache = ld('zest-class-cache', {});
+  cache[profile.classId] = membership;
+  sv('zest-class-cache', cache);
+  return true;
+ }
+ function getStudentMembership(studentKey){
+  var users = ld(K.users, {}), profile = users[studentKey];
+  return profile ? {classId: profile.classId || '', teacherId: profile.teacherId || '', teacherCode: profile.teacherCode || ''} : null;
+ }
+ function getStudentClass(studentKey){
+  var users = ld(K.users, {}), profile = users[studentKey], cache = ld('zest-class-cache', {});
+  return profile && profile.classId ? cache[profile.classId] || localClassById(profile.classId) : null;
+ }
  function readSignup(){
   var role = signupRole;
   var name = val('signup-name'), email = val('signup-email').toLowerCase();
@@ -4893,12 +5286,15 @@ if(location.protocol==='file:'){
   if(!EMAIL_RE.test(email)) return {error: 'Cette adresse e-mail n’est pas valide.'};
   if(p1.length < MIN_PASSWORD) return {error: 'Le mot de passe doit contenir au moins ' + MIN_PASSWORD + ' caractères.'};
   if(p1 !== p2) return {error: 'Les deux mots de passe ne correspondent pas.'};
-  var classCode = '';
+  var classCode = '', inviteCode = '', classInfo = null;
   if(role === 'student'){
    if(extra){
     var ce = validateClassCode(extra.toUpperCase());
     if(ce) return {error: ce.replace('Le code de classe', 'Le code de classe saisi')};
-    classCode = findKey(ld(K.teachers, {}), extra) || extra.toUpperCase();
+    classInfo = localClassByCode(extra);
+    if(classInfo){ classCode = classInfo.teacherCode; inviteCode = classInfo.code; }
+    else classCode = findKey(ld(K.teachers, {}), extra) || '';
+    if(!classCode) inviteCode = extra.toUpperCase();
    }
   }else if(role === 'teacher'){
    if(extra){
@@ -4914,11 +5310,12 @@ if(location.protocol==='file:'){
    var se = validateSchoolName(classCode);
    if(se) return {error: se};
   }
-  return {role: role, name: name, email: email, password: p1, classCode: classCode};
+  return {role: role, name: name, email: email, password: p1, classCode: classCode, inviteCode: inviteCode, classInfo: classInfo};
  }
- function initialProgress(role, email, classCode){
+ function initialProgress(role, email, classCode, classInfo, inviteCode){
   if(role !== 'student') return {};
-  return {email: email, teacherCode: classCode || '', totalScore: 0, spent: 0, gamesPlayed: 0, skin: '🦊', owned: [], mistakes: {}, pseudoChanges: 0, createdAt: Date.now()};
+  var membership = classInfo || {};
+  return {email: email, teacherCode: classCode || membership.teacherCode || '', classId: membership.id || '', className: membership.name || membership.className || '', annee: Number(membership.annee || membership.year) || 0, degre: Number(membership.degre || membership.degree) || 0, teacherId: membership.teacherId || '', inviteCode: String(inviteCode || membership.code || '').toUpperCase(), chapterProgress: {}, totalScore: 0, spent: 0, gamesPlayed: 0, skin: '🦊', owned: [], mistakes: {}, pseudoChanges: 0, createdAt: Date.now()};
  }
 
  /* ===== Données en attente : secours si le document Firestore n’a pas pu être créé à l’inscription ===== */
@@ -4927,11 +5324,11 @@ if(location.protocol==='file:'){
  function dropPending(uid){ var p = ld(PENDING_KEY, {}); if(has(p, uid)){ delete p[uid]; rawSv(PENDING_KEY, p); } }
  function defaultProfileFor(user, pending){
   if(pending && has(ROLES, pending.r)){
-   return {role: pending.r, name: clean(pending.n) || ROLES[pending.r].fallbackName, classCode: String(pending.c || '')};
+   return {role: pending.r, name: clean(pending.n) || ROLES[pending.r].fallbackName, classCode: String(pending.c || ''), inviteCode: String(pending.i || ''), classInfo: pending.m || null};
   }
   var base = clean((user && user.displayName) || String((user && user.email) || '').split('@')[0]).slice(0, 20);
   if(validatePseudo(base)) base = ROLES.student.fallbackName;
-  return {role: 'student', name: base, classCode: ''};
+  return {role: 'student', name: base, classCode: '', inviteCode: '', classInfo: null};
  }
 
  /* ===== Suivi de la synchronisation cloud (par compte, sur cet appareil) ===== */
@@ -4954,6 +5351,12 @@ if(location.protocol==='file:'){
   return {
    progress: progress,
    classCode: String(u.teacherCode || ''),
+   classId: String(u.classId || ''),
+   className: String(u.className || ''),
+   annee: Number(u.annee) || 0,
+   degre: Number(u.degre) || 0,
+   teacherId: String(u.teacherId || ''),
+   inviteCode: String(u.inviteCode || ''),
    data: {srs: ld('zest-srs-cards-' + stu, {}), scanHistory: ld('zest-scan-history-' + stu, [])}
   };
  }
@@ -5008,7 +5411,26 @@ if(location.protocol==='file:'){
   if(role === 'student'){
    if(!keepLocal){
     var progress = parseJson(d.progressJson, {});
-    store[key] = Object.assign(initialProgress('student', email, ''), progress, {email: email, teacherCode: String(d.classCode || progress.teacherCode || ''), fbUid: uid});
+    var classInfo = {
+     id: d.classId || progress.classId || '',
+     name: d.className || progress.className || '',
+     annee: Number(d.annee || progress.annee) || 0,
+     degre: Number(d.degre || progress.degre) || 0,
+     teacherId: d.teacherId || progress.teacherId || '',
+     teacherCode: String(d.classCode || progress.teacherCode || ''),
+     code: d.inviteCode || progress.inviteCode || ''
+    };
+    store[key] = Object.assign(initialProgress('student', email, classInfo.teacherCode, classInfo, classInfo.code), progress, {
+     email: email,
+     teacherCode: classInfo.teacherCode,
+     classId: classInfo.id,
+     className: classInfo.name,
+     annee: classInfo.annee,
+     degre: classInfo.degre,
+     teacherId: classInfo.teacherId,
+     inviteCode: String(classInfo.code || '').toUpperCase(),
+     fbUid: uid
+    });
     var data = parseJson(d.dataJson, {});
     rawSv('zest-srs-cards-' + key, data && data.srs && typeof data.srs === 'object' ? data.srs : {});
     rawSv('zest-scan-history-' + key, data && Array.isArray(data.scanHistory) ? data.scanHistory : []);
@@ -5116,6 +5538,11 @@ if(location.protocol==='file:'){
   savePending: savePending, readPending: readPending, dropPending: dropPending, defaultProfileFor: defaultProfileFor,
   applyCloudProfile: applyCloudProfile, attachLocalOnly: attachLocalOnly,
   collectProgress: collectProgress, markSynced: markSynced, readMeta: readMeta,
+  defaultChaptersForYear: defaultChaptersForYear, localClassByCode: localClassByCode, localClassById: localClassById,
+  setTeacherClasses: saveTeacherClasses, getTeacherClasses: function(teacherKey){
+   var profile = ld(K.teachers, {})[teacherKey];
+   return profile && Array.isArray(profile.classes) ? profile.classes : [];
+  }, getStudentMembership: getStudentMembership, getStudentClass: getStudentClass, applyStudentClass: applyStudentClass,
   roleToCloud: function(r){ return has(ROLES, r) ? ROLES[r].cloud : null; },
   roleLabel: function(r){ return has(ROLES, r) ? ROLES[r].label : ''; },
   clearSession: clearSession, showVerifyNotice: showVerifyNotice, showInfoNotice: showInfoNotice, wipeAccount: wipeAccount
@@ -5159,8 +5586,13 @@ if(location.protocol==='file:'){
   } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
   import {
     getFirestore,
+    collection,
     doc,
     getDoc,
+    getDocs,
+    query,
+    where,
+    runTransaction,
     setDoc,
     deleteDoc,
     serverTimestamp
@@ -5360,18 +5792,220 @@ if(location.protocol==='file:'){
   // ===== Cloud Firestore : un document par utilisateur, users/{uid} =====
   function profileRef(uid) { return doc(db, "users", uid); }
 
-  function buildProfileDoc(user, role, displayName, classCode) {
-    const progress = window.zestLocal.initialProgress(role, user.email || "", classCode);
+  function classRef(classId) { return doc(db, "classes", classId); }
+  function inviteRef(code) { return doc(db, "inviteCodes", code); }
+
+  function normalizedInviteCode(value) {
+    return String(value || "").trim().toUpperCase().replace(/\s+/g, "");
+  }
+
+  function classFromData(id, data) {
+    const storedCreatedAt = data.createdAt;
+    return {
+      id: id,
+      name: String(data.name || data.className || ""),
+      code: String(data.code || data.inviteCode || ""),
+      annee: Number(data.annee) || 0,
+      degre: Number(data.degre) || 0,
+      teacherId: String(data.teacherId || ""),
+      teacherCode: String(data.teacherCode || ""),
+      chapters: Array.isArray(data.chapters) ? data.chapters : [],
+      activeChapterIds: Array.isArray(data.activeChapterIds) ? data.activeChapterIds : [],
+      createdAt: storedCreatedAt && typeof storedCreatedAt.toMillis === "function"
+        ? storedCreatedAt.toMillis()
+        : Number(storedCreatedAt) || Date.now(),
+      _isNew: false
+    };
+  }
+
+  async function requireVerifiedFirebaseUser() {
+    const user = auth.currentUser;
+    if (!user || user.emailVerified !== true) throw new Error("Une session vérifiée est requise.");
+    return user;
+  }
+
+  async function requireTeacherProfile() {
+    const user = await requireVerifiedFirebaseUser();
+    const snapshot = await getDoc(profileRef(user.uid));
+    if (!snapshot.exists() || snapshot.data().role !== "professeur") {
+      throw new Error("Seul le professeur propriétaire peut gérer ces classes.");
+    }
+    return { user: user, profile: snapshot.data() };
+  }
+
+  window.zestFirebaseResolveInvite = async function (value) {
+    if (!auth.currentUser) throw new Error("Connecte-toi pour vérifier ce code de classe.");
+    const code = normalizedInviteCode(value);
+    if (!code) return null;
+    const snapshot = await getDoc(inviteRef(code));
+    if (!snapshot.exists()) return null;
+    const data = snapshot.data();
+    if (!data.classId || !data.teacherId) return null;
+    return {
+      id: String(data.classId),
+      name: String(data.className || data.name || ""),
+      className: String(data.className || data.name || ""),
+      code: code,
+      annee: Number(data.annee) || 0,
+      degre: Number(data.degre) || 0,
+      teacherId: String(data.teacherId),
+      teacherCode: String(data.teacherCode || "")
+    };
+  };
+
+  window.zestFirebaseSaveClass = async function (input) {
+    const owner = await requireTeacherProfile();
+    const classId = String(input && input.id || "");
+    const name = String(input && input.name || "").trim();
+    const code = normalizedInviteCode(input && input.code);
+    const annee = Number(input && input.annee);
+    const degre = Number(input && input.degre);
+    if (!classId || !name || !code || !Number.isInteger(annee) || annee < 1 || annee > 6 ||
+        !Number.isInteger(degre) || degre !== Math.ceil(annee / 2)) {
+      throw new Error("Les informations de la classe sont incomplètes ou invalides.");
+    }
+    const ref = classRef(classId);
+    if (!input._isNew) {
+      const current = await getDoc(ref);
+      if (!current.exists() || current.data().teacherId !== owner.user.uid) {
+        throw new Error("Cette classe n’existe pas ou ne t’appartient pas.");
+      }
+    }
+    const invite = inviteRef(code);
+    const createdAt = Number(input.createdAt) || Date.now();
+    const record = {
+      teacherId: owner.user.uid,
+      teacherCode: String(input.teacherCode || owner.profile.displayName || ""),
+      name: name,
+      code: code,
+      annee: annee,
+      degre: degre,
+      chapters: Array.isArray(input.chapters) ? input.chapters : [],
+      activeChapterIds: Array.isArray(input.activeChapterIds) ? input.activeChapterIds : [],
+      createdAt: createdAt,
+      updatedAt: serverTimestamp()
+    };
+    await runTransaction(db, async function (transaction) {
+      const inviteSnapshot = await transaction.get(invite);
+      if (inviteSnapshot.exists() && inviteSnapshot.data().classId !== classId) {
+        throw new Error("Ce code de classe est déjà utilisé. Renomme ou recrée la classe.");
+      }
+      transaction.set(ref, record);
+      transaction.set(invite, {
+        code: code,
+        classId: classId,
+        className: name,
+        teacherId: owner.user.uid,
+        teacherCode: record.teacherCode,
+        annee: annee,
+        degre: degre,
+        updatedAt: serverTimestamp()
+      });
+    });
+    return classFromData(classId, Object.assign({}, record, { createdAt: createdAt }));
+  };
+
+  window.zestFirebaseLoadTeacherClasses = async function () {
+    const owner = await requireTeacherProfile();
+    const snapshots = await getDocs(query(collection(db, "classes"), where("teacherId", "==", owner.user.uid)));
+    return snapshots.docs.map(function (snapshot) { return classFromData(snapshot.id, snapshot.data()); });
+  };
+
+  window.zestFirebaseLoadStudentClass = async function (classId) {
+    await requireVerifiedFirebaseUser();
+    if (!classId) return null;
+    const snapshot = await getDoc(classRef(String(classId)));
+    return snapshot.exists() ? classFromData(snapshot.id, snapshot.data()) : null;
+  };
+
+  window.zestFirebaseListClassStudents = async function (classId) {
+    const owner = await requireTeacherProfile();
+    const classroom = await getDoc(classRef(String(classId || "")));
+    if (!classroom.exists() || classroom.data().teacherId !== owner.user.uid) {
+      throw new Error("Cette classe n’existe pas ou ne t’appartient pas.");
+    }
+    const snapshots = await getDocs(query(collection(db, "users"), where("classId", "==", String(classId))));
+    return snapshots.docs.map(function (snapshot) {
+      const data = snapshot.data();
+      let progress = {};
+      try { progress = JSON.parse(data.progressJson || "{}"); } catch (error) {
+        console.warn("[Zest] Progression illisible pour l’élève " + snapshot.id, error);
+      }
+      return Object.assign({}, progress, {
+        fbUid: snapshot.id,
+        email: String(data.email || ""),
+        displayName: String(data.displayName || ""),
+        classId: String(data.classId || ""),
+        className: String(data.className || ""),
+        annee: Number(data.annee) || 0,
+        degre: Number(data.degre) || 0
+      });
+    });
+  };
+
+  window.zestFirebaseJoinClass = async function (value) {
+    const user = await requireVerifiedFirebaseUser();
+    const current = await getDoc(profileRef(user.uid));
+    if (!current.exists() || current.data().role !== "eleve") {
+      throw new Error("Seul un profil élève peut rejoindre une classe.");
+    }
+    const membership = await window.zestFirebaseResolveInvite(value);
+    if (!membership) throw new Error("Ce code de classe est introuvable.");
+    const fields = {
+      classId: membership.id,
+      className: membership.name,
+      annee: membership.annee,
+      degre: membership.degre,
+      teacherId: membership.teacherId,
+      classCode: membership.teacherCode,
+      inviteCode: membership.code,
+      updatedAt: serverTimestamp()
+    };
+    await setDoc(profileRef(user.uid), fields, { merge: true });
+    const classroomSnapshot = await getDoc(classRef(membership.id));
+    if (!classroomSnapshot.exists()) throw new Error("Cette classe n’est plus disponible.");
+    return classFromData(classroomSnapshot.id, classroomSnapshot.data());
+  };
+
+  window.zestFirebaseDeleteClass = async function (input) {
+    const owner = await requireTeacherProfile();
+    const classId = String(input && input.id || "");
+    const code = normalizedInviteCode(input && input.code);
+    if (!classId || !code) throw new Error("Les informations de la classe sont incomplètes.");
+    const ref = classRef(classId);
+    const current = await getDoc(ref);
+    if (!current.exists() || current.data().teacherId !== owner.user.uid) {
+      throw new Error("Cette classe n’existe pas ou ne t’appartient pas.");
+    }
+    await runTransaction(db, async function (transaction) {
+      const inviteSnapshot = await transaction.get(inviteRef(code));
+      transaction.delete(ref);
+      if (inviteSnapshot.exists() && inviteSnapshot.data().classId === classId) {
+        transaction.delete(inviteRef(code));
+      }
+    });
+  };
+
+  function buildProfileDoc(user, role, displayName, classCode, membership, inviteCode) {
+    const progress = window.zestLocal.initialProgress(role, user.email || "", classCode, membership, inviteCode);
+    const classInfo = role === "student" && membership ? membership : {};
     return {
       uid: user.uid,
       email: user.email || "",
       displayName: displayName,
       role: window.zestLocal.roleToCloud(role),
       classCode: classCode || "",
+      classId: String(classInfo.id || ""),
+      className: String(classInfo.name || classInfo.className || ""),
+      annee: Number(classInfo.annee) || 0,
+      degre: Number(classInfo.degre) || 0,
+      teacherId: String(classInfo.teacherId || ""),
+      inviteCode: String(inviteCode || classInfo.code || ""),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       scheduledDeletion: false,
       deletionTimestamp: null,
+      deletionRequestedAt: null,
       totalScore: 0,
       gamesPlayed: 0,
       progressJson: JSON.stringify(progress),
@@ -5383,7 +6017,7 @@ if(location.protocol==='file:'){
   // Le document users/{uid} n’existe pas (écriture refusée à l’inscription, compte ancien…) : on le crée.
   async function createMissingProfile(user) {
     const base = window.zestLocal.defaultProfileFor(user, window.zestLocal.readPending(user.uid));
-    const data = buildProfileDoc(user, base.role, base.name, base.classCode);
+    const data = buildProfileDoc(user, base.role, base.name, base.classCode, base.classInfo, base.inviteCode);
     try {
       await setDoc(profileRef(user.uid), data);
     } catch (error) {
@@ -5457,9 +6091,15 @@ if(location.protocol==='file:'){
           totalScore: Number(payload.progress.totalScore) || 0,
           gamesPlayed: Number(payload.progress.gamesPlayed) || 0,
           classCode: payload.classCode,
+          classId: payload.classId,
+          className: payload.className,
+          annee: payload.annee,
+          degre: payload.degre,
+          teacherId: payload.teacherId,
+          inviteCode: payload.inviteCode,
           progressTs: ts,
           updatedAt: serverTimestamp()
-        }, { mergeFields: ["progressJson", "dataJson", "totalScore", "gamesPlayed", "classCode", "progressTs", "updatedAt"] });
+        }, { mergeFields: ["progressJson", "dataJson", "totalScore", "gamesPlayed", "classCode", "classId", "className", "annee", "degre", "teacherId", "inviteCode", "progressTs", "updatedAt"] });
         this.lastSnapshot = snapshot;
         window.zestLocal.markSynced(uid, ts);
         if (sessionMessage) sessionMessage.textContent = "";
@@ -5492,7 +6132,9 @@ if(location.protocol==='file:'){
   function refreshAccountLock() {
     const copy = byId("account-lock-copy");
     if (!copy || !lockedData) return;
-    const deadline = Number(lockedData.deletionTimestamp);
+    const requestedAt = lockedData.deletionRequestedAt;
+    const requestedAtMs = requestedAt && typeof requestedAt.toMillis === "function" ? requestedAt.toMillis() : 0;
+    const deadline = requestedAtMs ? requestedAtMs + DELETION_DELAY_MS : Number(lockedData.deletionTimestamp);
     if (!Number.isFinite(deadline)) {
       copy.textContent = "La suppression de ton compte est programmée. Tu peux encore le récupérer en cliquant sur « Récupérer mon compte ».";
       return;
@@ -5539,7 +6181,14 @@ if(location.protocol==='file:'){
       logFirebaseError("suppression définitive du compte", error);
       if (documentDeleted) {
         // Le compte existe encore : on remet son enregistrement pour pouvoir réessayer la prochaine fois.
-        try { await setDoc(profileRef(uid), data); } catch (restoreError) { logFirebaseError("restauration de users/" + uid, restoreError); }
+        try {
+          await setDoc(profileRef(uid), Object.assign({}, data, {
+            scheduledDeletion: false,
+            deletionTimestamp: null,
+            deletionRequestedAt: null,
+            updatedAt: serverTimestamp()
+          }));
+        } catch (restoreError) { logFirebaseError("restauration de users/" + uid, restoreError); }
       }
       try { await signOut(auth); } catch (signOutError) { console.error("[Zest · diagnostic] signOut :", signOutError); }
       window.zestLocal.clearSession();
@@ -5555,7 +6204,12 @@ if(location.protocol==='file:'){
     recoverButton.disabled = true;
     setMsg("account-lock-msg", "Récupération de ton compte…", true);
     try {
-      await setDoc(profileRef(user.uid), { scheduledDeletion: false, deletionTimestamp: null, updatedAt: serverTimestamp() }, { merge: true });
+      await setDoc(profileRef(user.uid), {
+        scheduledDeletion: false,
+        deletionTimestamp: null,
+        deletionRequestedAt: null,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
       hideAccountLock();
       window.zestFirebaseUser = user;
       activeUid = null;
@@ -5591,7 +6245,22 @@ if(location.protocol==='file:'){
     }
 
     if (data && data.scheduledDeletion === true) {
-      const deadline = Number(data.deletionTimestamp);
+      const requestedAt = data.deletionRequestedAt;
+      const requestedAtMs = requestedAt && typeof requestedAt.toMillis === "function" ? requestedAt.toMillis() : 0;
+      if (!requestedAtMs) {
+        const migratedDeadline = Date.now() + DELETION_DELAY_MS;
+        try {
+          await setDoc(profileRef(user.uid), {
+            deletionTimestamp: migratedDeadline,
+            deletionRequestedAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+          data = Object.assign({}, data, { deletionTimestamp: migratedDeadline });
+        } catch (migrationError) {
+          logFirebaseError("migration du délai de suppression", migrationError);
+        }
+      }
+      const deadline = requestedAtMs ? requestedAtMs + DELETION_DELAY_MS : Number(data.deletionTimestamp);
       if (!Number.isFinite(deadline) || Date.now() < deadline) {
         showAccountLock(user, data);
         return "locked";
@@ -5606,6 +6275,44 @@ if(location.protocol==='file:'){
     if (data) result = window.zestLocal.applyCloudProfile(user.uid, user.email || "", data);
     else result = window.zestLocal.attachLocalOnly(user.uid);   // secours hors ligne
     if (!result) return false;
+
+    if (result.role === "teacher") {
+      try {
+        const remoteClasses = await window.zestFirebaseLoadTeacherClasses();
+        const classes = remoteClasses.slice();
+        const localClasses = window.zestLocal.getTeacherClasses(result.key);
+        localClasses.filter(function (item) { return item && item._syncPending; }).forEach(function (item) {
+          const index = classes.findIndex(function (remote) { return remote.id === item.id; });
+          if (index < 0) classes.push(item);
+          else classes[index] = item;
+        });
+        for (let index = 0; index < classes.length; index += 1) {
+          if (!classes[index]._syncPending) continue;
+          try {
+            const saved = await window.zestFirebaseSaveClass(classes[index]);
+            classes[index] = Object.assign({}, saved, { _syncPending: false });
+          } catch (syncError) {
+            logFirebaseError("synchronisation d’une classe en attente", syncError);
+            if (sessionMessage) sessionMessage.textContent = "Certaines classes restent en attente de synchronisation. Vérifie les règles Firestore.";
+          }
+        }
+        window.zestLocal.setTeacherClasses(result.key, classes);
+      } catch (classError) {
+        logFirebaseError("chargement des classes du professeur", classError);
+        if (sessionMessage) sessionMessage.textContent = "Les classes n’ont pas pu être chargées depuis Firestore. Vérifie les règles et la connexion.";
+      }
+    } else if (result.role === "student") {
+      const membership = window.zestLocal.getStudentMembership(result.key);
+      if (membership && membership.classId) {
+        try {
+          const classroom = await window.zestFirebaseLoadStudentClass(membership.classId);
+          if (classroom) window.zestLocal.applyStudentClass(classroom);
+        } catch (classError) {
+          logFirebaseError("chargement du programme de classe", classError);
+          if (sessionMessage) sessionMessage.textContent = "Le programme de classe n’a pas pu être actualisé. Les données disponibles hors ligne restent affichées.";
+        }
+      }
+    }
 
     activeUid = user.uid;
     cloud.start(user.uid);
@@ -5656,18 +6363,36 @@ if(location.protocol==='file:'){
     signupButton.disabled = true;
     setMsg("signup-msg", "Création du compte en cours…", true);
     let created = null;
+    let membership = data.classInfo || null;
+    let inviteCode = data.inviteCode || "";
+    let classCode = data.classCode || "";
+    let inviteWarning = false;
     allowUnverifiedVerificationFlow = true;
     try {
       const credential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       created = credential.user;
-      window.zestLocal.savePending(created.uid, { r: data.role, n: data.name, c: data.classCode });
+      if (data.role === "student" && inviteCode) {
+        try {
+          membership = await window.zestFirebaseResolveInvite(inviteCode);
+          if (membership) classCode = membership.teacherCode || "";
+          else inviteWarning = true;
+        } catch (inviteError) {
+          logFirebaseError("vérification du code de classe", inviteError);
+          inviteWarning = true;
+          membership = null;
+        }
+        if (!membership) inviteCode = "";
+      }
+      window.zestLocal.savePending(created.uid, {
+        r: data.role, n: data.name, c: classCode, i: inviteCode, m: membership
+      });
       try {
         await updateProfile(created, { displayName: data.name });
       } catch (profileError) {
         logFirebaseError("updateProfile", profileError);
       }
       try {
-        await setDoc(profileRef(created.uid), buildProfileDoc(created, data.role, data.name, data.classCode));
+        await setDoc(profileRef(created.uid), buildProfileDoc(created, data.role, data.name, classCode, membership, inviteCode));
         window.zestLocal.dropPending(created.uid);
       } catch (firestoreError) {
         // Non bloquant : le profil sera recréé à la première connexion à partir des données gardées sur l’appareil.
@@ -5682,6 +6407,9 @@ if(location.protocol==='file:'){
       window.setAuthRole("student");
       setMsg("signup-msg", "", true);
       window.zestLocal.showVerifyNotice(data.email);
+      if (inviteWarning) {
+        setMsg("auth-notice-msg", "Le compte est créé, mais le code de classe n’a pas pu être vérifié. Tu pourras le saisir depuis ton profil après confirmation de ton e-mail.", false);
+      }
     } catch (error) {
       if (created) {
         logFirebaseError("sendEmailVerification", error, { email: data.email });
@@ -5857,6 +6585,7 @@ if(location.protocol==='file:'){
       await setDoc(profileRef(user.uid), {
         scheduledDeletion: true,
         deletionTimestamp: deletionTimestamp,
+        deletionRequestedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }, { merge: true });
 
