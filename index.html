@@ -88,6 +88,11 @@ h2{margin:6px 0}h3{margin:6px 0}
 .stam-field-result.wrong{border-color:#f43f5e;background:#f43f5e22;color:#be123c}
 body.dark .stam-field-result.correct{color:#6ee7b7}
 body.dark .stam-field-result.wrong{color:#fda4af}
+.mistake-detail{padding:10px 0;border-top:1px solid var(--bd)}
+.mistake-answer-wrong{color:#dc2626;font-weight:700}
+.mistake-answer-correct{color:#059669;font-weight:700}
+body.dark .mistake-answer-wrong{color:#fda4af}
+body.dark .mistake-answer-correct{color:#6ee7b7}
 @keyframes pulseGlow{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
 .msg{min-height:20px;font-size:14px;font-weight:600;margin:0 0 8px;color:#f43f5e}.msg.ok{color:#10b981}
 .cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
@@ -1382,6 +1387,8 @@ var K = {
  directors: 'zest-directors',
  quizzes: 'zest-published-quizzes'
 };
+var ZEST_THEMES=['clair','chaud','sombre'];
+var ZEST_THEME_LABELS={clair:'Clair',chaud:'Chaud',sombre:'Sombre'};
 
 (function initDefaultData(){
  try {
@@ -1394,9 +1401,7 @@ var K = {
     if(savedFont) {
       document.documentElement.style.setProperty('--app-font', savedFont);
     }
-    var savedTheme=ld('zest-theme','dark');
-    document.body.classList.toggle('dark',savedTheme!=='light');
-    document.body.classList.toggle('theme-light',savedTheme==='light');
+    applyThemeMode(getSavedTheme(),false);
   } catch(e){}
 })();
 
@@ -1421,6 +1426,230 @@ rm('zest-otp-verified-sessions-v1');
 
 function me(){ return stu ? ld(K.users, {})[stu] : null; }
 function saveMe(fn){ var u = ld(K.users, {}); if (stu && u[stu]) { fn(u[stu]); sv(K.users, u); } }
+var MISTAKES_HISTORY_PREFIX='zest-mistakes-history-',mistakePracticeState=null;
+function mistakeText(value){return String(value==null?'':value).replace(/\s+/g,' ').trim();}
+function mistakeIdentity(subject,topic,question){
+ return JSON.stringify([subject,topic,question].map(function(value){return mistakeText(value).toLocaleLowerCase();}));
+}
+function mistakeHistoryKey(userKey){return MISTAKES_HISTORY_PREFIX+(userKey||'guest');}
+function quizMistakeSubject(category){
+ var value=mistakeText(category)||'Quiz général';
+ if(/animal/i.test(value))return 'Vocabulaire — Les Animaux';
+ if(/vocabulaire|lexique/i.test(value))return value;
+ if(/grammaire|conjugaison|verbe/i.test(value))return value;
+ return 'Vocabulaire — '+value;
+}
+function mergeMistakeHistory(groups){
+ var byId={};
+ groups.forEach(function(group){
+  if(!Array.isArray(group))return;
+  group.forEach(function(entry){
+   if(!entry||!entry.id)return;
+   var current=byId[entry.id];
+   if(!current||Number(entry.updatedAt||0)>=Number(current.updatedAt||0)){
+    byId[entry.id]=Object.assign({},entry,{occurrences:Math.max(Number(entry.occurrences)||1,Number(current&&current.occurrences)||0),resolutionCount:Math.max(Number(entry.resolutionCount)||0,Number(current&&current.resolutionCount)||0)});
+   }else{
+    current.occurrences=Math.max(Number(current.occurrences)||1,Number(entry.occurrences)||0);
+    current.resolutionCount=Math.max(Number(current.resolutionCount)||0,Number(entry.resolutionCount)||0);
+   }
+  });
+ });
+ return Object.keys(byId).map(function(id){return byId[id];}).sort(function(a,b){return Number(a.lastSeenAt||0)-Number(b.lastSeenAt||0);});
+}
+function loadMistakeHistory(){
+ var user=me(),local=ld(mistakeHistoryKey(stu),[]),profile=user&&user.mistakesHistory,groups=[local,profile];
+ if(stu)groups.push(ld(mistakeHistoryKey('guest'),[]));
+ return mergeMistakeHistory(groups);
+}
+function persistMistakeHistory(history,legacyEntry){
+ sv(mistakeHistoryKey(stu),history);
+ if(!stu)return;
+ saveMe(function(user){
+  user.mistakesHistory=history.map(function(entry){return Object.assign({},entry);});
+  if(legacyEntry){
+   user.mistakes=user.mistakes||{};
+   var key=legacyEntry.subject+' · '+legacyEntry.question,current=user.mistakes[key];
+   var count=Number(current&&typeof current==='object'?current.count:current)||0;
+   user.mistakes[key]={count:count+1,cat:legacyEntry.subject};
+  }
+ });
+}
+function recordUserMistake(data){
+ if(!data||typeof data!=='object')throw new TypeError('Une erreur à enregistrer est requise.');
+ var subject=mistakeText(data.subject),topic=mistakeText(data.topic)||subject,question=mistakeText(data.question);
+ if(!subject||!question)throw new TypeError('Une erreur doit inclure un sujet et une question.');
+ var now=Date.now(),id=mistakeIdentity(subject,topic,question),history=loadMistakeHistory(),entry=null;
+ for(var i=0;i<history.length;i++)if(history[i].id===id){entry=history[i];break;}
+ if(!entry){
+  entry={id:id,subject:subject,topic:topic,question:question,firstSeenAt:now,occurrences:0,resolutionCount:0,active:true};
+  history.push(entry);
+ }
+ entry.userAnswer=mistakeText(data.userAnswer)||'Aucune réponse';
+ entry.correctAnswer=mistakeText(data.correctAnswer)||'Réponse attendue non fournie';
+ entry.ruleExplanation=mistakeText(data.ruleExplanation)||'Revois la règle associée à cette question.';
+ entry.occurrences=(Number(entry.occurrences)||0)+1;
+ entry.lastSeenAt=now;entry.updatedAt=now;entry.active=true;entry.resolvedAt=null;
+ persistMistakeHistory(history,entry);
+ renderMistakesDashboard();
+ return Object.assign({},entry);
+}
+function resolveUserMistake(subject,topic,question){
+ subject=mistakeText(subject);topic=mistakeText(topic)||subject;question=mistakeText(question);
+ if(!subject||!question)return false;
+ var history=loadMistakeHistory(),id=mistakeIdentity(subject,topic,question),entry=null;
+ for(var i=0;i<history.length;i++)if(history[i].id===id){entry=history[i];break;}
+ if(!entry||!entry.active)return false;
+ var now=Date.now();entry.active=false;entry.resolutionCount=(Number(entry.resolutionCount)||0)+1;entry.resolvedAt=now;entry.updatedAt=now;
+ persistMistakeHistory(history,null);
+ renderMistakesDashboard();
+ return true;
+}
+window.recordUserMistake=recordUserMistake;
+window.resolveUserMistake=resolveUserMistake;
+function mistakeAnswerMatches(userAnswer,correctAnswer){
+ var user=mistakeText(userAnswer).toLocaleLowerCase().replace(/[.,!?;:]/g,'').replace(/[’']/g,' ').replace(/\s+/g,' ').trim();
+ return String(correctAnswer||'').split(/\s*\/\s*/).some(function(answer){
+  return user===mistakeText(answer).toLocaleLowerCase().replace(/[.,!?;:]/g,'').replace(/[’']/g,' ').replace(/\s+/g,' ').trim();
+ });
+}
+function getMistakeDiagnosis(entries){
+ var subjects={},rules={};
+ entries.forEach(function(entry){
+  subjects[entry.subject]=(subjects[entry.subject]||0)+(Number(entry.occurrences)||1);
+  var rule=entry.ruleExplanation||'À revoir';rules[rule]=(rules[rule]||0)+(Number(entry.occurrences)||1);
+ });
+ var subject=Object.keys(subjects).sort(function(a,b){return subjects[b]-subjects[a];})[0]||'';
+ var rule=Object.keys(rules).sort(function(a,b){return rules[b]-rules[a];})[0]||'';
+ var examples=entries.filter(function(entry){return entry.subject===subject;}).sort(function(a,b){return Number(b.lastSeenAt||0)-Number(a.lastSeenAt||0);}).slice(0,3);
+ var text;
+ if(/temps primitifs/i.test(subject)&&examples.some(function(entry){return /auxiliaire/i.test(entry.question);})){
+  text='Tu confonds parfois les auxiliaires « hebben » et « zijn » dans les temps primitifs.';
+ }else if(/animaux/i.test(subject)&&examples.some(function(entry){return /de|het|article|déterminant/i.test(entry.ruleExplanation+' '+entry.question);})){
+  text='Tu hésites encore sur les déterminants « de » et « het » dans le vocabulaire des animaux.';
+ }else{
+  text='Ta difficulté principale concerne « '+subject+' » : '+rule;
+ }
+ var plan=examples.map(function(entry){
+  return 'Revois « '+entry.question+' » : ta réponse « '+(entry.userAnswer||'aucune réponse')+' », réponse attendue « '+(entry.correctAnswer||'à revoir')+' ». '+(entry.ruleExplanation||'');
+ });
+ if(plan.length<2)plan.push('Refais une série ciblée sur « '+subject+' » et vérifie chaque réponse avec la règle correspondante.');
+ if(plan.length<3)plan.push('À la prochaine erreur, compare les formes et reformule la règle avec tes propres mots.');
+ return {subject:subject,rule:rule,text:text,plan:plan.slice(0,3),examples:examples};
+}
+function renderMistakePractice(){
+ var panel=$('mistake-practice'),state=mistakePracticeState;
+ if(!panel||!state)return;
+ if(state.index>=state.entries.length){
+  panel.innerHTML='<div class="box"><div class="row"><b>Révision terminée</b><button class="btn sm" type="button" data-mistake-practice-close>Fermer</button></div><p class="sub">Tu as terminé la révision des erreurs actives de « '+esc(state.subject)+' ».</p></div>';
+  renderMistakesDashboard();return;
+ }
+ var entry=state.entries[state.index];
+ panel.classList.remove('hide');
+ panel.innerHTML='<div class="box"><div class="row"><b>Quiz ciblé · '+esc(state.subject)+'</b><span>'+ (state.index+1)+' / '+state.entries.length+'</span></div><h4>'+esc(entry.question)+'</h4><p>Dernière réponse : <span class="mistake-answer-wrong">'+esc(entry.userAnswer||'Aucune réponse')+'</span></p><p>Bonne réponse : <span class="mistake-answer-correct">'+esc(entry.correctAnswer||'À revoir dans le module')+'</span></p><p class="sub">'+esc(entry.ruleExplanation||'')+'</p><form id="mistake-practice-form"><label for="mistake-practice-answer"><b>Ta nouvelle réponse</b></label><input id="mistake-practice-answer" class="inp" autocomplete="off" autocapitalize="none" spellcheck="false"><p id="mistake-practice-feedback" class="msg" role="status" aria-live="polite"></p><button class="btn grad" type="submit">Vérifier</button> <button class="btn sm" type="button" data-mistake-practice-close>Terminer</button></form></div>';
+}
+function startMistakePractice(subject){
+ var entries=loadMistakeHistory().filter(function(entry){return entry.active&&entry.subject===subject;});
+ if(!entries.length){alert('Il n’y a pas d’erreur active à réviser pour ce sujet.');return;}
+ mistakePracticeState={subject:subject,entries:entries,index:0};
+ renderMistakePractice();
+ var panel=$('mistake-practice');if(panel)panel.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function submitMistakePractice(event){
+ event.preventDefault();
+ var state=mistakePracticeState,entry=state&&state.entries[state.index],input=$('mistake-practice-answer');
+ if(!entry||!input)return;
+ var answer=input.value,feedback=$('mistake-practice-feedback');
+ var isOpenWriting=entry.correctAnswer==='Texte répondant à au moins 4 critères sur 5';
+ var correct=isOpenWriting&&typeof window.zestCheckWrite==='function'?window.zestCheckWrite(answer):mistakeAnswerMatches(answer,entry.correctAnswer);
+ if(correct){
+  resolveUserMistake(entry.subject,entry.topic,entry.question);
+  state.index++;renderMistakePractice();
+ }else{
+  recordUserMistake({subject:entry.subject,topic:entry.topic,question:entry.question,userAnswer:answer,correctAnswer:entry.correctAnswer,ruleExplanation:entry.ruleExplanation});
+  if(feedback){feedback.className='msg';feedback.textContent='Pas encore. Réponse attendue : '+entry.correctAnswer+'. '+entry.ruleExplanation;}
+ }
+}
+function renderMistakesDashboard(){
+ var host=$('mistakes');if(!host)return;
+ var user=me()||{},history=loadMistakeHistory(),serialized=JSON.stringify(history),profileHistory=JSON.stringify(Array.isArray(user.mistakesHistory)?user.mistakesHistory:[]);
+ if(stu&&serialized!==profileHistory)persistMistakeHistory(history,null);
+ var active=history.filter(function(entry){return entry.active;}),groups={};
+ history.forEach(function(entry){(groups[entry.subject]||(groups[entry.subject]=[])).push(entry);});
+ var legacy=user.mistakes||{},legacyOnly=Object.keys(legacy).filter(function(key){
+  return !history.some(function(entry){return key===entry.subject+' · '+entry.question;});
+ });
+ var totalActive=active.reduce(function(total,entry){return total+(Number(entry.occurrences)||1);},0);
+ if($('st-err'))$('st-err').textContent=String(totalActive+legacyOnly.reduce(function(total,key){var value=legacy[key];return total+(Number(value&&typeof value==='object'?value.count:value)||0);},0));
+ var subjects=Object.keys(groups).sort(function(a,b){
+  var count=function(subject){return groups[subject].filter(function(entry){return entry.active;}).reduce(function(total,entry){return total+(Number(entry.occurrences)||1);},0);};
+  return count(b)-count(a);
+ });
+ if(!history.length&&!legacyOnly.length){
+  host.innerHTML='<div class="box center sub">Aucune erreur enregistrée. Continue comme ça !</div>';
+ }else{
+  var html=subjects.map(function(subject){
+   var entries=groups[subject],open=entries.filter(function(entry){return entry.active;}),resolved=entries.filter(function(entry){return !entry.active&&Number(entry.resolutionCount)>0;}).length;
+   var activeCount=open.reduce(function(total,entry){return total+(Number(entry.occurrences)||1);},0),mastery=entries.length?Math.round(resolved/entries.length*100):0;
+   var recent=open.slice().sort(function(a,b){return Number(b.lastSeenAt||0)-Number(a.lastSeenAt||0);}).slice(0,5);
+   return '<article class="box"><div class="row"><div><b>'+esc(subject)+'</b><p class="sub" style="margin:4px 0">'+activeCount+' erreur(s) active(s) · maîtrise des erreurs repérées : '+mastery+'%</p></div><span class="tag '+(open.length?'r':'g')+'">'+open.length+' question(s) active(s)</span></div>'+
+    (recent.length?'<details><summary>Dernières erreurs exactes ('+Math.min(open.length,5)+')</summary>'+recent.map(function(entry){return '<div class="mistake-detail"><b>'+esc(entry.question)+'</b><p>Ta réponse : <span class="mistake-answer-wrong">'+esc(entry.userAnswer||'Aucune réponse')+'</span></p><p>Bonne réponse : <span class="mistake-answer-correct">'+esc(entry.correctAnswer||'Non renseignée')+'</span></p><p class="sub">Règle : '+esc(entry.ruleExplanation||'À revoir')+'</p><small class="sub">Dernière occurrence : '+new Date(Number(entry.lastSeenAt)||Date.now()).toLocaleString('fr-BE')+' · '+(Number(entry.occurrences)||1)+' occurrence(s)</small></div>';}).join('')+'</details>':'<p class="sub">Toutes les erreurs enregistrées dans ce sujet sont résolues.</p>')+
+    (open.length?'<button class="btn sm grad" type="button" data-mistake-practice="'+esc(subject)+'">S’entraîner sur ce sujet</button>':'')+'</article>';
+  }).join('');
+  if(legacyOnly.length){
+   html+='<div class="box"><b>Erreurs historiques</b><p class="sub">Certaines erreurs précédentes ne contiennent pas le corrigé détaillé. Rejoue ces questions dans leur module pour créer une révision ciblée.</p>'+legacyOnly.map(function(key){var value=legacy[key],count=Number(value&&typeof value==='object'?value.count:value)||0,category=value&&value.cat||'Général';return '<p>'+esc(category)+' — '+esc(key)+' : '+count+' occurrence(s)</p>';}).join('')+'</div>';
+  }
+  host.innerHTML=html;
+ }
+ var aiText=$('ai-coach-text'),button=$('mistakes-ai-analyze'),feedback=$('mistakes-ai-feedback');
+ if(button)button.classList.toggle('hide',active.length===0);
+ if(aiText){
+  if(!active.length)aiText.textContent=history.length?'Toutes les erreurs recensées ont été corrigées. Continue à t’entraîner pour consolider ces acquis.':'Aucune difficulté détectée pour l’instant. Les erreurs des quiz apparaîtront ici avec leur correction.';
+  else{
+   var diagnosis=getMistakeDiagnosis(active),planHtml='<ol>'+diagnosis.plan.map(function(item){return '<li>'+esc(item)+'</li>';}).join('')+'</ol>';
+   aiText.innerHTML='<b>Diagnostic principal :</b> '+esc(diagnosis.text)+'<br><b>Plan de révision :</b>'+planHtml;
+  }
+ }
+}
+async function generateMistakeAnalysis(){
+ var button=$('mistakes-ai-analyze'),feedback=$('mistakes-ai-feedback'),active=loadMistakeHistory().filter(function(entry){return entry.active;});
+ if(!active.length){alert('Aucune erreur active à analyser pour le moment.');return;}
+ if(!isGeminiProxyConfigured()){
+  var missing='Le service d’analyse IA n’est pas configuré. Réessaie plus tard.';
+  if(feedback){feedback.textContent=missing;feedback.className='msg';}
+  alert(missing);return;
+ }
+ if(button){button.disabled=true;button.textContent='Analyse en cours…';}
+ if(feedback){feedback.textContent='Envoi du résumé des erreurs au service IA…';feedback.className='msg ok';feedback.dataset.pending='true';}
+ try{
+  var summary=active.slice().sort(function(a,b){return Number(b.lastSeenAt||0)-Number(a.lastSeenAt||0);}).slice(0,40).map(function(entry){return {subject:entry.subject,topic:entry.topic,question:entry.question,userAnswer:entry.userAnswer,correctAnswer:entry.correctAnswer,ruleExplanation:entry.ruleExplanation,occurrences:entry.occurrences};});
+  var requestBody=JSON.stringify({systemInstruction:{parts:[{text:'Tu es un assistant pédagogique spécialisé en néerlandais pour des élèves du secondaire belge. À partir des erreurs réelles fournies, formule un diagnostic concis, explique les règles, puis propose un plan en 2 ou 3 étapes avec 3 exercices courts et leurs corrigés. N’invente pas de faits sur l’élève et réponds en français.'}]},contents:[{role:'user',parts:[{text:'Analyse ces erreurs de l’élève et propose une remédiation personnalisée :\n'+JSON.stringify(summary)}]}],generationConfig:{temperature:0.35}});
+  var response;
+  try{response=await fetch(GEMINI_PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:requestBody});}
+  catch(networkError){console.error('Le proxy d’analyse des erreurs est injoignable :',networkError);throw new Error('Impossible de joindre le service IA. Vérifie ta connexion Internet et réessaie.');}
+  var result=null;try{result=await response.json();}catch(parseError){result=null;}
+  if(!response.ok)throw new Error(describeGeminiProxyError(response.status));
+  var text=result&&result.candidates&&result.candidates[0]&&result.candidates[0].content&&result.candidates[0].content.parts&&result.candidates[0].content.parts.map(function(part){return part.text||'';}).join('').trim();
+  if(!text)throw new Error('Le service IA a renvoyé une réponse vide ou illisible.');
+  if(feedback){feedback.textContent=text;feedback.className='msg ok';feedback.dataset.pending='';}
+ }catch(error){
+  console.error('Échec de l’analyse IA des erreurs :',error);
+  var message='L’analyse IA détaillée a échoué : '+error.message;
+  if(feedback){feedback.textContent=message;feedback.className='msg';feedback.dataset.pending='';}
+  alert(message);
+ }finally{
+  if(button){button.disabled=false;button.textContent='Générer une analyse IA détaillée';}
+ }
+}
+document.addEventListener('click',function(event){
+ var target=event.target;
+ var practice=target.closest&&target.closest('[data-mistake-practice]');
+ if(practice){startMistakePractice(practice.getAttribute('data-mistake-practice'));return;}
+ if(target.closest&&target.closest('[data-mistake-practice-close]')){mistakePracticeState=null;var panel=$('mistake-practice');if(panel)panel.classList.add('hide');return;}
+ if(target.closest&&target.closest('[data-mistakes-ai]'))generateMistakeAnalysis();
+});
+document.addEventListener('submit',function(event){
+ if(event.target&&event.target.id==='mistake-practice-form')submitMistakePractice(event);
+});
 var YAYA_ENERGY_KEY='yayaEnergy',YAYA_ENERGY_MAX=200,YAYA_QUIZ_LIFE_COST=30,YAYA_QUIZ_TWO_LIVES_COST=20;
 var yayaEnergy=Math.max(0,Math.min(YAYA_ENERGY_MAX,Number(ld(YAYA_ENERGY_KEY,100))||0));
 var yayaEnergyAlertTimer=null;
@@ -1720,19 +1949,41 @@ function updateLiveYayaReaction(emoji,message){
  reaction.appendChild(createYayaTeaching(emoji,message));
  reaction.classList.remove('hide');
 }
-function toggleTheme(){ 
- try {
-    var d = document.body.classList.toggle('dark');
-    document.body.classList.toggle('theme-light',!d);
-    localStorage.setItem('zest-theme', d ? 'dark' : 'light'); 
-  } catch(e){} 
+function getSavedTheme(){
+ try{
+  var theme=localStorage.getItem('zest_theme');
+  if(ZEST_THEMES.indexOf(theme)>=0)return theme;
+  return localStorage.getItem('zest-theme')==='light'?'chaud':'sombre';
+ }catch(error){return 'sombre';}
+}
+function updateThemeButtons(theme){
+ var label='Thème : '+ZEST_THEME_LABELS[theme];
+ ['theme-toggle-button','theme-toggle-settings'].forEach(function(id){
+  var button=$(id);if(!button)return;
+  button.textContent=label;
+  button.title='Changer de thème';
+  button.setAttribute('aria-label','Thème actif : '+ZEST_THEME_LABELS[theme]+'. Cliquer pour changer.');
+ });
+}
+function applyThemeMode(theme,persist){
+ if(ZEST_THEMES.indexOf(theme)<0)throw new RangeError('Thème Zest inconnu : '+theme);
+ document.documentElement.setAttribute('data-zest-theme',theme);
+ document.body.classList.toggle('dark',theme==='sombre');
+ document.body.classList.toggle('theme-light',theme==='chaud');
+ if(persist!==false){
+  try{localStorage.setItem('zest_theme',theme);}
+  catch(error){console.error('Impossible de sauvegarder le thème Zest :',error);alert('Le thème est appliqué, mais sa sauvegarde locale a échoué. Vérifie les réglages de stockage du navigateur.');}
+ }
+ updateThemeButtons(theme);
+}
+function toggleTheme(){
+ var current=getSavedTheme(),index=ZEST_THEMES.indexOf(current);
+ applyThemeMode(ZEST_THEMES[(index+1)%ZEST_THEMES.length],true);
 }
 
 var uiSoundEnabled=ld('zest-ui-sounds',false);
 var soundToggleButton=$('ui-sounds-toggle');if(soundToggleButton)soundToggleButton.textContent=uiSoundEnabled?'🔊 Sons doux : activés':'🔈 Sons doux : désactivés';
-var savedTheme=ld('zest-theme','dark');
-document.body.classList.toggle('dark',savedTheme!=='light');
-document.body.classList.toggle('theme-light',savedTheme==='light');
+applyThemeMode(getSavedTheme(),false);
 function toggleUISounds(){
  uiSoundEnabled=!uiSoundEnabled;sv('zest-ui-sounds',uiSoundEnabled);
  var button=$('ui-sounds-toggle');if(button)button.textContent=uiSoundEnabled?'🔊 Sons doux : activés':'🔈 Sons doux : désactivés';
@@ -2033,7 +2284,11 @@ function checkGrammarQuiz3e(){
   var selected=container.querySelector('input[name="gq'+index+'"]:checked');
   var selectedIndex=selected?Number(selected.value):null;
   answers.push(selectedIndex);
-  if(selectedIndex===item.ans)score++;
+  if(selectedIndex===item.ans){
+   score++;resolveUserMistake('Grammaire · 3e degré','Quiz de grammaire',item.q);
+  }else{
+   recordUserMistake({subject:'Grammaire · 3e degré',topic:'Quiz de grammaire',question:item.q,userAnswer:selectedIndex===null?'Aucune réponse':item.opts[selectedIndex],correctAnswer:item.opts[item.ans],ruleExplanation:item.explication||'Revois la règle correspondant à cette réponse.'});
+  }
  });
  gramQuizCompleted3e=true;
  reactToYayaEnergy(null,true);
@@ -2370,7 +2625,9 @@ function answerAICourseQuestion(answer){
  if(question.options.length<=1&&!String(answer||'').trim()){
    var emptyFeedback=$('ai-cours-answer-feedback');if(emptyFeedback)emptyFeedback.textContent='Écris une réponse avant de vérifier.';return;
  }
- var correct=String(answer||'').trim().toLowerCase()===question.answer.toLowerCase();
+ var userAnswer=String(answer||'').trim(),correct=userAnswer.toLowerCase()===question.answer.toLowerCase(),subject='Quiz Cours IA',topic='Quiz personnalisé';
+ if(correct)resolveUserMistake(subject,topic,question.prompt);
+ else recordUserMistake({subject:subject,topic:topic,question:question.prompt,userAnswer:userAnswer||'Aucune réponse',correctAnswer:question.answer,ruleExplanation:'Compare ta formulation à la réponse attendue et repère la règle ou le mot clé qui change le sens.'});
  vibrateQuizResult(correct);
  state.answered=true;state.selected=String(answer||'').trim();if(correct)state.score++;
  renderAICourseQuestion();
@@ -2605,7 +2862,7 @@ function renderYayaDailyMixQuestion(){
   var button=document.createElement('button');button.type='button';button.className='yaya-mix-option';button.textContent=option;button.disabled=state.answered;
   button.onclick=function(){
    if(state.answered)return;
-   state.answered=true;var correct=option===question.fr;if(correct)state.score++;
+   state.answered=true;var correct=option===question.fr,topic=question.topics&&question.topics[0]||'Vocabulaire',subject=/animal|dieren/i.test(topic)?'Vocabulaire — Les Animaux':'Vocabulaire — '+topic,mistakeQuestion='Que signifie « '+question.nl+' » ?';if(correct){state.score++;resolveUserMistake(subject,topic,mistakeQuestion);}else recordUserMistake({subject:subject,topic:topic,question:mistakeQuestion,userAnswer:option,correctAnswer:question.fr,ruleExplanation:'Associe le mot néerlandais « '+question.nl+' » à sa traduction française.'});
    choices.querySelectorAll('button').forEach(function(choice){choice.disabled=true;if(choice.textContent===question.fr)choice.classList.add('correct');else if(choice===button)choice.classList.add('wrong');});
    feedback.textContent=correct?'🥳 Oui, bien joué ! — Yaya':'😬 Presque : « '+question.nl+' » veut dire « '+question.fr+' ».';
    showAvatarBubble(correct?'Yeah ! Tu assures !':'Pas grave, on apprend en se trompant !',2600);
@@ -2689,46 +2946,7 @@ function renderAll(){
       
       renderPortalShop(s);
 
-      var rawMistakes = s.mistakes || {};
-      var mistakesList = Object.keys(rawMistakes).map(function(q){
-        var val = rawMistakes[q];
-        var count = (typeof val === 'object' && val !== null) ? val.count : val;
-        var cat = (typeof val === 'object' && val !== null) ? val.cat : 'Général';
-        return {q: q, count: count, cat: cat};
-      }).sort(function(a, b){ return b.count - a.count; });
-
-      var totalErr = mistakesList.reduce(function(acc, x){ return acc + x.count; }, 0);
-      if($('st-err')) $('st-err').textContent = totalErr;
-
-      var mistakesEl = $('mistakes');
-      if(mistakesEl) {
-        mistakesEl.innerHTML = mistakesList.length ? mistakesList.map(function(x){ 
-          return '<div class="box row"><div><b>❓ ' + esc(x.q) + '</b><br><span class="tag" style="margin-top:4px">📁 ' + esc(x.cat) + '</span></div><span class="tag r">' + x.count + ' erreur(s)</span></div>'; 
-        }).join('') : '<div class="box center sub">Aucune erreur enregistrée. Continue comme ça ! 🌟</div>';
-      }
-
-      var aiText = $('ai-coach-text');
-      if (aiText) {
-        if (!mistakesList.length) {
-          aiText.textContent = "Aucune difficulté détectée pour l'instant. Tu gères parfaitement toutes les matières ! 🚀";
-        } else {
-          var catCounts = {};
-          mistakesList.forEach(function(item){
-            catCounts[item.cat] = (catCounts[item.cat] || 0) + item.count;
-          });
-          var worstCat = Object.keys(catCounts).reduce(function(a, b){ return catCounts[a] > catCounts[b] ? a : b; });
-          
-          var advice = "🤖 Analyse IA : Ton point de vigilance actuel concerne le sujet <b>« " + worstCat + " »</b>. ";
-          if (worstCat === 'Grammaire') {
-            advice += "Pense à bien réviser la conjugaison de <i>zijn</i> et <i>hebben</i> dans le dictionnaire.";
-          } else if (worstCat === 'Nourriture') {
-            advice += "Exerce-toi avec les quiz ciblés sur l'alimentation et les boissons pour ancrer ton vocabulaire.";
-          } else {
-            advice += "Je te conseille de refaire un tour dans le dictionnaire de la catégorie <i>" + worstCat + "</i> pour consolider tes acquis !";
-          }
-          aiText.innerHTML = advice;
-        }
-      }
+      renderMistakesDashboard();
 
       var sk = $('skins');
       if (sk){
@@ -3322,6 +3540,9 @@ function answer(i){
  var q = Q[cur];
  var explanation=q.explication?' '+q.explication:'';
  var feedbackMessage=i===q.correct?'Yeah ! Bien joué !'+explanation:(i<0?'Oups, le temps est écoulé ! ':'Zut, presque ! ')+'La bonne réponse était : '+(q.answer||q.options[q.correct])+'.'+explanation;
+ var mistakeSubject=quizMistakeSubject(q.cat),mistakeTopic=q.topic||q.cat||'Quiz général',correctAnswer=q.answer||q.options[q.correct];
+ if(i===q.correct)resolveUserMistake(mistakeSubject,mistakeTopic,q.q);
+ else recordUserMistake({subject:mistakeSubject,topic:mistakeTopic,question:q.q,userAnswer:i<0?'Aucune réponse':q.options[i],correctAnswer:correctAnswer,ruleExplanation:q.explication||'Mémorise le vocabulaire ou la règle associée à cette question.'});
  updateLiveYayaReaction(i===q.correct?'🥳':'😬',feedbackMessage);
  vibrateQuizResult(i===q.correct);
  var opts = document.querySelectorAll('.opt');
@@ -3342,14 +3563,6 @@ function answer(i){
     quizLives=Math.max(0,quizLives-1);
     updateQuizLives();
     streak = 0;
-    if (stu) {
-      saveMe(function(u){ 
-        u.mistakes = u.mistakes || {}; 
-        var current = u.mistakes[q.q];
-        var count = (typeof current === 'object' && current !== null) ? current.count + 1 : ((current || 0) + 1);
-        u.mistakes[q.q] = { count: count, cat: q.cat || 'Général' }; 
-      });
-    }
   }
 
  setTimeout(function(){
@@ -4222,10 +4435,6 @@ function openEv(id){
 function closeEv(){ show('modal', false); }
 function openVocab(term){ closeEv(); switchTab('vocabulaire'); cat = 'all'; var sInput = $('search'); if(sInput) sInput.value = term; renderVocab(); }
 
-try {
- if (localStorage.getItem('zest-theme') === 'light') document.body.classList.remove('dark');
-} catch(e){}
-
 /* Intégration globale Zest+ */
 (function(){
 'use strict';
@@ -4481,6 +4690,9 @@ function chkOne(inp){
  var v=VB[cv],i=+inp.getAttribute('data-i'),val=norm(inp.value),fb=inp.nextElementSibling;
  if(!val){inp.className='inp cj-in';if(fb)fb.textContent='';return;}
  var acc=v[i].split('|'),good=acc.indexOf(val)>-1;
+ var mistakeSubject='Labo — Conjugaison',mistakeTopic=cv,mistakeQuestion='Conjugue « '+cv+' » avec « '+PR[i]+' ».',expected=acc.join(' / '),rule='Au présent, « '+cv+' » se conjugue « '+PR[i]+' → '+acc[0]+' ».';
+ if(good)resolveUserMistake(mistakeSubject,mistakeTopic,mistakeQuestion);
+ else recordUserMistake({subject:mistakeSubject,topic:mistakeTopic,question:mistakeQuestion,userAnswer:inp.value,correctAnswer:expected,ruleExplanation:rule});
  inp.className='inp cj-in '+(good?'ok':'ko');if(fb)fb.textContent=good?'✅':'❌ '+acc[0];
  if(good&&!inp.getAttribute('data-done')){
   inp.setAttribute('data-done','1');
@@ -4592,8 +4804,9 @@ function act(a,v){
  else if(a==='dkslow'&&dk.w)speak(dk.w[0],0.5,true);
  else if(a==='dknext'){dk.w=null;renderSub();}
  else if(a==='dkcheck'&&dk.w){var inp=g('dk-in'),fb=g('dk-fb');if(!inp||!fb)return;
-    if(norm(inp.value)===norm(dk.w[0])){fb.style.color='#10b981';fb.textContent='✅ Correct ! '+dk.w[0]+' = '+dk.w[1];up(function(u){u.dicteeOK=(u.dicteeOK||0)+1;u.totalScore=(u.totalScore||0)+5;qinc(u,'dictee',1,'dictee:'+norm(dk.w[0]));});}
-    else{fb.style.color='#ef4444';fb.textContent='❌ Réponse : '+dk.w[0];}}
+    var dictationQuestion='Écris le mot dicté : '+dk.w[1];
+    if(norm(inp.value)===norm(dk.w[0])){resolveUserMistake('Labo — Dictée','Dictée vocale',dictationQuestion);fb.style.color='#10b981';fb.textContent='✅ Correct ! '+dk.w[0]+' = '+dk.w[1];up(function(u){u.dicteeOK=(u.dicteeOK||0)+1;u.totalScore=(u.totalScore||0)+5;qinc(u,'dictee',1,'dictee:'+norm(dk.w[0]));});}
+    else{recordUserMistake({subject:'Labo — Dictée',topic:'Dictée vocale',question:dictationQuestion,userAnswer:inp.value,correctAnswer:dk.w[0],ruleExplanation:'Écoute les sons du mot et vérifie son orthographe néerlandaise.'});fb.style.color='#ef4444';fb.textContent='❌ Réponse : '+dk.w[0];}}
  else if(a==='aianalyse'){
     var txt = g('ai-text-input').value.trim();
     var fb = g('ai-feedback-box');
@@ -4612,6 +4825,14 @@ function act(a,v){
     
     var hasZijn = /\b(ben|bent|is|zijn)\b/i.test(txt);
     var hasHebben = /\b(heb|hebt|heeft|hebben)\b/i.test(txt);
+    var correctedText=txt.charAt(0).toLocaleUpperCase()+txt.slice(1);
+    if(!hasEndPunctuation)correctedText+='.';
+    var capitalizationQuestion='La phrase commence par une majuscule.';
+    var punctuationQuestion='La phrase se termine par une ponctuation.';
+    if(hasCapital)resolveUserMistake('Labo — Correcteur IA','Majuscule',capitalizationQuestion);
+    else recordUserMistake({subject:'Labo — Correcteur IA',topic:'Majuscule',question:capitalizationQuestion,userAnswer:txt,correctAnswer:correctedText,ruleExplanation:'En néerlandais, une phrase commence par une majuscule.'});
+    if(hasEndPunctuation)resolveUserMistake('Labo — Correcteur IA','Ponctuation',punctuationQuestion);
+    else recordUserMistake({subject:'Labo — Correcteur IA',topic:'Ponctuation',question:punctuationQuestion,userAnswer:txt,correctAnswer:correctedText,ruleExplanation:'Termine la phrase par un point, un point d’interrogation ou un point d’exclamation.'});
     
     if(errors.length > 0){
       fb.style.color = '#ef4444';
@@ -5035,9 +5256,17 @@ var ALL=[],TI={};WORLDS.forEach(function(w){w.T.forEach(function(t){ALL.push({w:
 function U(){return window.stu?window.me():null;}
 function upMondes(fn){if(!window.stu)return;try{window.saveMe(fn);}catch(e){console.warn(e);}}
 function weak(u){var a=[];ALL.forEach(function(x){var e=u&&u.we&&u.we[x.t.id];if(!e||!e.r||e.r.length<5)return;var ko=e.r.filter(function(v){return !v;}).length,rate=ko/e.r.length;if(rate>=0.4)a.push({w:x.w,t:x.t,rate:rate});});return a.sort(function(a,b){return b.rate-a.rate;});}
-function rec(q,good){upMondes(function(u){var e=(u.we=u.we||{}),t=(e[q.topic]=e[q.topic]||{ok:0,ko:0,it:{},r:[]});
+function rec(q,good){
+ var subject=mondesMistakeSubject(q),topic=q.topic||q.cat||'Programme secondaire',question=q.q||q.label||'Question du programme';
+ if(q.t!=='match'){
+  if(good)resolveUserMistake(subject,topic,question);
+  else recordUserMistake({subject:subject,topic:topic,question:question,userAnswer:q.userAnswer||'Réponse incorrecte',correctAnswer:q.correctAnswer||q.ans||(q.t==='mcq'&&q.o?q.o[q.a]:'Réponse attendue'),ruleExplanation:q.explication||q.ruleExplanation||'Revois le vocabulaire et la règle de ce chapitre.'});
+ }
+ upMondes(function(u){var e=(u.we=u.we||{}),t=(e[q.topic]=e[q.topic]||{ok:0,ko:0,it:{},r:[]});
   t.r=(t.r||[]).concat(good?1:0).slice(-12);
-  if(good)t.ok++;else{t.ko++;t.it=t.it||{};t.it[q.key]=(t.it[q.key]||0)+1;u.mistakes=u.mistakes||{};var m=u.mistakes[q.label],c=(m&&typeof m==='object')?m.count:(m||0);u.mistakes[q.label]={count:c+1,cat:q.cat};}});}
+  if(good)t.ok++;else{t.ko++;t.it=t.it||{};t.it[q.key]=(t.it[q.key]||0)+1;}});
+}
+function mondesMistakeSubject(q){return String(q.cat||'Mon secondaire').replace(/^Programme secondaire\s*·\s*/,'Mon secondaire — ');}
 
 function ec(u,tid){return (u&&u.we&&u.we[tid]&&u.we[tid].it)||{};}
 function byErr(list,kf,u,tid){var e=ec(u,tid);return sh(list).sort(function(a,b){return (e[kf(b)]||0)-(e[kf(a)]||0);});}
@@ -5130,9 +5359,12 @@ function startCap(palierId,level,reviewQuestions){
   C={palierId:palier.id,level:level,title:palier.title,questions:questions,index:0,correct:0,errors:[],review:review,orderPick:[]};
   renderCapQuestion();
 }
-function recordCapAnswer(question,correct){
+function recordCapAnswer(question,correct,userAnswer){
   if(!C)return;
   if(correct)C.correct++;else C.errors.push(question);
+  var mistakeSubject='Cap sur la 1ère',mistakeTopic='Palier '+C.palierId+' · '+CAP_LEVEL_LABELS[C.level];
+  if(correct)resolveUserMistake(mistakeSubject,mistakeTopic,question.prompt);
+  else recordUserMistake({subject:mistakeSubject,topic:mistakeTopic,question:question.prompt,userAnswer:userAnswer||'Aucune réponse',correctAnswer:question.answer,ruleExplanation:question.explication});
   upMondes(function(user){
     user.capSurLaPremiere=user.capSurLaPremiere||{};
     var stage=user.capSurLaPremiere['p'+C.palierId]||(user.capSurLaPremiere['p'+C.palierId]={});
@@ -5170,7 +5402,7 @@ function submitCapAnswer(value){
   var question=C.questions[C.index];
   if(!question||question.done)return;
   var correct=normalizeCapAnswer(value)===normalizeCapAnswer(question.answer);
-  question.done=true;recordCapAnswer(question,correct);
+  question.done=true;recordCapAnswer(question,correct,value);
   var feedback=g('cap-feedback');
   if(feedback){
     feedback.className='msg'+(correct?' ok':'');
@@ -5265,8 +5497,13 @@ function renderQ(){
   bodyM(h);
   var inp=g('mn-in');if(inp)inp.focus();
 }
-function fin(good,msg){
-  var q=S&&S.qs[S.i];if(!q||q.fin)return;q.fin=true;if(good)S.ok++;else S.ko++;rec(q,good);
+function fin(good,msg,userAnswer){
+  var q=S&&S.qs[S.i];if(!q||q.fin)return;q.fin=true;q.userAnswer=userAnswer;
+  if(q.t==='write'){
+    q.correctAnswer='Texte répondant à au moins 4 critères sur 5';
+    q.explication='Vérifie les critères affichés : salutation, phrases, vocabulaire du thème, formule finale, majuscule et ponctuation.';
+  }
+  if(good)S.ok++;else S.ko++;rec(q,good);
   var fb=g('mn-fb');if(fb){fb.className='msg'+(good?' ok':'');fb.innerHTML=msg;}
   var nx=g('mn-nx');if(nx)nx.classList.remove('hide');
 }
@@ -5274,6 +5511,7 @@ function checkWrite(t){
   var c=[['Salutation (Hallo, Beste, Lieve…)',/^(hallo|beste|lieve|hoi|dag)\b/i.test(t)],['Au moins 2 phrases',(t.match(/[.!?]/g)||[]).length>=2],['Un mot des vacances (zee, strand, zon, hotel…)',/(vakantie|zee|strand|zon|hotel|reis|bergen|zwemmen)/i.test(t)],['Formule finale (Groetjes, Tot snel, Liefs…)',/(groetjes|tot snel|liefs|met vriendelijke groeten|tot ziens)/i.test(t)],['Majuscule au début et ponctuation à la fin',/^[A-ZÀ-Ý]/.test(t)&&/[.!?]$/.test(t)]];
   return {c:c,ok:c.filter(function(x){return x[1];}).length};
 }
+window.zestCheckWrite=function(text){return checkWrite(String(text||'')).ok>=4;};
 function finish(){
   var n=S.qs.length,pct=n?Math.round(S.ok/n*100):0,stars=pct>=90?3:pct>=75?2:pct>=60?1:0,basePts=S.ok*8+(pct>=60?20:0)+(S.rev&&pct>=60?15:0),pts=basePts,streakBonus=false,streakCount=0,S0=S;
   upMondes(function(u){
@@ -5326,17 +5564,17 @@ function actMondes(a,el){
   else if(a==='sp')speakM(v,0.85);
   else if(a==='next'){S.i++;renderQ();}
   else if(a==='opt'&&q&&!q.fin){var i=+v,bs=document.querySelectorAll('#mn-body .opt');for(var k=0;k<bs.length;k++){bs[k].style.pointerEvents='none';if(k===q.a)bs[k].classList.add('correct');else if(k===i)bs[k].classList.add('wrong');}
-    fin(i===q.a,i===q.a?'✅ Bravo !':'❌ La bonne réponse : <b>'+E(q.o[q.a])+'</b>');}
-  else if(a==='ty'&&q&&!q.fin){var val=(g('mn-in')||{}).value||'';if(!val.trim())return;var good=strip(val)===strip(q.ans);fin(good,good?'✅ Bravo !':'❌ On écrit : <b>'+E(q.ans)+'</b>');}
+    fin(i===q.a,i===q.a?'✅ Bravo !':'❌ La bonne réponse : <b>'+E(q.o[q.a])+'</b>',q.o[i]);}
+  else if(a==='ty'&&q&&!q.fin){var val=(g('mn-in')||{}).value||'';if(!val.trim())return;var good=strip(val)===strip(q.ans);fin(good,good?'✅ Bravo !':'❌ On écrit : <b>'+E(q.ans)+'</b>',val);}
   else if(a==='mnl'&&q&&!q.fin){q.sn=+v;g('mn-dyn').innerHTML=mhtml(q);}
-  else if(a==='mnr'&&q&&!q.fin&&q.sn!=null){var j=+v;if(j===q.sn){q.ok[j]=1;q.d++;}else{q.er++;q.bad[q.sn]=1;}q.sn=null;g('mn-dyn').innerHTML=mhtml(q);
+  else if(a==='mnr'&&q&&!q.fin&&q.sn!=null){var j=+v,pair=q.pairs[q.sn],selectedPair=q.pairs[j],pairQuestion='Associe « '+pair[0]+' » à sa traduction.',pairSubject=mondesMistakeSubject(q),pairTopic=q.cat||q.topic;if(j===q.sn){q.ok[j]=1;q.d++;resolveUserMistake(pairSubject,pairTopic,pairQuestion);}else{q.er++;q.bad[q.sn]=1;recordUserMistake({subject:pairSubject,topic:pairTopic,question:pairQuestion,userAnswer:selectedPair[1],correctAnswer:pair[1],ruleExplanation:'Associe chaque mot néerlandais à sa traduction française.'});}q.sn=null;g('mn-dyn').innerHTML=mhtml(q);
     if(q.d===q.pairs.length)fin(q.er<=1,q.er<=1?'✅ Bien associé !':'❌ '+q.er+' erreurs d\'association, révise ces mots.');}
   else if(a==='opk'&&q&&!q.fin){q.pick.push(+v);g('mn-dyn').innerHTML=ohtml(q);}
   else if(a==='otk'&&q&&!q.fin){q.pick=q.pick.filter(function(x){return x!==+v;});g('mn-dyn').innerHTML=ohtml(q);}
   else if(a==='orst'&&q&&!q.fin){q.pick=[];g('mn-dyn').innerHTML=ohtml(q);}
-  else if(a==='ook'&&q&&!q.fin){var s=q.pick.map(function(id){return q.w[id];}).join(' '),gd=N(s)===N(q.ans);fin(gd,gd?'✅ Phrase correcte !':'❌ Phrase correcte : <b>'+E(q.ans)+'</b>');}
+  else if(a==='ook'&&q&&!q.fin){var s=q.pick.map(function(id){return q.w[id];}).join(' '),gd=N(s)===N(q.ans);fin(gd,gd?'✅ Phrase correcte !':'❌ Phrase correcte : <b>'+E(q.ans)+'</b>',s);}
   else if(a==='wr'&&q&&!q.fin){var t=((g('mn-wr')||{}).value||'').trim();if(!t)return;var r=checkWrite(t);
-    fin(r.ok>=4,(r.ok>=4?'✅ Bien joué ! ':'❌ À améliorer. ')+r.ok+'/5<br>'+r.c.map(function(x){return (x[1]?'✅ ':'❌ ')+E(x[0]);}).join('<br>'));}
+    fin(r.ok>=4,(r.ok>=4?'✅ Bien joué ! ':'❌ À améliorer. ')+r.ok+'/5<br>'+r.c.map(function(x){return (x[1]?'✅ ':'❌ ')+E(x[0]);}).join('<br>'),t);}
 }
 
 function lab(k){var m=/^(.+?)([|#])(.+)$/.exec(k);if(!m)return k;var x=TI[m[1]];if(!x)return k;var t=x.t;
@@ -5720,6 +5958,11 @@ function submitStamQuiz(){
  });
  var fullyCorrect=results.every(function(result){return result.correct;});
  stamQuiz.answered=true;stamQuiz.results=results;
+ results.forEach(function(result){
+  var mistakeTopic=verb.niveau+' · '+result.label,mistakeQuestion=verb.inf+' — '+result.label;
+  if(result.correct)resolveUserMistake('Temps primitifs',mistakeTopic,mistakeQuestion);
+  else recordUserMistake({subject:'Temps primitifs',topic:mistakeTopic,question:mistakeQuestion,userAnswer:result.value,correctAnswer:result.expected,ruleExplanation:verb.piege});
+ });
  if(fullyCorrect)stamQuiz.score++;
  else if(!stamQuiz.errors.some(function(item){return item.inf===verb.inf;}))stamQuiz.errors.push(verb);
  recordStamAnswer(verb,fullyCorrect);
@@ -6061,7 +6304,7 @@ if(trainingTab){
  function initialProgress(role, email, classCode, classInfo, inviteCode){
   if(role !== 'student') return {};
   var membership = classInfo || {};
-  return {email: email, teacherCode: classCode || membership.teacherCode || '', classId: membership.id || '', className: membership.name || membership.className || '', annee: Number(membership.annee || membership.year) || 0, degre: Number(membership.degre || membership.degree) || 0, teacherId: membership.teacherId || '', inviteCode: String(inviteCode || membership.code || '').toUpperCase(), chapterProgress: {}, totalScore: 0, spent: 0, gamesPlayed: 0, skin: '🦊', owned: [], mistakes: {}, pseudoChanges: 0, createdAt: Date.now()};
+  return {email: email, teacherCode: classCode || membership.teacherCode || '', classId: membership.id || '', className: membership.name || membership.className || '', annee: Number(membership.annee || membership.year) || 0, degre: Number(membership.degre || membership.degree) || 0, teacherId: membership.teacherId || '', inviteCode: String(inviteCode || membership.code || '').toUpperCase(), chapterProgress: {}, totalScore: 0, spent: 0, gamesPlayed: 0, skin: '🦊', owned: [], mistakes: {}, mistakesHistory: [], pseudoChanges: 0, createdAt: Date.now()};
  }
 
  /* ===== Données en attente : secours si le document Firestore n’a pas pu être créé à l’inscription ===== */
@@ -6094,8 +6337,11 @@ if(trainingTab){
   if(!u) return null;
   var progress = JSON.parse(JSON.stringify(u));
   delete progress.fbUid;
+  var mistakesHistory=Array.isArray(progress.mistakesHistory)?progress.mistakesHistory:[];
+  delete progress.mistakesHistory;
   return {
    progress: progress,
+    mistakesHistory: mistakesHistory,
    classCode: String(u.teacherCode || ''),
    classId: String(u.classId || ''),
    className: String(u.className || ''),
@@ -6157,6 +6403,8 @@ if(trainingTab){
   if(role === 'student'){
    if(!keepLocal){
     var progress = parseJson(d.progressJson, {});
+    if(Array.isArray(d.mistakesHistory))progress.mistakesHistory=d.mistakesHistory;
+    else if(!Array.isArray(progress.mistakesHistory))progress.mistakesHistory=[];
     var classInfo = {
      id: d.classId || progress.classId || '',
      name: d.className || progress.className || '',
@@ -6888,6 +7136,7 @@ if(trainingTab){
       totalScore: 0,
       gamesPlayed: 0,
       progressJson: JSON.stringify(progress),
+      mistakesHistory: Array.isArray(progress.mistakesHistory) ? progress.mistakesHistory : [],
       dataJson: "{}",
       progressTs: 0
     };
@@ -6954,11 +7203,13 @@ if(trainingTab){
 
       let progressJson = JSON.stringify(payload.progress);
       let dataJson = JSON.stringify(payload.data);
-      if (byteLength(progressJson) + byteLength(dataJson) > 900000) {
+      let mistakesJson = JSON.stringify(Array.isArray(payload.mistakesHistory) ? payload.mistakesHistory : []);
+      if (byteLength(progressJson) + byteLength(dataJson) + byteLength(mistakesJson) > 900000) {
         // Un document Firestore est limité à 1 Mo : on écarte d’abord l’historique des cours scannés.
         dataJson = JSON.stringify({ srs: payload.data.srs, scanHistory: [] });
-        if (byteLength(progressJson) + byteLength(dataJson) > 900000) {
-          console.error("[Zest · diagnostic] Progression trop volumineuse pour un document Firestore : synchronisation ignorée.");
+        if (byteLength(progressJson) + byteLength(dataJson) + byteLength(mistakesJson) > 900000) {
+          console.error("[Zest · diagnostic] Progression et historique d’erreurs trop volumineux pour Firestore : synchronisation ignorée.");
+          if (sessionMessage) sessionMessage.textContent = "Ta progression et ton historique d’erreurs sont trop volumineux pour être synchronisés. Une partie de tes données reste enregistrée sur cet appareil.";
           return;
         }
       }
@@ -6966,6 +7217,7 @@ if(trainingTab){
       try {
         await setDoc(profileRef(uid), {
           progressJson: progressJson,
+          mistakesHistory: Array.isArray(payload.mistakesHistory) ? payload.mistakesHistory : [],
           dataJson: dataJson,
           totalScore: Number(payload.progress.totalScore) || 0,
           gamesPlayed: Number(payload.progress.gamesPlayed) || 0,
@@ -6978,7 +7230,7 @@ if(trainingTab){
           inviteCode: payload.inviteCode,
           progressTs: ts,
           updatedAt: serverTimestamp()
-        }, { mergeFields: ["progressJson", "dataJson", "totalScore", "gamesPlayed", "classCode", "classId", "className", "annee", "degre", "teacherId", "inviteCode", "progressTs", "updatedAt"] });
+        }, { mergeFields: ["progressJson", "mistakesHistory", "dataJson", "totalScore", "gamesPlayed", "classCode", "classId", "className", "annee", "degre", "teacherId", "inviteCode", "progressTs", "updatedAt"] });
         this.lastSnapshot = snapshot;
         window.zestLocal.markSynced(uid, ts);
         if (sessionMessage) sessionMessage.textContent = "";
