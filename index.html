@@ -24,6 +24,7 @@ body.weather-rainy{--glass-tint:rgba(56,189,248,.1)}
 body.weather-cloudy{--glass-tint:rgba(148,163,184,.08)}
 :root{--glass-tint:transparent}
 *{box-sizing:border-box}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
 body,button,input,select,textarea{font-family:var(--app-font)}
 body{background-image:radial-gradient(ellipse at 20% 15%,var(--glass-tint),transparent 48%);background-attachment:fixed;background-position:calc(50% + var(--parallax-x,0px)) calc(50% + var(--parallax-y,0px));transition:background-color .25s ease,background-position .3s ease}
 button{transition:transform .1s ease}
@@ -51,6 +52,7 @@ footer{text-align:center;font-size:12px;color:var(--sub);padding:20px;border-top
 .box{background:var(--box);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:10px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:center}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;text-align:center}
+.avatar-shop-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 .row{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
 h2{margin:6px 0}h3{margin:6px 0}
 .big{font-size:40px;line-height:1.15;font-weight:800;margin:0 0 14px}
@@ -102,6 +104,11 @@ body.dark .mistake-answer-correct{color:#6ee7b7}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th{position:sticky;top:0;background:var(--box);text-align:left;padding:12px;font-size:12px;text-transform:uppercase;color:var(--sub)}
 td{padding:12px;border-top:1px solid var(--bd)}
+.stam-table-scroll{position:relative;isolation:isolate}
+.stam-study-table thead{position:sticky;top:0;z-index:20}
+.stam-study-table th{z-index:20;background-color:var(--box);background-clip:padding-box}
+.stam-study-table tbody td,.stam-study-table tbody button{position:relative;z-index:1}
+.stam-scroll-hint{display:none}
 .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .opt{font-weight:700;padding:16px;border-radius:14px;border:1px solid var(--bd);background:var(--box);color:var(--txt);cursor:pointer;transition:all 0.2s ease}
 .opt:hover{background:var(--accent);color:#fff;transform:translateY(-2px)}
@@ -292,13 +299,18 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat 
  .dictionary-category-review .btn{width:100%}
  main{padding:16px 12px calc(82px + env(safe-area-inset-bottom))}
  .card{padding:18px;border-radius:16px}
+ header,.tab,.card,.box,.modal,.mbox{max-width:100%;min-width:0}
  .grid2,.grid3,.opts{grid-template-columns:minmax(0,1fr)}
+ .avatar-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #portal-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .avatar-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:stretch}
  .zp-badges{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
  .zp-b{padding:10px 6px}.zp-b .e{font-size:30px}.zp-b .sub{font-size:11px!important;overflow-wrap:anywhere}.zp-b-progress{font-size:10px}
  .row{align-items:stretch}
  .row>*{min-width:0}
  .btn,.opt,.cat,.skin{min-height:46px}
  .opts .opt{width:100%}
+ input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select{font-size:16px!important}
  .tl{gap:8px}
  .tl-d{flex-basis:54px}
  .mn-t{align-items:stretch}
@@ -306,13 +318,13 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat 
  .tw{max-width:100%}
  .flashcard-swipe-hint{display:block}
  .playlist-player{right:10px;bottom:calc(76px + env(safe-area-inset-bottom))}
- .yaya-flashcard-coach{left:10px;bottom:calc(78px + env(safe-area-inset-bottom));width:calc(100vw - 20px)}
+ .yaya-flashcard-coach{left:10px;right:10px;bottom:calc(140px + env(safe-area-inset-bottom));width:auto;max-width:none}
  footer{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
  .mobile-bottom-nav{position:fixed;inset:auto 0 0;z-index:40;display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-top:1px solid var(--bd);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
  .mobile-bottom-nav button{display:flex;min-height:54px;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;border-radius:12px;background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer}
  .mobile-bottom-nav button span:first-child{font-size:20px;line-height:1}
  .mobile-bottom-nav button.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
- .scroll-top-button{position:fixed;right:18px;bottom:calc(26px + env(safe-area-inset-bottom));z-index:39;width:48px;height:48px;border:1px solid var(--bd);border-radius:50%;background:color-mix(in srgb,var(--card) 86%,transparent);color:var(--accent);box-shadow:0 8px 24px #0003;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease,visibility .2s}
+ .scroll-top-button{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:39;width:48px;height:48px;border:1px solid var(--bd);border-radius:50%;background:color-mix(in srgb,var(--card) 86%,transparent);color:var(--accent);box-shadow:0 8px 24px #0003;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease,visibility .2s}
  .scroll-top-button.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
  .breadcrumb{display:none}
  .dictionary-term-wrap{position:relative;padding-left:14px}
@@ -558,6 +570,19 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
 .account-lock{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,23,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .account-lock .mbox{max-width:480px;width:100%}
 #delete-account-modal .auth-form{margin:0}
+@media(max-width:760px){
+ html,body{overflow-x:hidden}
+ .modal:not(.fullscreen-modal){padding:12px}
+ .modal:not(.fullscreen-modal) .mbox{width:100%;max-width:94vw!important;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px)}
+ .scroll-top-button{bottom:calc(78px + env(safe-area-inset-bottom))}
+ .stam-table-scroll{max-width:100%;overflow:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+ .stam-study-table{min-width:860px}
+ .stam-study-table th:first-child{position:sticky;left:0;background-color:var(--box);background-clip:padding-box}
+ .stam-study-table td:first-child{position:sticky;left:0;background-color:var(--card);background-clip:padding-box}
+ .stam-study-table th:first-child{z-index:22}
+ .stam-study-table td:first-child{z-index:2}
+ .stam-scroll-hint{display:block;margin:6px 0;font-size:12px}
+}
 </style>
 <script>
 (function(){
@@ -1113,7 +1138,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
     <span class="tag a" id="st-points-badge">0 pts</span>
    </div>
    <p class="sub" style="margin:4px 0 10px">Utilise tes points gagnés aux quiz pour débloquer de superbes skins !</p>
-   <div class="grid3" id="portal-shop-grid" style="margin-top:10px"></div>
+   <div class="grid3 avatar-shop-grid" id="portal-shop-grid" style="margin-top:10px"></div>
   </div>
 
   <div class="box" id="ai-coach-box" style="background:#4f46e511;border-color:var(--accent);margin-bottom:16px">
@@ -1202,8 +1227,8 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
   <div class="yaya-shop-grid" id="yaya-shop-items"></div>
   <p class="yaya-energy-status" id="yaya-shop-status" role="status" aria-live="polite"></p>
  </div>
- <button class="scroll-top-button" id="scroll-to-top" type="button" onclick="scrollToTop()" aria-label="Remonter en haut de la page">⬆️</button>
 </div>
+<button class="scroll-top-button" id="scroll-to-top" type="button" onclick="scrollToTop()" aria-label="Remonter en haut de la page">⬆️</button>
 
 <script>
 // ===== Analyse de cours par IA : adresse du proxy Cloudflare Worker =====
@@ -4749,7 +4774,7 @@ window.setFontStyle = setFontStyle;
 function viewShop(s){
  if(!s)return '<div class="card center sub">🔒 Connecte-toi pour utiliser la boutique.</div>';
  var own=s.owned||['🦊','🌸','⚡','🍥','🐱','🍀','🔥'],pts=avail(s);
- return '<div class="card"><h3>🛍️ Boutique de skins & Avatars</h3><p class="sub">Points disponibles : <b>'+pts+'</b> (Dépense tes points pour débloquer de superbes avatars !)</p><div class="grid3">'+
+ return '<div class="card"><h3>🛍️ Boutique de skins & Avatars</h3><p class="sub">Points disponibles : <b>'+pts+'</b> (Dépense tes points pour débloquer de superbes avatars !)</p><div class="grid3 avatar-shop-grid">'+
    SK.map(function(it){var has=own.indexOf(it.e)>-1,eq=s.skin===it.e;
     var iconDisp = (it.e === 'GAARA') ? GAARA_SVG : it.e;
     return '<div class="box"><div style="font-size:40px;display:flex;justify-content:center;align-items:center;min-height:45px;">'+iconDisp+'</div>'+
@@ -5897,7 +5922,7 @@ function renderStamStudyTable(){
 function renderStamStudy(){
  var content=document.getElementById('stam-module-content');
  if(!content)return;
- content.innerHTML='<div class="box"><div class="grid2"><label for="stam-search"><b>Recherche instantanée</b><input class="inp" id="stam-search" type="search" placeholder="Infinitif néerlandais ou traduction française"></label><label for="stam-filter"><b>Filtrer les verbes</b><select class="inp" id="stam-filter"><option value="all">Tous les verbes</option><option value="1er degré">1er degré</option><option value="2e degré">2e degré</option><option value="3e degré">3e degré</option><option value="review">À revoir</option></select></label></div><div class="row" style="justify-content:flex-start"><button class="btn sm '+(stamHideMode?'grad':'')+'" type="button" data-stam-action="mask-mode">'+(stamHideMode?'Désactiver le mode révision':'Mode Révision (Masquer)')+'</button><label><input type="checkbox" data-stam-mask="ovt" '+(stamHideMode&&stamMasks.ovt?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer l’OVT</label><label><input type="checkbox" data-stam-mask="vd" '+(stamHideMode&&stamMasks.vd?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer le participe passé</label><label><input type="checkbox" data-stam-mask="aux" '+(stamHideMode&&stamMasks.aux?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer l’auxiliaire</label></div><p class="sub" id="stam-match-count" aria-live="polite"></p></div><div class="tw" style="overflow:auto;max-height:70vh"><table style="width:100%;min-width:860px;border-collapse:collapse"><thead><tr><th>Infinitif · français</th><th>OVT singulier</th><th>OVT pluriel</th><th>Participe passé</th><th>Auxiliaire</th><th>Maîtrise</th><th>Audio</th></tr></thead><tbody id="stam-table-body"></tbody></table></div><p id="stam-status" class="msg" role="status" aria-live="polite"></p>';
+ content.innerHTML='<div class="box"><div class="grid2"><label for="stam-search"><b>Recherche instantanée</b><input class="inp" id="stam-search" type="search" placeholder="Infinitif néerlandais ou traduction française"></label><label for="stam-filter"><b>Filtrer les verbes</b><select class="inp" id="stam-filter"><option value="all">Tous les verbes</option><option value="1er degré">1er degré</option><option value="2e degré">2e degré</option><option value="3e degré">3e degré</option><option value="review">À revoir</option></select></label></div><div class="row" style="justify-content:flex-start"><button class="btn sm '+(stamHideMode?'grad':'')+'" type="button" data-stam-action="mask-mode">'+(stamHideMode?'Désactiver le mode révision':'Mode Révision (Masquer)')+'</button><label><input type="checkbox" data-stam-mask="ovt" '+(stamHideMode&&stamMasks.ovt?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer l’OVT</label><label><input type="checkbox" data-stam-mask="vd" '+(stamHideMode&&stamMasks.vd?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer le participe passé</label><label><input type="checkbox" data-stam-mask="aux" '+(stamHideMode&&stamMasks.aux?'checked':'')+' '+(!stamHideMode?'disabled':'')+'> Masquer l’auxiliaire</label></div><p class="sub" id="stam-match-count" aria-live="polite"></p></div><p class="sub stam-scroll-hint">Sur mobile, fais défiler le tableau horizontalement pour lire les formes. La première colonne reste affichée.</p><div class="tw stam-table-scroll" style="overflow:auto;max-height:70vh"><table class="stam-study-table" style="width:100%;min-width:860px;border-collapse:collapse"><thead><tr><th>Infinitif · français</th><th>OVT singulier</th><th>OVT pluriel</th><th>Participe passé</th><th>Auxiliaire</th><th>Maîtrise</th><th>Audio</th></tr></thead><tbody id="stam-table-body"></tbody></table></div><p id="stam-status" class="msg" role="status" aria-live="polite"></p>';
  renderStamStudyTable();
 }
 function renderStamQuizConfig(){
