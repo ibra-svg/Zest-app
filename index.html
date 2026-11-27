@@ -127,6 +127,11 @@ td{padding:12px;border-top:1px solid var(--bd)}
 .cj-in.ok{border-color:#10b981!important;background:#10b98133!important}.cj-in.ko{border-color:#ef4444!important;background:#ef444433!important}
 .zp-pop{position:fixed;top:-120px;left:50%;transform:translateX(-50%);z-index:100;background:var(--accent-grad);color:#fff;border-radius:18px;padding:14px 20px;display:flex;gap:14px;align-items:center;box-shadow:0 12px 40px rgba(0,0,0,.4);transition:top .45s cubic-bezier(.2,1.4,.4,1);max-width:92vw}
 .zp-pop.show{top:16px}.zp-ico{font-size:38px;animation:zpb .8s ease infinite alternate}@keyframes zpb{to{transform:scale(1.3) rotate(-8deg)}}
+.zp-pop.trophy-pop{z-index:210}.zp-pop.trophy-pop.show{animation:trophyPopIn .55s cubic-bezier(.2,1.4,.4,1) both}.zp-pop.trophy-pop .zp-ico{animation:trophyIconGlow .75s ease-in-out infinite alternate}
+.zp-pop.trophy-simple .zp-ico{animation:none}.zp-pop.trophy-simple.show{animation:none}
+@keyframes trophyPopIn{from{opacity:.5;transform:translateX(-50%) scale(.65)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes trophyIconGlow{to{transform:scale(1.22) rotate(-6deg);filter:drop-shadow(0 0 10px #facc15)}}
+@media(prefers-reduced-motion:reduce){.zp-b.unlocked:after,.zp-pop.trophy-pop.show,.zp-pop.trophy-pop .zp-ico{animation:none!important}}
 .zp-prog{height:8px;background:var(--bd);border-radius:99px;overflow:hidden;margin:8px 0}.zp-prog i{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#ec4899);transition:width .5s}
 .zp-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}.zp-bar span{flex:0 0 110px;overflow:hidden;text-overflow:ellipsis}.zp-bar div{flex:1;background:var(--bd);border-radius:99px;height:14px;overflow:hidden}.zp-bar i{display:block;height:100%;border-radius:99px}
 .daily-quest{padding:10px 0;border-top:1px solid var(--bd)}
@@ -157,7 +162,14 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-flashcard-coach{transition:o
 .yaya-intro-mascot{display:flex;align-items:center;justify-content:center;width:112px;height:112px;margin:0 auto 18px;border:1px solid #f9a8d4;border-radius:50%;background:linear-gradient(145deg,#fef3c7,#f9a8d4);font-size:68px;box-shadow:0 12px 32px rgba(236,72,153,.25)}
 body.yaya-home:not(.yaya-animations-disabled) .yaya-intro-mascot{animation:zest-celebrate .75s ease-in-out 2}
 .yaya-intro-copy{max-width:440px;margin:10px auto 20px;font-size:16px;line-height:1.65}
-.zp-badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.zp-b{text-align:center}.zp-b.lock{filter:grayscale(1);opacity:.45}.zp-b .e{font-size:38px}
+.zp-badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.zp-b{position:relative;overflow:hidden;text-align:center}.zp-b.lock{filter:grayscale(1);opacity:.55}.zp-b .e{font-size:38px}
+.zp-b.unlocked{border:1px solid #fbbf24;box-shadow:0 0 0 1px #fbbf2455,0 8px 24px #f59e0b22;filter:none;opacity:1}
+.zp-b.unlocked:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 25%,#fff8 48%,transparent 68%);transform:translateX(-120%);animation:trophyShimmer 3.6s ease-in-out infinite}
+.zp-b-new{position:absolute;top:7px;right:7px;padding:3px 7px;border-radius:99px;background:#f59e0b;color:#111827;font-size:10px;font-weight:900;text-transform:uppercase;transition:opacity .3s ease,transform .3s ease}
+.zp-b-new.is-hiding{opacity:0;transform:scale(.7)}
+.zp-b .zp-prog{margin:8px 0 3px}.zp-b-progress{font-size:12px;font-weight:700}
+body.yaya-animations-disabled .zp-b.unlocked:after,body.low-perf .zp-b.unlocked:after{animation:none}
+@keyframes trophyShimmer{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
 .zp-chk{display:block;padding:6px 4px;font-size:14px;cursor:pointer}
 body.dys,body.dys *{font-family:"OpenDyslexic","Comic Sans MS","Verdana",sans-serif!important;letter-spacing:.05em;word-spacing:.18em}body.dys{line-height:1.8}
 .nav.dys-on{outline:2px solid #f59e0b}
@@ -265,7 +277,9 @@ body.yaya-home:not(.yaya-animations-disabled) .yaya-eat-smile{animation:yayaEat 
  .dictionary-category-review .btn{width:100%}
  main{padding:16px 12px calc(82px + env(safe-area-inset-bottom))}
  .card{padding:18px;border-radius:16px}
- .grid2,.grid3,.opts,.zp-badges{grid-template-columns:minmax(0,1fr)}
+ .grid2,.grid3,.opts{grid-template-columns:minmax(0,1fr)}
+ .zp-badges{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .zp-b{padding:10px 6px}.zp-b .e{font-size:30px}.zp-b .sub{font-size:11px!important;overflow-wrap:anywhere}.zp-b-progress{font-size:10px}
  .row{align-items:stretch}
  .row>*{min-width:0}
  .btn,.opt,.cat,.skin{min-height:46px}
@@ -1707,6 +1721,7 @@ function setAppTheme(color, grad, silent){
  if(!silent) {
     localStorage.setItem('zest-accent', color);
     localStorage.setItem('zest-grad', grad);
+    if(typeof window.updateTrophyProgress==='function')window.updateTrophyProgress(function(u){u.styleActivated=true;});
   }
 }
 
@@ -2166,6 +2181,7 @@ async function analyserFeuilleCours(imageFile){
   });
   aiCoursGeneratedModes=modes;
   saveYayaScannedCourse(modes,text||'');
+  if(typeof window.updateTrophyProgress==='function')window.updateTrophyProgress(function(u){u.customAIQuizzes=(u.customAIQuizzes||0)+1;});
   if(feedback){feedback.textContent='Yaya a préparé tes trois niveaux de quiz. Choisis par quoi commencer !';feedback.className='msg ok';}
   renderAICourseModes(modes);
  }catch(error){
@@ -2402,7 +2418,7 @@ function renderPortalShop(s){
 
 function portalBuyEq(action, v){
  if(!stu) return;
- saveMe(function(u){
+ window.updateTrophyProgress(function(u){
   u.owned = u.owned || ['🦊','🌸','⚡','🍥','🐱','🍀','🔥'];
   var SK_ITEMS = [
     {e:'🦊',p:0},{e:'🌸',p:0},{e:'⚡',p:50},{e:'🍥',p:50},{e:'🐱',p:100},{e:'🐶',p:100},
@@ -2416,6 +2432,7 @@ function portalBuyEq(action, v){
       u.spent = (u.spent || 0) + it.p;
       u.owned.push(it.e);
       u.skin = it.e;
+      u.shopPurchases=(u.shopPurchases||0)+1;
     }
   } else if(action === 'eq'){
     var skinObj = SK_ITEMS.find(function(x){ return x.e === v; });
@@ -3963,19 +3980,51 @@ dayQuests().forEach(function(quest){
  return true;
 }
 window.recordDailyQuestProgress=function(k,n,eventId){if(eventId===undefined||eventId===null)return false;var counted=false;up(function(u){counted=qinc(u,k,n,eventId);});return counted;};
+function trophyCount(u,key){var n=Number(u&&u[key]);return Number.isFinite(n)&&n>0?n:0;}
+function makeTrophy(id,e,n,d,target,progress){
+ return {id:id,e:e,n:n,d:d,target:target,progress:progress,f:function(u){return progress(u)>=target;}};
+}
 var BADGES=[
- {id:'first',e:'🥇',n:'Première Victoire',d:'Terminer une partie de quiz',f:function(u){return (u.gamesPlayed||0)>=1;}},
- {id:'run10',e:'🔥',n:'Série de 10',d:'10 bonnes réponses d\'affilée',f:function(u){return (u.bestRun||0)>=10;}},
- {id:'gram',e:'📋',n:'Expert Grammaire',d:'10 réussites en grammaire / conjugaison',f:function(u){return (u.gramOK||0)>=10;}},
- {id:'ear',e:'🎧',n:'Oreille d\'or',d:'Réussir 10 dictées',f:function(u){return (u.dicteeOK||0)>=10;}},
- {id:'rich',e:'💰',n:'Tirelire',d:'Atteindre 300 points',f:function(u){return (u.totalScore||0)>=300;}},
- {id:'shop',e:'🛍️',n:'Collectionneur',d:'Acheter 3 skins',f:function(u){return (u.owned||[]).length>=3;}},
- {id:'quest',e:'🎯',n:'Chasseur de défis',d:'Réussir un défi du jour',f:function(u){return (u.questDone||0)>=1;}}];
-function award(u){u.badges=u.badges||[];BADGES.forEach(function(b){if(u.badges.indexOf(b.id)<0&&b.f(u)){u.badges.push(b.id);pops.push({ico:b.e,t:'Badge débloqué : '+b.n,s:b.d});}});}
+ makeTrophy('first','🥇','Première Victoire','Terminer une partie de quiz',1,function(u){return trophyCount(u,'gamesPlayed');}),
+ makeTrophy('run10','🔥','Série de 10','10 bonnes réponses d\'affilée',10,function(u){return trophyCount(u,'bestRun');}),
+ makeTrophy('ear','🎧','Oreille d\'or','Réussir 10 dictées',10,function(u){return trophyCount(u,'dicteeOK');}),
+ makeTrophy('rich','💰','Tirelire','Atteindre 300 points',300,function(u){return trophyCount(u,'totalScore');}),
+ makeTrophy('shop','🛍️','Collectionneur','Acheter 3 skins',3,function(u){return Array.isArray(u&&u.owned)?u.owned.length:0;}),
+ makeTrophy('gram','📋','Expert Grammaire','10 réussites en grammaire / conjugaison',10,function(u){return trophyCount(u,'gramOK');}),
+ makeTrophy('quest','🎯','Chasseur de défis','Réussir un défi du jour',1,function(u){return trophyCount(u,'questDone');}),
+ makeTrophy('perfect','💯','Sans-faute','Obtenir 100 % de bonnes réponses à un quiz',1,function(u){return trophyCount(u,'perfectQuizzes');}),
+ makeTrophy('run25','⚡','Inarrêtable','Enchaîner 25 bonnes réponses d\'affilée',25,function(u){return trophyCount(u,'bestRun');}),
+ makeTrophy('quiz50','📚','Maître des quiz','Terminer 50 parties de quiz',50,function(u){return trophyCount(u,'quizzesCompleted');}),
+ makeTrophy('score1000','🔐','Coffre-fort','Atteindre 1 000 points',1000,function(u){return trophyCount(u,'totalScore');}),
+ makeTrophy('score5000','👑','Légende de Zest','Atteindre 5 000 points',5000,function(u){return trophyCount(u,'totalScore');}),
+ makeTrophy('shop8','💎','VIP Boutique','Acheter 8 articles dans la boutique',8,function(u){return trophyCount(u,'shopPurchases');}),
+ makeTrophy('relooking','🎨','Relooking','Activer un dégradé ou un style de caractères',1,function(u){return u&&u.styleActivated?1:0;}),
+ makeTrophy('yaya1','🤖','Apprenti de Yaya','Générer 1 quiz personnalisé avec l\'IA',1,function(u){return trophyCount(u,'customAIQuizzes');}),
+ makeTrophy('yaya5','🪄','Génie de l\'IA','Générer 5 quiz personnalisés avec l\'IA',5,function(u){return trophyCount(u,'customAIQuizzes');}),
+ makeTrophy('dict25','✍️','Plume d\'argent','Réussir 25 dictées',25,function(u){return trophyCount(u,'dicteeOK');}),
+ makeTrophy('conj25','🔤','Roi de la Conjugaison','Réussir 25 exercices de conjugaison',25,function(u){return trophyCount(u,'conjExercises');}),
+ makeTrophy('phrase10','👁️','Œil de lynx','Analyser 10 phrases avec le Correcteur IA',10,function(u){return trophyCount(u,'aiPhraseAnalyses');}),
+ makeTrophy('worlds','🗺️','Explorateur des Mondes','Terminer un parcours P1 à P6',1,function(u){return u&&u.worldP1P6Completed?1:0;}),
+ makeTrophy('quest7','🏅','Maître des Défis','Réussir 7 défis du jour',7,function(u){return trophyCount(u,'questDone');})];
+function award(u){
+ u.badges=Array.isArray(u.badges)?u.badges:[];
+ u.newBadges=Array.isArray(u.newBadges)?u.newBadges:[];
+ BADGES.forEach(function(b){
+  if(u.badges.indexOf(b.id)<0&&b.f(u)){
+   u.badges.push(b.id);u.newBadges.push(b.id);
+   pops.push({ico:b.e,t:'Nouveau trophée débloqué !',s:b.n+' · '+b.d,trophy:true});
+  }
+ });
+}
 function avail(u){return Math.max(0,(u.totalScore||0)-(u.spent||0));}
 function up(fn){if(!window.stu)return;try{saveMe(function(u){fn(u);award(u);});}catch(e){console.warn(e);}flush();refresh();}
+window.updateTrophyProgress=function(fn){if(typeof fn!=='function'){console.error('Mise à jour des trophées invalide.');return false;}if(!window.stu)return false;up(fn);return true;};
+window.refreshTrophyAwards=function(){if(window.stu)up(function(){});};
 function flush(){if(busy||!pops.length)return;busy=true;var p=pops.shift(),el=g('zp-pop');if(!el){busy=false;return;}
- el.innerHTML='<div class="zp-ico">'+p.ico+'</div><div><b>'+esc2(p.t)+'</b><br><small>'+esc2(p.s)+'</small></div>';el.className='zp-pop show';
+ var animateTrophy=!!p.trophy&&!document.body.classList.contains('yaya-animations-disabled')&&!document.body.classList.contains('low-perf')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ el.innerHTML='<div class="zp-ico">'+p.ico+'</div><div><b>'+esc2(p.t)+'</b><br><small>'+esc2(p.s)+'</small></div>';
+ el.className='zp-pop show'+(p.trophy?(animateTrophy?' trophy-pop':' trophy-simple'):'');
+ if(animateTrophy&&typeof window.triggerSuccessAnimation==='function')window.triggerSuccessAnimation();
  setTimeout(function(){el.className='zp-pop';setTimeout(function(){busy=false;flush();},350);},3300);}
 function refresh(){var s=window.me?window.me():null,pt=g('zp-points');if(pt&&s)pt.textContent=avail(s);renderQuest();}
 
@@ -4053,7 +4102,11 @@ hook('answer',function(i){
  if(typeof Q==='undefined'||!Q[cur])return;var q=Q[cur],good=(i===q.correct);
  up(function(u){if(good){u.run=(u.run||0)+1;if(u.run>(u.bestRun||0))u.bestRun=u.run;qinc(u,'ok',1,'quiz-question:'+norm(q.q));if(q.cat==='Grammaire')u.gramOK=(u.gramOK||0)+1;}else u.run=0;});
 });
-hook('endQuiz',function(){up(function(u){qinc(u,'games',1,quizRunId);if(Q.length&&quizWrongCount===0)qinc(u,'perfect',1,quizRunId);});if(score>0)triggerSuccessAnimation();});
+hook('endQuiz',function(){up(function(u){
+ u.quizzesCompleted=(u.quizzesCompleted||0)+1;
+ qinc(u,'games',1,quizRunId);
+ if(Q.length&&quizWrongCount===0){u.perfectQuizzes=(u.perfectQuizzes||0)+1;qinc(u,'perfect',1,quizRunId);}
+});if(score>0)triggerSuccessAnimation();});
 hook('renderAll',function(){renderQuest();refresh();renderClanQuest();});
 
 var VB={zijn:['ben','bent','is','zijn','zijn','zijn'],hebben:['heb','hebt','heeft','hebben','hebben','hebben'],werken:['werk','werkt','werkt','werken','werken','werken'],
@@ -4084,7 +4137,8 @@ var sub='conj',cv='zijn',dk={w:null,fb:''};
 
 function words(){return (typeof W!=='undefined'?W:[]).filter(function(w){return w[2]!=='Grammaire'&&!/[?\[\]]/.test(w[0])&&w[0].length<=24;});}
 function viewConj(){
- var rows=PR.map(function(p,i){return '<div class="row" style="margin-bottom:8px"><b style="min-width:120px">'+p+'</b><input class="inp cj-in" data-i="'+i+'" autocomplete="off" autocapitalize="none" spellcheck="false" style="flex:1;margin:0"><span style="min-width:90px"></span></div>';}).join('');
+ var exerciseId='cj-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+ var rows=PR.map(function(p,i){return '<div class="row" style="margin-bottom:8px"><b style="min-width:120px">'+p+'</b><input class="inp cj-in" data-i="'+i+'" data-round="'+exerciseId+'" autocomplete="off" autocapitalize="none" spellcheck="false" style="flex:1;margin:0"><span style="min-width:90px"></span></div>';}).join('');
  return '<div class="card"><h3>🔤 Conjugaison (présent)</h3><select id="cj-verb" class="inp">'+Object.keys(VB).map(function(k){return '<option value="'+k+'"'+(k===cv?' selected':'')+'>'+k+' — '+FRV[k]+'</option>';}).join('')+'</select>'+
    '<p class="sub">Écris chaque forme puis appuie sur Entrée : vert = juste, rouge = faux (+2 pts par forme juste).</p>'+rows+
    '<button class="btn sm green" data-a="cjall">✔ Tout vérifier</button> <button class="btn sm" data-a="cjreset">🔄 Recommencer</button></div>';
@@ -4094,7 +4148,15 @@ function chkOne(inp){
  if(!val){inp.className='inp cj-in';if(fb)fb.textContent='';return;}
  var acc=v[i].split('|'),good=acc.indexOf(val)>-1;
  inp.className='inp cj-in '+(good?'ok':'ko');if(fb)fb.textContent=good?'✅':'❌ '+acc[0];
- if(good&&!inp.getAttribute('data-done')){inp.setAttribute('data-done','1');up(function(u){u.gramOK=(u.gramOK||0)+1;u.totalScore=(u.totalScore||0)+2;qinc(u,'conj',1,'conjugation:'+cv+':'+i);});}
+ if(good&&!inp.getAttribute('data-done')){
+  inp.setAttribute('data-done','1');
+  var fields=document.querySelectorAll('#tab-labo .cj-in'),round=inp.getAttribute('data-round');
+  var exerciseComplete=fields.length===PR.length&&Array.prototype.every.call(fields,function(field){return field.getAttribute('data-done')==='1';});
+  up(function(u){
+   u.gramOK=(u.gramOK||0)+1;u.totalScore=(u.totalScore||0)+2;qinc(u,'conj',1,'conjugation:'+cv+':'+i);
+   if(exerciseComplete&&u.lastConjExerciseId!==round){u.lastConjExerciseId=round;u.conjExercises=(u.conjExercises||0)+1;}
+  });
+ }
 }
 function viewDictee(){
  if(!dk.w){var l=words();dk.w=l[Math.floor(Math.random()*l.length)];dk.fb='';}
@@ -4133,6 +4195,7 @@ function viewCustomizer(){
 function setFontStyle(font){
  document.documentElement.style.setProperty('--app-font', font);
  localStorage.setItem('zest-font', font);
+ if(typeof window.updateTrophyProgress==='function')window.updateTrophyProgress(function(u){u.styleActivated=true;});
  alert('Style de caractère appliqué avec succès !');
 }
 window.setFontStyle = setFontStyle;
@@ -4150,9 +4213,21 @@ function viewShop(s){
 }
 
 function viewTrophies(s){
- var got=(s&&s.badges)||[];
- return '<div class="card"><h3>🏅 Trophées</h3>'+(s?'':'<p class="sub">Connecte-toi pour débloquer des badges.</p>')+'<div class="zp-badges">'+
-   BADGES.map(function(b){var on=got.indexOf(b.id)>-1;return '<div class="box zp-b'+(on?'':' lock')+'"><div class="e">'+b.e+'</div><b>'+esc2(b.n)+'</b><p class="sub" style="margin:4px 0 0;font-size:12px">'+esc2(b.d)+'</p></div>';}).join('')+'</div></div>';
+ if(s&&BADGES.some(function(b){return (!Array.isArray(s.badges)||s.badges.indexOf(b.id)<0)&&b.f(s);})&&typeof window.refreshTrophyAwards==='function'){
+  window.refreshTrophyAwards();s=window.me?window.me():s;
+ }
+ var user=s||{},got=Array.isArray(user.badges)?user.badges:[],fresh=Array.isArray(user.newBadges)?user.newBadges.slice():[];
+ var cards=BADGES.map(function(b){
+  var on=got.indexOf(b.id)>-1,progress=Math.min(b.target,Math.max(0,b.progress(user))),pct=b.target?Math.round(progress/b.target*100):0,isNew=fresh.indexOf(b.id)>-1;
+  return '<div class="box zp-b'+(on?' unlocked':' lock')+'" data-badge="'+b.id+'"><div class="e">'+b.e+'</div><b>'+esc2(b.n)+'</b>'+ (isNew?'<span class="zp-b-new">Nouveau</span>':'')+
+   '<p class="sub" style="margin:4px 0 0;font-size:12px">'+esc2(b.d)+'</p>'+
+   (on?'<span class="tag g">Débloqué</span>':'<div class="zp-b-progress"><div class="zp-prog" role="progressbar" aria-label="Progression : '+esc2(b.n)+'" aria-valuemin="0" aria-valuemax="'+b.target+'" aria-valuenow="'+progress+'"><i style="width:'+pct+'%"></i></div>'+progress+' / '+b.target+'</div>')+'</div>';
+ }).join('');
+ if(s&&fresh.length){
+  saveMe(function(profile){profile.newBadges=(Array.isArray(profile.newBadges)?profile.newBadges:[]).filter(function(id){return fresh.indexOf(id)<0;});});
+  setTimeout(function(){fresh.forEach(function(id){var tag=document.querySelector('#tab-labo .zp-b[data-badge="'+id+'"] .zp-b-new');if(tag){tag.classList.add('is-hiding');setTimeout(function(){if(tag.parentNode)tag.parentNode.removeChild(tag);},350);}});},2500);
+ }
+ return '<div class="card"><h3>🏅 Trophées</h3>'+(s?'':'<p class="sub">Connecte-toi pour débloquer des badges.</p>')+'<div class="zp-badges">'+cards+'</div></div>';
 }
 
 var labSub='conj';
@@ -4215,11 +4290,12 @@ function act(a,v){
       fb.style.color = '#10b981';
       fb.innerHTML = res;
     }
+    up(function(u){u.aiPhraseAnalyses=(u.aiPhraseAnalyses||0)+1;});
   }
  else if(a==='buy'||a==='eq'){
     if(!window.stu)return;
     up(function(u){u.owned=u.owned||['🦊','🌸','⚡','🍥','🐱','🍀','🔥'];
-      if(a==='buy'){var it=SK.filter(function(x){return x.e===v;})[0];if(it&&u.owned.indexOf(it.e)<0&&avail(u)>=it.p){u.spent=(u.spent||0)+it.p;u.owned.push(it.e);u.skin=it.e;}}
+      if(a==='buy'){var it=SK.filter(function(x){return x.e===v;})[0];if(it&&u.owned.indexOf(it.e)<0&&avail(u)>=it.p){u.spent=(u.spent||0)+it.p;u.owned.push(it.e);u.skin=it.e;u.shopPurchases=(u.shopPurchases||0)+1;}}
       else if(itIsFreeOrOwned(v, u)) u.skin=v;});
     renderLabo();}
 }
@@ -4488,9 +4564,11 @@ function finish(){
         if(u.mnStreak>=3){streakBonus=true;pts=basePts*2;u.mnStreak=0;u.mnLastStreakTheme=null;}
       }else{u.mnStreak=0;u.mnLastStreakTheme=null;}
       u.wp=u.wp||{};var p=u.wp[S0.tid]||{best:0,plays:0,stars:0};p.plays++;p.best=Math.max(p.best,pct);p.stars=Math.max(p.stars,stars);u.wp[S0.tid]=p;
+      if(!u.worldP1P6Completed&&ALL.every(function(item){var topic=u.wp[item.t.id];return !!topic&&topic.best>=60;}))u.worldP1P6Completed=true;
     }
     streakCount=u.mnStreak;u.totalScore+=pts;
   });
+  if(typeof window.refreshTrophyAwards==='function')window.refreshTrophyAwards();
   var uA=U();
   if(!S0.rev&&S0.w.id<6&&uB&&uA&&!isOpen(uB,WD(S0.w.id+1))&&isOpen(uA,WD(S0.w.id+1)))toastM('🎉 Monde '+(S0.w.id+1)+' débloqué !');
   var msg=pct>=60?'Thème validé !':'Encore un essai : il faut 60% pour valider.';
