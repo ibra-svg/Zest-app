@@ -559,7 +559,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
   <button class="nav" id="nav-quiz" onclick="switchTab('quiz')">⚡ Entraînement</button>
   <button class="nav" id="nav-ai-cours" onclick="switchTab('ai-cours')">🪄 Quiz Cours IA</button>
   <button class="nav" id="nav-cours-gram" onclick="switchTab('cours-gram')">📚 Grammaire 3e</button>
-  <button class="nav" id="nav-labo" onclick="checkUltimateAndSwitch()">🧪 Labo & IA <span id="labo-lock-icon">🔒</span></button>
+  <button class="nav" id="nav-labo" onclick="switchTab('labo')">🧪 Labo</button>
   <button class="nav" id="nav-connexion" onclick="switchTab('connexion')">🔑 Connexion</button>
   <button class="nav" id="nav-portail" onclick="switchTab('portail')">👤 Profil & Paramètres <span id="badge"></span></button>
   <button class="nav" onclick="toggleTheme()" title="Thème">🌓</button>
@@ -586,7 +586,6 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
    <div class="card-today-content">
     <span class="icon-calendar" aria-hidden="true">📅</span>
     <span>Aujourd'hui en Belgique : <strong id="current-date-banner">Jeudi 8 octobre 2026</strong></span>
-    <span class="tag legend" id="ultimate-legend-badge" style="display:none;margin-left:auto">Version Ultimate Débloquée 🚀</span>
    </div>
   </div>
   <button class="card row home-profile-card clickable-card" id="home-profile-link" type="button" onclick="switchTab((stu||tch||dir)?'portail':'connexion')">
@@ -613,7 +612,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
 
    <button class="btn gold" onclick="switchTab('vocabulaire')">📚 Dictionnaire</button>
    <button class="btn amber" type="button" onclick="openYayaShop()">🍎 Boutique de Yaya</button>
-   <button class="btn violet" onclick="checkUltimateAndSwitch()">🧪 Explorer le Labo IA</button>
+   <button class="btn violet" onclick="switchTab('labo')">🧪 Explorer le Labo</button>
   </div>
   <div class="card center">
    <h3>⚔️️ Quête Collaborative de Classe</h3>
@@ -628,10 +627,10 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
  </div>
 
  <div class="card" style="margin-top:20px;border-color:var(--accent)">
-  <h3>💡 Les Avantages de la Version Ultimate</h3>
+  <h3>💡 Les fonctionnalités de Zest</h3>
   <div class="grid3" style="margin-top:14px">
    <div class="box">
-    <b>🎨 Dégradés & Fondu Ultimate</b>
+    <b>🎨 Dégradés & Fondu personnalisés</b>
     <p class="sub" style="font-size:13px;margin:6px 0 0">Crée tes propres dégradés de couleurs personnalisés en fondu.</p>
    </div>
    <div class="box">
@@ -1039,7 +1038,7 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
    <div class="yaya-scan-list" id="yaya-scan-history"></div>
   </section>
 
-  <!-- BOUTIQUE DÉPLACÉE ICI DANS LE PORTAIL ÉLÈVE POUR ACCÈS LIBRE (SANS CODE ULTIMATE REQUIS) -->
+  <!-- Boutique et avatars accessibles depuis le portail élève. -->
   <div class="box" style="margin-top:14px">
    <div class="row">
     <b>🛍️️ Boutique & Avatars</b>
@@ -1100,19 +1099,6 @@ body.dark .auth-notice.warn{background:#2a1a04;color:#fde68a}
 </main>
 
 <footer>Zest © 2026 — Plateforme pédagogique connectée</footer>
-
-<!-- Modal de code d'accès Ultimate -->
-<div id="ultimate-code-modal" class="modal hide">
- <div class="mbox center" style="max-width:400px">
-  <span class="tag legend">🔒 Version Zest Standard</span>
-  <h2>Entrer le code Ultimate</h2>
-  <p class="sub">Entre ton code personnel pour débloquer toutes les fonctionnalités Ultimate (Labo IA, Dictée, etc.).</p>
-  <input class="inp center" id="ultimate-input" type="password" placeholder="Code secret" style="font-weight:700;letter-spacing:2px">
-  <p id="ultimate-msg" class="msg"></p>
-  <button class="btn grad full" onclick="verifyUltimateCode()">Activer Ultimate 🚀</button>
-  <button class="btn sm" style="background:#64748b;margin-top:8px" onclick="closeUltimateModal()">Annuler</button>
- </div>
-</div>
 
 <div id="modal" class="modal hide" onclick="if(event.target===this)closeEv()"><div class="mbox" id="mbox"></div></div>
 <div id="daily-quest-modal" class="modal fullscreen-modal hide" role="dialog" aria-modal="true" aria-labelledby="daily-quest-title">
@@ -1344,24 +1330,8 @@ var K = {
     var savedTheme=ld('zest-theme','dark');
     document.body.classList.toggle('dark',savedTheme!=='light');
     document.body.classList.toggle('theme-light',savedTheme==='light');
-    
-    applyUltimateBranding();
   } catch(e){}
 })();
-
-function applyUltimateBranding(){
- var s = me();
- var unlocked = s ? (s.ultimateUnlocked === true) : false;
- var logoTitle = $('brand-title');
- var logoSub = $('brand-sub');
- var laboLock = $('labo-lock-icon');
- var legendBadge = $('ultimate-legend-badge');
- 
- if(logoTitle) logoTitle.textContent = unlocked ? 'Zest Ultimate' : 'Zest';
- if(logoSub) logoSub.textContent = unlocked ? 'Apprends le néerlandais sans stress !' : 'Apprends le néerlandais sans stress !';
- if(laboLock) laboLock.textContent = unlocked ? '' : '🔒';
- if(legendBadge) legendBadge.style.display = unlocked ? 'inline-block' : 'none';
-}
 
 var stu = null, tch = null, dir = null;
 var ZEST_SESSION_KEYS = {student:'zest-home-user', teacher:'zest-logged-teacher', direction:'zest-logged-dir'};
@@ -2350,42 +2320,6 @@ if(aiCoursSection)aiCoursSection.addEventListener('click',function(event){
  if(target.hasAttribute('data-ai-next')){aiCoursQuiz.index++;aiCoursQuiz.answered=false;renderAICourseQuestion();}
 });
 
-function checkUltimateAndSwitch(){
- var s = me();
- var unlocked = s ? (s.ultimateUnlocked === true) : false;
- if (unlocked) {
-    switchTab('labo');
-  } else {
-    show('ultimate-code-modal', true);
-    var inp = $('ultimate-input'); if(inp) { inp.value = ''; inp.focus(); }
-    say('ultimate-msg', '');
-  }
-}
-
-function verifyUltimateCode(){
- var inp = $('ultimate-input');
- var val = inp ? inp.value.trim().toLowerCase() : '';
- var monCodeSecret = 'moncode2026'; 
-
- if (val === monCodeSecret) {
-    var s = me();
-    if (s) {
-      saveMe(function(u){ u.ultimateUnlocked = true; });
-      show('ultimate-code-modal', false);
-      applyUltimateBranding();
-      switchTab('labo');
-    } else {
-      say('ultimate-msg', '❌ Connecte-toi d\'abord à ton compte élève !');
-    }
-  } else {
-    say('ultimate-msg', '❌ Code incorrect.');
-  }
-}
-
-function closeUltimateModal(){
- show('ultimate-code-modal', false);
-}
-
 var coachTips = [
  "🎯 Défi : Traduis mentalement 3 objets autour de toi en néerlandais toutes les 10 minutes !",
  "💡 Conseil : Répète toujours un nouveau mot à voix haute pour habituer ton oreille.",
@@ -2736,7 +2670,7 @@ function renderAll(){
           var b = document.createElement('button'); b.className = 'skin' + (s.skin === k ? ' on' : ''); 
           if (k === 'GAARA') {
             b.innerHTML = GAARA_SVG;
-            b.title = 'Gardien du Sable (Gaara - Légendaire Ultimate)';
+            b.title = 'Gardien du Sable (Gaara - Légendaire)';
           } else {
             b.textContent = k;
           }
@@ -3941,7 +3875,7 @@ try {
  if (localStorage.getItem('zest-theme') === 'light') document.body.classList.remove('dark');
 } catch(e){}
 
-/* Intégration globale Zest+ Ultimate */
+/* Intégration globale Zest+ */
 (function(){
 'use strict';
 function g(i){return document.getElementById(i);}
@@ -4165,22 +4099,22 @@ function chkOne(inp){
 function viewDictee(){
  if(!dk.w){var l=words();dk.w=l[Math.floor(Math.random()*l.length)];dk.fb='';}
  var warn=('speechSynthesis' in window)?'':'<p class="msg">⚠ Synthèse vocale indisponible sur ce navigateur.</p>';
- return '<div class="card center"><h3>🎧 Dictée vocale articulée (Ultimate)</h3><p class="sub">Écoute le mot prononcé distinctement en néerlandais puis écris-le (+5 pts par mot juste).</p>'+warn+
+ return '<div class="card center"><h3>🎧 Dictée vocale articulée</h3><p class="sub">Écoute le mot prononcé distinctement en néerlandais puis écris-le (+5 pts par mot juste).</p>'+warn+
    '<button class="btn" data-a="dkplay">🔊 Écouter</button> <button class="btn sm" data-a="dkslow">🐢 Très lentement</button>'+
    '<input class="inp center" id="dk-in" style="max-width:320px;margin:14px auto 10px" placeholder="Écris le mot ici..." autocomplete="off" autocapitalize="none" spellcheck="false">'+
    '<p id="dk-fb" style="min-height:24px;font-weight:700"></p><button class="btn green" data-a="dkcheck">Vérifier</button> <button class="btn sm" data-a="dknext">Mot suivant ➡️</button></div>';
 }
 
 function viewAiWriter(){
- return '<div class="card"><h3>✍️ Correcteur de rédaction IA (Ultimate)</h3>' +
+ return '<div class="card"><h3>✍️ Correcteur de rédaction IA</h3>' +
    '<p class="sub">Tape une phrase en néerlandais ci-dessous. L\'IA vérifie la majuscule, la ponctuation finale et tes accords !</p>' +
    '<textarea class="inp" id="ai-text-input" rows="3" placeholder="Ex: Ik ben naar de winkel gegaan."></textarea>' +
    '<p id="ai-feedback-box" class="msg" style="margin-top:10px"></p>' +
    '<button class="btn grad" data-a="aianalyse">Analyser ma phrase ✨</button></div>';
 }
 
-function viewUltimateCustomizer(){
- return '<div class="card"><h3>🌈 Personnalisation avancée & Fondu (Ultimate)</h3>' +
+function viewCustomizer(){
+ return '<div class="card"><h3>🌈 Personnalisation avancée & Fondu</h3>' +
    '<p class="sub">Choisis un effet de fondu coloré personnalisé pour toute l\'application ou active une police spéciale !</p>' +
    '<div class="box"><b>🎨 Choisir un dégradé en fondu :</b><div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">' +
    '<button class="btn sm grad" onclick="setAppTheme(\'#ec4899\', \'linear-gradient(135deg,#ec4899,#8b5cf6,#3b82f6)\')">Fondu Cyberpunk</button>' +
@@ -4225,7 +4159,7 @@ function renderSub(){
  if(labSub==='conj') b.innerHTML=viewConj();
  else if(labSub==='dictee') b.innerHTML=viewDictee();
  else if(labSub==='aiwriter') b.innerHTML=viewAiWriter();
- else if(labSub==='custom') b.innerHTML=viewUltimateCustomizer();
+ else if(labSub==='custom') b.innerHTML=viewCustomizer();
  else if(labSub==='shop') b.innerHTML=viewShop(s);
  else if(labSub==='trophees') b.innerHTML=viewTrophies(s);
 }
@@ -4233,7 +4167,7 @@ function renderSub(){
 function renderLabo(){
  var t=g('tab-labo');if(!t)return;var s=window.me?window.me():null;
  var tabs=[['conj','🔤 Conjugaison'],['dictee','🎧 Dictée'],['aiwriter','✍️ Correcteur IA'],['custom','🌈 Fondu & Caractères'],['shop','🛍️ Boutique'],['trophees','🏅 Trophées']];
- t.innerHTML='<div class="card"><span class="tag v">🧪 Labo Ultimate</span><h2>Entraîne-toi, analyse et collectionne</h2>'+(s?'<p class="sub">💰 Points disponibles : <b id="zp-points">'+avail(s)+'</b></p>':'<p class="sub">Connecte-toi (page Connexion) pour gagner des points.</p>')+
+ t.innerHTML='<div class="card"><span class="tag v">🧪 Labo</span><h2>Entraîne-toi, analyse et collectionne</h2>'+(s?'<p class="sub">💰 Points disponibles : <b id="zp-points">'+avail(s)+'</b></p>':'<p class="sub">Connecte-toi (page Connexion) pour gagner des points.</p>')+
    '<div class="cats" style="margin:0">'+tabs.map(function(x){return '<button class="cat'+(labSub===x[0]?' on':'')+'" data-a="labsub" data-v="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div></div><div id="labo-sub"></div>';
  renderSub();
 }
@@ -4962,14 +4896,12 @@ if(location.protocol==='file:'){
   Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
   if(role === 'student') stu = key; else if(role === 'teacher') tch = key; else dir = key;
   sv(ROLES[role].session, key);
-  applyUltimateBranding();
   renderAll();
  }
  function clearSession(){
   if(!(stu || tch || dir)) return;
   stu = null; tch = null; dir = null;
   Object.keys(ZEST_SESSION_KEYS).forEach(function(r){ rm(ZEST_SESSION_KEYS[r]); });
-  applyUltimateBranding();
   renderAll();
  }
 
@@ -5127,7 +5059,7 @@ if(location.protocol==='file:'){
   });
  });
  window.setAuthRole('student');
- window.addEventListener('load', function(){ applyUltimateBranding(); renderAll(); });
+ window.addEventListener('load', renderAll);
 })();
 </script>
 <script type="module">
