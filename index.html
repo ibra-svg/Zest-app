@@ -5213,9 +5213,19 @@ if(location.protocol==='file:'){
   const MSG_NO_PROFILE = "Impossible de charger ton profil. Vérifie ta connexion Internet et réessaie.";
   const MSG_TECHNICAL = "Zest rencontre un problème technique. Réessaie dans quelques instants.";
   const DELETION_DELAY_MS = 7 * 24 * 60 * 60 * 1000;
+  const EMAIL_RESEND_COOLDOWN_MS = 60 * 1000;
+  const EMAIL_VERIFICATION_ACTION_SETTINGS = {
+    url: "https://ibra-svg.github.io/Zest-app/",
+    handleCodeInApp: false
+  };
 
-  // true pendant une opération en cours (inscription, connexion, suppression…) : l’observateur de session n’interfère pas.
+  // Évite les opérations d’authentification concurrentes.
   let authBusy = false;
+  let resendBusy = false;
+  let resendCooldownUntil = 0;
+  let resendCooldownTimer = null;
+  // Seule l’inscription et le renvoi peuvent garder brièvement une session non vérifiée pour envoyer le lien.
+  let allowUnverifiedVerificationFlow = false;
   // Identifiants de la dernière inscription ou connexion refusée (e-mail non confirmé), gardés en mémoire
   // uniquement, pour pouvoir renvoyer l’e-mail de confirmation.
   let pendingVerification = null;
@@ -5228,6 +5238,34 @@ if(location.protocol==='file:'){
 
   function setResendVisible(visible) {
     if (resendButton) resendButton.classList.toggle("hide", !visible);
+  }
+
+  function refreshResendButtons() {
+    const secondsLeft = Math.max(0, Math.ceil((resendCooldownUntil - Date.now()) / 1000));
+    [resendButton, noticeResendButton].forEach(function (button) {
+      if (!button) return;
+      button.disabled = resendBusy || secondsLeft > 0;
+      button.textContent = secondsLeft > 0 ? "Renvoyer l’e-mail (" + secondsLeft + " s)" : "Renvoyer l’e-mail";
+    });
+    if (secondsLeft > 0 && resendCooldownTimer === null) {
+      resendCooldownTimer = window.setInterval(refreshResendButtons, 1000);
+    } else if (secondsLeft === 0 && resendCooldownTimer !== null) {
+      window.clearInterval(resendCooldownTimer);
+      resendCooldownTimer = null;
+    }
+  }
+
+  function startResendCooldown() {
+    resendCooldownUntil = Date.now() + EMAIL_RESEND_COOLDOWN_MS;
+    refreshResendButtons();
+  }
+
+  async function sendVerificationEmail(user) {
+    try {
+      await sendEmailVerification(user, EMAIL_VERIFICATION_ACTION_SETTINGS);
+    } finally {
+      startResendCooldown();
+    }
   }
 
   // ===== Messages affichés à l’utilisateur : en français, simples, sans vocabulaire technique =====
@@ -5618,6 +5656,7 @@ if(location.protocol==='file:'){
     signupButton.disabled = true;
     setMsg("signup-msg", "Création du compte en cours…", true);
     let created = null;
+    allowUnverifiedVerificationFlow = true;
     try {
       const credential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       created = credential.user;
@@ -5634,7 +5673,7 @@ if(location.protocol==='file:'){
         // Non bloquant : le profil sera recréé à la première connexion à partir des données gardées sur l’appareil.
         logFirebaseError("setDoc users/" + created.uid, firestoreError);
       }
-      await sendEmailVerification(created);
+      await sendVerificationEmail(created);
 
       pendingVerification = { email: data.email, password: data.password };
       const loginEmail = byId("login-email");
@@ -5657,6 +5696,7 @@ if(location.protocol==='file:'){
         // L’utilisateur doit d’abord cliquer sur le lien reçu par e-mail : on le déconnecte tout de suite.
         try { await signOut(auth); } catch (signOutError) { console.error("[Zest · diagnostic] signOut après inscription :", signOutError); }
       }
+      allowUnverifiedVerificationFlow = false;
       authBusy = false;
       signupButton.disabled = false;
     }
@@ -5718,8 +5758,9 @@ if(location.protocol==='file:'){
     }
     const credentials = pendingVerification;
     authBusy = true;
-    if (resendButton) resendButton.disabled = true;
-    if (noticeResendButton) noticeResendButton.disabled = true;
+    resendBusy = true;
+    allowUnverifiedVerificationFlow = true;
+    refreshResendButtons();
     setMsg(messageId, "Envoi de l’e-mail…", true);
     let signedIn = false;
     try {
@@ -5739,7 +5780,7 @@ if(location.protocol==='file:'){
         }
         return;
       }
-      await sendEmailVerification(credential.user);
+      await sendVerificationEmail(credential.user);
       setMsg(messageId, "E-mail renvoyé à " + credentials.email + ". Pense à vérifier tes courriers indésirables.", true);
     } catch (error) {
       logFirebaseError("sendEmailVerification (renvoi)", error, { email: credentials.email });
@@ -5748,9 +5789,10 @@ if(location.protocol==='file:'){
       if (signedIn) {
         try { await signOut(auth); } catch (signOutError) { console.error("[Zest · diagnostic] signOut après renvoi :", signOutError); }
       }
+      allowUnverifiedVerificationFlow = false;
       authBusy = false;
-      if (resendButton) resendButton.disabled = false;
-      if (noticeResendButton) noticeResendButton.disabled = false;
+      resendBusy = false;
+      refreshResendButtons();
     }
   }
 
@@ -5893,8 +5935,8 @@ if(location.protocol==='file:'){
     window.zestFirebaseUser = verified ? user : null;
 
     if (user && !verified) {
-      // E-mail non confirmé : jamais de session (sauf pendant l’inscription / la connexion en cours, qui s’en chargent).
-      if (!authBusy) {
+      // Une session non vérifiée n’est tolérée que le temps contrôlé d’envoyer le lien.
+      if (!allowUnverifiedVerificationFlow) {
         try { await signOut(auth); } catch (error) { console.error("[Zest · diagnostic] signOut (e-mail non confirmé) :", error); }
       }
       return;
